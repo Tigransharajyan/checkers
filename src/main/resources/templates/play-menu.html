@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="|#{play.menu.title} — #{app.title}|">Choose game</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <script th:src="@{/js/assistant.js}" defer></script>
+  <script>var global = window;</script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script th:src="@{/js/lobby.js}" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: sidebar('play')}"></div>
+  <div th:replace="~{fragments/sidebar :: mobile('play')}"></div>
+
+  <main class="content">
+    <section class="mode-page">
+      <div class="mode-page-head">
+        <h1 th:text="#{play.menu.title}">Choose game mode</h1>
+        <p th:text="#{play.menu.subtitle}">Start a random match, invite a friend, or train with the bot.</p>
+      </div>
+
+      <div class="mode-strip mode-strip-page" aria-label="Game modes">
+        <article class="mode-tile mode-tile-primary" id="mode-random" role="button" tabindex="0" data-mode-card data-mode-action="[data-find-random]">
+          <div class="mode-tile-icon"><i data-lucide="play"></i></div>
+          <div class="mode-tile-copy">
+            <h2 th:text="#{lobby.mode.random.title}">Random opponent</h2>
+            <p th:text="#{lobby.mode.random.desc}">Find an online player.</p>
+          </div>
+          <button type="button" class="mode-tile-action" data-find-random th:aria-label="#{lobby.mode.random.cta}">
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <div class="mm-search-box hidden" data-mm-search-state>
+            <div class="spinner"></div>
+            <div data-mm-status th:text="#{lobby.matchmaking.queued}">Searching...</div>
+            <button type="button" class="btn btn-ghost btn-sm" data-cancel-random th:text="#{lobby.mode.random.cancel}">Cancel</button>
+          </div>
+        </article>
+
+        <article class="mode-tile" id="mode-bot" role="button" tabindex="0" data-mode-card data-mode-action="[data-start-bot]">
+          <div class="mode-tile-icon"><i data-lucide="bot"></i></div>
+          <div class="mode-tile-copy">
+            <h2 th:text="#{lobby.mode.bot.title}">Play bot</h2>
+            <p th:text="#{lobby.mode.bot.desc}">Practice at your level.</p>
+          </div>
+          <button type="button" class="mode-tile-action" data-start-bot th:aria-label="#{lobby.mode.bot.cta}">
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <select data-bot-diff class="difficulty-select" th:aria-label="#{lobby.difficulty}">
+            <option value="EASY" th:text="#{lobby.difficulty.EASY}">Easy</option>
+            <option value="MEDIUM" selected th:text="#{lobby.difficulty.MEDIUM}">Medium</option>
+            <option value="HARD" th:text="#{lobby.difficulty.HARD}">Hard</option>
+          </select>
+        </article>
+
+        <article class="mode-tile" id="mode-friend" role="button" tabindex="0" data-mode-card data-mode-action="[data-create-friend]">
+          <div class="mode-tile-icon"><i data-lucide="users"></i></div>
+          <div class="mode-tile-copy">
+            <h2 th:text="#{lobby.mode.friend.title}">Play a friend</h2>
+            <p th:text="#{lobby.mode.friend.desc}">Create and share an invite.</p>
+          </div>
+          <button type="button" class="mode-tile-action" data-create-friend th:aria-label="#{lobby.mode.friend.cta}">
+            <i data-lucide="chevron-right"></i>
+          </button>
+        </article>
+      </div>
+
+      <div class="invite-box dashboard-invite" data-invite-box>
+        <strong th:text="#{lobby.invite.link}">Invite Link</strong>
+        <code data-invite-link></code>
+        <div class="actions-row">
+          <button type="button" class="btn btn-ghost" data-copy-invite>
+            <i data-lucide="copy"></i>
+            <span th:text="#{common.copy}">Copy</span>
+          </button>
+          <button type="button" class="btn btn-primary" data-open-invite-game th:text="#{nav.play}">Play</button>
+        </div>
+      </div>
+
+      <div class="join-code-row">
+        <input type="text" data-join-code maxlength="16" autocomplete="off"
+               th:placeholder="#{lobby.mode.friend.codePlaceholder}"/>
+        <button type="button" class="btn btn-ghost" data-join-friend>
+          <i data-lucide="log-in"></i>
+          <span th:text="#{lobby.mode.friend.join}">Join</span>
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast-root" aria-live="polite"></div>
+<div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>

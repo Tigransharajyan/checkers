@@ -1,0 +1,97 @@
+spring:
+  application:
+    name: checkers-online
+  profiles:
+    active: dev
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+  thymeleaf:
+    cache: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-change-me-to-a-long-enough-secret-key-for-hs256-checkers-online}
+    access-token-ttl-minutes: 30
+    refresh-token-ttl-days: 14
+  site:
+    # Must match host used in static/sitemap.xml (update both for production)
+    base-url: ${SITE_BASE_URL:http://localhost:8080}
+  game:
+    reconnect-timeout-seconds: 60
+    # In-memory queue; for multi-instance deploy prefer Redis LIST/ZSET + pub-sub
+    matchmaking-timeout-seconds: 120
+  assistant:
+    # intent (default) | llm — set to llm when LlmAssistantService is implemented
+    provider: intent
+    llm:
+      api-key: ${ASSISTANT_LLM_API_KEY:}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:h2:mem:checkers;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    com.checkers: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    # Render provides SPRING_DATASOURCE_URL via Blueprint fromDatabase.connectionString
+    # DatabaseUrlConfig converts postgres:// → jdbc:postgresql:// before Hikari connects
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/checkers}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  thymeleaf:
+    cache: true
+
+logging:
+  level:
+    com.checkers: INFO
+    root: WARN

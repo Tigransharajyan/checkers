@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="#{app.title}">Checkers Online</title>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: sidebar('home')}"></div>
+  <div th:replace="~{fragments/sidebar :: mobile('home')}"></div>
+  <main class="content" th:fragment="content">
+    <!-- page content -->
+  </main>
+</div>
+<div id="toast-root" aria-live="polite"></div>
+<div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>

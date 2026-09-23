@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="|#{auth.login.title} — #{app.title}|">Login</title>
+  <th:block th:replace="~{fragments/seo :: hreflang('/login')}"></th:block>
+  <script th:src="@{/js/assistant.js}" defer></script>
+  <script th:src="@{/js/auth.js}" defer></script>
+</head>
+<body class="auth-page">
+  <div class="auth-top-lang">
+    <div class="lang-switch" th:aria-label="#{lang.label}">
+      <button type="button" data-lang="en" th:text="#{lang.en}">EN</button>
+      <button type="button" data-lang="ru" th:text="#{lang.ru}">RU</button>
+      <button type="button" data-lang="hy" th:text="#{lang.hy}">HY</button>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <h1 th:text="#{auth.login.title}">Log in</h1>
+    <p class="lead" th:text="#{app.tagline}">Play online</p>
+    <form data-auth-form="login" novalidate>
+      <div class="field">
+        <label for="usernameOrEmail" th:text="#{auth.usernameOrEmail}">User</label>
+        <input id="usernameOrEmail" name="usernameOrEmail" required autocomplete="username"/>
+        <span class="field-error" data-field-error="usernameOrEmail"></span>
+      </div>
+      <div class="field">
+        <label for="password" th:text="#{auth.password}">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password"/>
+        <span class="field-error" data-field-error="password"></span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" th:text="#{auth.submitLogin}">Log in</button>
+      <button type="button" class="btn btn-ghost btn-block" data-guest-login th:text="#{auth.guest}">Guest</button>
+      <p class="muted" th:text="#{auth.guestHint}">Hint</p>
+    </form>
+    <p class="auth-links">
+      <span th:text="#{auth.noAccount}">No account?</span>
+      <a th:href="@{/register(lang=${currentLocale})}" th:text="#{nav.register}">Sign up</a>
+      <span style="display:block;margin-top:var(--s-12)">
+        <a th:href="@{/(lang=${currentLocale})}" style="color:var(--muted);font-weight:normal">&larr; <span th:text="#{nav.home}">Lobby</span></a>
+      </span>
+    </p>
+  </div>
+
+  <div id="toast-root" aria-live="polite"></div>
+  <div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>

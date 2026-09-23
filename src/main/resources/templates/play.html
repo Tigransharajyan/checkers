@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="|#{play.title} — #{app.title}|">Play</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <script th:src="@{/js/assistant.js}" defer></script>
+  <script th:src="@{/js/board.js}"></script>
+  <script>var global = window;</script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script th:src="@{/js/play.js}" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: sidebar('play')}"></div>
+  <div th:replace="~{fragments/sidebar :: mobile('play')}"></div>
+
+  <main class="content">
+    <div class="play-layout">
+      <!-- 8x8 Board Column -->
+      <div class="board-column">
+        <div class="board-frame">
+          <div class="rank-labels" data-rank-labels>
+            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+          </div>
+          <div class="board-wrap">
+            <div class="board" data-board></div>
+          </div>
+          <div class="file-labels" data-file-labels>
+            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side Control Panel -->
+      <aside class="side-panel">
+        <!-- Opponent Card -->
+        <div class="player-card" data-opp-card>
+          <div class="avatar" data-opp-avatar aria-hidden="true">?</div>
+          <div class="player-meta">
+            <strong data-opp-name th:text="#{common.opponent}">Opponent</strong>
+            <span data-opp-color></span>
+          </div>
+        </div>
+
+        <!-- Status Banner -->
+        <div class="status-banner" data-game-status th:text="#{common.loading}">Loading</div>
+
+        <!-- Your Player Card -->
+        <div class="player-card" data-you-card>
+          <div class="avatar you" data-you-avatar aria-hidden="true">?</div>
+          <div class="player-meta">
+            <strong data-you-name th:text="#{common.you}">You</strong>
+            <span data-you-color></span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions-row">
+          <button type="button" class="btn btn-danger" data-resign-btn>
+            <i data-lucide="flag"></i>
+            <span th:text="#{play.resign}">Resign</span>
+          </button>
+          <button type="button" class="btn btn-ghost" data-draw-offer-btn>
+            <i data-lucide="handshake"></i>
+            <span th:text="#{play.drawOffer}">Draw</span>
+          </button>
+          <a class="btn btn-ghost" th:href="@{/(lang=${currentLocale})}">
+            <i data-lucide="home"></i>
+            <span th:text="#{play.backLobby}">Lobby</span>
+          </a>
+        </div>
+
+        <!-- Draw Offer Alert Box (for opponent) -->
+        <div class="card hidden" data-draw-offer style="padding:var(--s-16);border-left:4px solid var(--accent)">
+          <div style="font-weight:var(--fw-bold);font-size:var(--fs-14)" th:text="#{event.DRAW_OFFERED}">Draw offered</div>
+          <p class="muted" style="margin:var(--s-4) 0 var(--s-12);font-size:var(--fs-13)" th:text="#{play.drawOfferIncoming}">Opponent offers a draw.</p>
+          <div class="actions-row">
+            <button type="button" class="btn btn-primary btn-sm" data-draw-accept th:text="#{play.drawAccept}">Accept</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-draw-decline th:text="#{play.drawDecline}">Decline</button>
+          </div>
+        </div>
+
+        <!-- Move Log in 2-column notation -->
+        <div class="move-log-panel">
+          <h3 th:text="#{play.moveLog}">Notation</h3>
+          <div class="move-log" data-move-log></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<!-- Resign Confirmation Modal -->
+<div class="modal-backdrop hidden" data-resign-modal>
+  <div class="modal-dialog">
+    <h2 th:text="#{play.resign}">Resign</h2>
+    <p th:text="#{play.resignConfirm}">Are you sure you want to resign?</p>
+    <div class="actions-row">
+      <button type="button" class="btn btn-danger" data-confirm-resign th:text="#{play.resign}">Resign</button>
+      <button type="button" class="btn btn-ghost" data-cancel-resign th:text="#{common.cancel}">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game Over Modal -->
+<div class="modal-backdrop hidden" data-gameover-modal>
+  <div class="modal-dialog">
+    <h2 data-gameover-title>Game Over</h2>
+    <p data-gameover-reason></p>
+    <div class="actions-row" style="margin-top:var(--s-8)">
+      <button type="button" class="btn btn-primary" data-new-game-btn th:text="#{play.newGame}">New Game</button>
+      <a class="btn btn-ghost" th:href="@{/(lang=${currentLocale})}" th:text="#{play.backLobby}">Lobby</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root" aria-live="polite"></div>
+<div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>

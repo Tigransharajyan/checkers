@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Replace https://example.com with the production origin before deploy -->
+  <url>
+    <loc>https://example.com/?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://example.com/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://example.com/?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://example.com/?lang=hy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://example.com/?lang=en"/>
+  </url>
+  <url>
+    <loc>https://example.com/login?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://example.com/login?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://example.com/login?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://example.com/login?lang=hy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://example.com/login?lang=en"/>
+  </url>
+  <url>
+    <loc>https://example.com/register?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://example.com/register?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://example.com/register?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://example.com/register?lang=hy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://example.com/register?lang=en"/>
+  </url>
+  <url>
+    <loc>https://example.com/faq?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://example.com/faq?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://example.com/faq?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://example.com/faq?lang=hy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://example.com/faq?lang=en"/>
+  </url>
+</urlset>

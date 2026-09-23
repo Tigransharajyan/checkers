@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="|#{history.title} — #{app.title}|">History</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <script th:src="@{/js/assistant.js}" defer></script>
+  <script th:src="@{/js/history.js}" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: sidebar('history')}"></div>
+  <div th:replace="~{fragments/sidebar :: mobile('history')}"></div>
+
+  <main class="content">
+    <section class="page-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-16)">
+        <h1 th:text="#{history.title}">History</h1>
+        <a class="btn btn-ghost btn-sm" th:href="@{/(lang=${currentLocale})}">
+          <i data-lucide="arrow-left"></i>
+          <span th:text="#{nav.home}">Lobby</span>
+        </a>
+      </div>
+
+      <!-- Guest Blocked Banner -->
+      <div class="card hidden" data-history-guest style="text-align:center;padding:var(--s-32)">
+        <h2 style="font-size:var(--fs-18);margin-bottom:var(--s-8)" th:text="#{history.guestBlocked}">History is only for registered users</h2>
+        <p class="muted" style="margin:0 0 var(--s-20)" th:text="#{auth.guestHint}">Sign in to track your game stats and win history.</p>
+        <div style="display:flex;gap:var(--s-12);justify-content:center">
+          <a class="btn btn-primary" th:href="@{/login(lang=${currentLocale})}" th:text="#{nav.login}">Log in</a>
+          <a class="btn btn-ghost" th:href="@{/register(lang=${currentLocale})}" th:text="#{nav.register}">Sign up</a>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="card hidden" data-history-empty style="text-align:center;padding:var(--s-32)">
+        <p class="muted" style="margin:0 0 var(--s-16)" th:text="#{history.empty}">No finished games yet.</p>
+        <a class="btn btn-primary" th:href="@{/play(lang=${currentLocale})}" th:text="#{nav.play}">Play Now</a>
+      </div>
+
+      <!-- History Table -->
+      <div data-history-table-wrap>
+        <table class="history-table">
+          <thead>
+          <tr>
+            <th th:text="#{history.mode}">Mode</th>
+            <th>Игроки</th>
+            <th th:text="#{history.winner}">Winner</th>
+            <th th:text="#{history.result}">Result</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody data-history-body></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast-root" aria-live="polite"></div>
+<div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>

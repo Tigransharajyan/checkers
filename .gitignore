@@ -1,0 +1,24 @@
+target/
+build/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
+
+# Secrets — never commit real credentials
+.env
+.env.*
+*.local
+application-local.yml
+application-local.properties
+
+# Maven downloaded artifacts (not needed in Git)
+# .mvn/ wrapper files ARE committed intentionally for reproducible builds
+!.mvn/
+!.mvn/wrapper/
+!.mvn/wrapper/maven-wrapper.properties

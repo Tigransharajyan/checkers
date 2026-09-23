@@ -1,0 +1,35 @@
+# Build outputs
+target/
+build/
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Secrets — never commit these
+.env
+.env.*
+*.local
+
+# Java compiled class files
+*.class
+
+# Maven cache (not needed in build context)
+!.mvn/wrapper/maven-wrapper.properties
+!.mvn/wrapper/maven-wrapper.jar
+
+# Git
+.git/
+.gitignore

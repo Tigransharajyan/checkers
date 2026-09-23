@@ -1,0 +1,117 @@
+<aside class="sidebar" xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar(active)" data-sidebar>
+  <a class="sidebar-brand" th:href="@{/(lang=${currentLocale})}">
+    <span class="logo-mark" aria-hidden="true"><i data-lucide="circle-dot"></i></span>
+    <span th:text="#{app.title}">Checkers Online</span>
+  </a>
+
+  <nav class="sidebar-nav" aria-label="Main">
+    <a class="nav-link"
+       th:classappend="${active == 'home'} ? ' is-active'"
+       th:href="@{/(lang=${currentLocale})}">
+      <i data-lucide="home"></i>
+      <span th:text="#{nav.home}">Home</span>
+    </a>
+
+    <a class="nav-link"
+       th:classappend="${active == 'play'} ? ' is-active'"
+       th:href="@{/play(lang=${currentLocale})}">
+      <i data-lucide="gamepad-2"></i>
+      <span th:text="#{nav.play}">Play</span>
+    </a>
+
+    <a class="nav-link"
+       th:classappend="${active == 'tasks'} ? ' is-active'"
+       th:href="@{/tasks(lang=${currentLocale})}">
+      <i data-lucide="target"></i>
+      <span th:text="#{nav.tasks}">Tasks</span>
+    </a>
+
+    <a class="nav-link"
+       th:classappend="${active == 'rating'} ? ' is-active'"
+       th:href="@{/rating(lang=${currentLocale})}">
+      <i data-lucide="trophy"></i>
+      <span th:text="#{nav.rating}">Rating</span>
+    </a>
+
+    <a class="nav-link"
+       th:classappend="${active == 'faq'} ? ' is-active'"
+       th:href="@{/faq(lang=${currentLocale})}">
+      <i data-lucide="book-open"></i>
+      <span th:text="#{nav.faq}">Rules & FAQ</span>
+    </a>
+
+    <a class="nav-link"
+       th:classappend="${active == 'history'} ? ' is-active'"
+       th:href="@{/history(lang=${currentLocale})}">
+      <i data-lucide="history"></i>
+      <span th:text="#{nav.history}">History</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="account-block">
+      <div class="account-avatar" data-account-avatar aria-hidden="true">?</div>
+      <div class="account-meta">
+        <strong data-auth="user" data-user-name class="hidden">User</strong>
+        <strong data-auth="guest" th:text="#{common.guest}">Guest</strong>
+        <span data-auth="user" class="hidden">
+          <a href="#" data-logout th:text="#{nav.logout}">Log out</a>
+        </span>
+        <span data-auth="guest">
+          <a th:href="@{/login(lang=${currentLocale})}" th:text="#{nav.login}">Log in</a>
+        </span>
+      </div>
+    </div>
+
+    <div class="lang-switch" th:aria-label="#{lang.label}">
+      <button type="button" data-lang="en" th:text="#{lang.en}">EN</button>
+      <button type="button" data-lang="ru" th:text="#{lang.ru}">RU</button>
+      <button type="button" data-lang="hy" th:text="#{lang.hy}">HY</button>
+    </div>
+  </div>
+</aside>
+
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="mobile(active)">
+  <header class="mobile-top">
+    <button type="button" class="icon-btn" data-sidebar-toggle aria-label="Menu">
+      <i data-lucide="menu"></i>
+    </button>
+    <a class="brand-mini" th:href="@{/(lang=${currentLocale})}" th:text="#{app.title}">Checkers</a>
+    <a class="icon-btn" th:href="@{/faq(lang=${currentLocale})}" aria-label="FAQ">
+      <i data-lucide="help-circle"></i>
+    </a>
+  </header>
+
+  <nav class="bottom-nav" aria-label="Mobile">
+    <a th:href="@{/(lang=${currentLocale})}"
+       th:classappend="${active == 'home'} ? ' is-active'">
+      <i data-lucide="home"></i>
+      <span th:text="#{nav.home}">Lobby</span>
+    </a>
+    <a th:href="@{/play(lang=${currentLocale})}"
+       th:classappend="${active == 'play'} ? ' is-active'">
+      <i data-lucide="swords"></i>
+      <span th:text="#{nav.play}">Play</span>
+    </a>
+    <a th:href="@{/tasks(lang=${currentLocale})}"
+       th:classappend="${active == 'tasks'} ? ' is-active'">
+      <i data-lucide="target"></i>
+      <span th:text="#{nav.tasks}">Tasks</span>
+    </a>
+    <a th:href="@{/rating(lang=${currentLocale})}"
+       th:classappend="${active == 'rating'} ? ' is-active'">
+      <i data-lucide="trophy"></i>
+      <span th:text="#{nav.rating}">Rating</span>
+    </a>
+    <a data-auth="guest" th:href="@{/login(lang=${currentLocale})}">
+      <i data-lucide="log-in"></i>
+      <span th:text="#{nav.login}">Log in</span>
+    </a>
+    <a data-auth="user" class="hidden" href="#" data-logout>
+      <i data-lucide="log-out"></i>
+      <span th:text="#{nav.logout}">Log out</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+</th:block>

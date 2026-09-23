@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: checkers-online
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /
+
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # Render injects DATABASE_URL automatically from the linked database,
+      # but Spring Boot needs jdbc:postgresql:// format.
+      # We override with the explicit JDBC URL using fromDatabase fields.
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: checkers-db
+          property: connectionString
+
+      # JWT secret — generated randomly per environment, never stored in Git
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Production site URL — set this after first deploy to your Render URL
+      - key: SITE_BASE_URL
+        sync: false
+
+      # LLM API key — optional, only needed if provider=llm
+      - key: ASSISTANT_LLM_API_KEY
+        sync: false
+
+      # Render provides PORT automatically — Spring Boot reads ${PORT:8080}
+      # No need to set PORT manually; Render manages it
+
+databases:
+  - name: checkers-db
+    databaseName: checkers
+    user: checkers
+    plan: free
+    region: frankfurt

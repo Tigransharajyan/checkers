@@ -1,0 +1,41 @@
+<div class="assistant" xmlns:th="http://www.thymeleaf.org" th:fragment="widget">
+  <div class="assistant-panel" data-assistant-panel>
+    <div class="assistant-head">
+      <span th:text="#{assistant.title}">AI Assistant</span>
+      <button type="button" class="icon-btn" data-assistant-close th:aria-label="#{assistant.close}">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="assistant-body">
+      <!-- Quick FAQ Chips -->
+      <div class="assistant-chips">
+        <button type="button" class="chip" data-chip-key="assistant.quick.start.question"
+                data-chip-label-key="assistant.quick.start.label"
+                th:data-chip="#{assistant.quick.start.question}"
+                th:text="#{assistant.quick.start.label}">Start?</button>
+        <button type="button" class="chip" data-chip-key="assistant.quick.friend.question"
+                data-chip-label-key="assistant.quick.friend.label"
+                th:data-chip="#{assistant.quick.friend.question}"
+                th:text="#{assistant.quick.friend.label}">Friend?</button>
+        <button type="button" class="chip" data-chip-key="assistant.quick.king.question"
+                data-chip-label-key="assistant.quick.king.label"
+                th:data-chip="#{assistant.quick.king.question}"
+                th:text="#{assistant.quick.king.label}">King?</button>
+        <button type="button" class="chip" data-chip-key="assistant.quick.matchmaking.question"
+                data-chip-label-key="assistant.quick.matchmaking.label"
+                th:data-chip="#{assistant.quick.matchmaking.question}"
+                th:text="#{assistant.quick.matchmaking.label}">Match?</button>
+      </div>
+      <div class="assistant-log" data-assistant-log></div>
+      <form class="assistant-form" data-assistant-form>
+        <input type="text" data-assistant-input maxlength="500" th:placeholder="#{assistant.placeholder}" autocomplete="off"/>
+        <button type="submit" class="btn btn-primary btn-sm" data-assistant-send th:aria-label="#{assistant.send}">
+          <i data-lucide="send"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+  <button type="button" class="assistant-toggle" data-assistant-toggle th:aria-label="#{assistant.open}">
+    <i data-lucide="message-circle"></i>
+  </button>
+</div>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="|#{rating.title} — #{app.title}|">Rating</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <script th:src="@{/js/assistant.js}" defer></script>
+  <script th:src="@{/js/rating.js}" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: sidebar('rating')}"></div>
+  <div th:replace="~{fragments/sidebar :: mobile('rating')}"></div>
+
+  <main class="content">
+    <section class="rating-page">
+      <div class="mode-page-head">
+        <h1 th:text="#{rating.title}">Rating</h1>
+        <p th:text="#{rating.subtitle}">Your progress and current form.</p>
+      </div>
+
+      <div class="rating-grid">
+        <article class="rating-summary-card">
+          <span class="rating-kicker" th:text="#{rating.current}">Current rating</span>
+          <strong data-rating-score>—</strong>
+          <p data-rating-note th:text="#{rating.guest}">Sign in to save rating and history.</p>
+          <a class="btn btn-primary" th:href="@{/play(lang=${currentLocale})}">
+            <i data-lucide="gamepad-2"></i>
+            <span th:text="#{nav.play}">Play</span>
+          </a>
+        </article>
+
+        <article class="rating-stats-card">
+          <h2 th:text="#{lobby.stats.title}">Your stats</h2>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <strong data-rating-wins>0</strong>
+              <span th:text="#{lobby.stats.wins}">Wins</span>
+            </div>
+            <div class="stat-box">
+              <strong data-rating-losses>0</strong>
+              <span th:text="#{lobby.stats.losses}">Losses</span>
+            </div>
+            <div class="stat-box">
+              <strong data-rating-draws>0</strong>
+              <span th:text="#{lobby.stats.draws}">Draws</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="rating-levels-card">
+          <h2 th:text="#{rating.levels}">Levels</h2>
+          <div class="rating-level-row"><span>1200</span><strong th:text="#{rating.level.beginner}">Beginner</strong></div>
+          <div class="rating-level-row"><span>1500</span><strong th:text="#{rating.level.club}">Club player</strong></div>
+          <div class="rating-level-row"><span>1800</span><strong th:text="#{rating.level.master}">Master</strong></div>
+        </article>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast-root" aria-live="polite"></div>
+<div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>

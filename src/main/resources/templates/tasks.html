@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="|#{tasks.title} — #{app.title}|">Tasks</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <script th:src="@{/js/assistant.js}" defer></script>
+  <script th:src="@{/js/board.js}"></script>
+  <script th:src="@{/js/tasks.js}" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: sidebar('tasks')}"></div>
+  <div th:replace="~{fragments/sidebar :: mobile('tasks')}"></div>
+
+  <main class="content">
+    <section class="task-page">
+      <div class="mode-page-head">
+        <h1 th:text="#{tasks.title}">Daily task</h1>
+        <p th:text="#{tasks.subtitle}">Find the winning capture sequence.</p>
+      </div>
+
+      <div class="task-board-layout">
+        <div class="task-board-card">
+          <div class="task-board-interactive" data-task-board></div>
+        </div>
+
+        <div class="task-answer-card">
+          <h2 th:text="#{tasks.question}">White to move. What is best?</h2>
+          <p class="task-instructions" data-task-instructions th:text="#{tasks.instructions}">Make the winning move on the board.</p>
+          <div class="task-feedback hidden" data-task-feedback></div>
+          <a class="btn btn-ghost" th:href="@{/play(lang=${currentLocale})}">
+            <i data-lucide="gamepad-2"></i>
+            <span th:text="#{tasks.practice}">Practice after solving</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast-root" aria-live="polite"></div>
+<div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>

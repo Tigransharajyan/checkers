@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /faq
+Allow: /css/
+Allow: /js/
+
+# Private / dynamic / realtime
+Disallow: /api/
+Disallow: /ws/
+Disallow: /play
+Disallow: /history
+Disallow: /h2-console
+
+Sitemap: https://example.com/sitemap.xml

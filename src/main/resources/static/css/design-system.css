@@ -1,0 +1,302 @@
+/* Checkers Online — design tokens */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap");
+
+:root {
+  /* Chess.com Classic Green Board Palette */
+  --board-light: #ebecd0;
+  --board-dark: #779556;
+  --board-border: #52673d;
+  --sq-last-move: rgba(247, 247, 105, 0.55);
+  --sq-must-capture: rgba(235, 77, 75, 0.25);
+
+  /* Pieces */
+  --piece-white: #ffffff;
+  --piece-white-shade: #ece6dc;
+  --piece-white-rim: #d1c8b9;
+  --piece-black: #343230;
+  --piece-black-shade: #1e1d1c;
+  --piece-black-rim: #141312;
+
+  /* Surfaces */
+  --bg: #081018;
+  --surface: #111b26;
+  --surface-alt: #172433;
+  --sidebar: #090f16;
+  --sidebar-text: #edf4fb;
+  --sidebar-muted: #9cacbb;
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+  --sidebar-active: linear-gradient(135deg, rgba(72, 201, 101, 0.28), rgba(56, 151, 85, 0.18));
+
+  /* Text */
+  --ink: #f3f7fb;
+  --ink-secondary: #c7d2df;
+  --muted: #93a3b4;
+  --line: rgba(148, 163, 184, 0.16);
+  --line-strong: rgba(148, 163, 184, 0.28);
+
+  /* Accents (Chess.com signature green) */
+  --accent: #69db72;
+  --accent-hover: #88ef91;
+  --accent-active: #4fbd59;
+  --accent-ink: #ffffff;
+  --danger: #d03939;
+  --danger-hover: #b82e2e;
+  --warn-bg: #fff8e8;
+  --warn-border: #f0dda6;
+  --warn-text: #8a6414;
+  --ok-bg: #f1f8eb;
+  --ok-border: #cde6b8;
+  --ok-text: #3d6e1b;
+
+  /* Type */
+  --font: "Inter", "Noto Sans Armenian", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-15: 15px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-28: 28px;
+  --fs-32: 32px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  /* Spacing */
+  --s-2: 2px;
+  --s-4: 4px;
+  --s-6: 6px;
+  --s-8: 8px;
+  --s-10: 10px;
+  --s-12: 12px;
+  --s-14: 14px;
+  --s-16: 16px;
+  --s-18: 18px;
+  --s-20: 20px;
+  --s-24: 24px;
+  --s-28: 28px;
+  --s-32: 32px;
+  --s-40: 40px;
+  --s-48: 48px;
+
+  /* Geometry & Shadows */
+  --radius-sm: 4px;
+  --radius-card: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+  --shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.18);
+  --shadow-card: 0 18px 44px rgba(0, 0, 0, 0.24);
+  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.46);
+
+  --sidebar-width: 250px;
+  --header-mobile: 52px;
+  --bottom-nav: 60px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-15);
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-weight: var(--fw-bold);
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0;
+}
+
+h1 { font-size: var(--fs-28); line-height: 1.2; }
+h2 { font-size: var(--fs-20); line-height: 1.25; }
+h3 { font-size: var(--fs-16); line-height: 1.3; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+/* —— Buttons —— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-8);
+  height: 44px;
+  padding: 0 var(--s-18);
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 0 #5f8d34;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--accent-active);
+  box-shadow: none;
+}
+
+.btn-ghost {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line-strong);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-alt);
+  border-color: #bcbab5;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+  border-color: var(--danger);
+  box-shadow: 0 2px 0 #9c2727;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+  border-color: var(--danger-hover);
+}
+
+.btn-sm {
+  height: 34px;
+  padding: 0 var(--s-12);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn [data-lucide] {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+
+/* —— Form Fields —— */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.field label {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field input,
+.field select {
+  height: 42px;
+  padding: 0 var(--s-12);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  outline: none;
+  font-size: var(--fs-14);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(129, 182, 76, 0.22);
+}
+
+.field input.is-error,
+.field select.is-error {
+  border-color: var(--danger);
+}
+
+.field-error {
+  font-size: var(--fs-12);
+  color: var(--danger);
+  min-height: 16px;
+}
+
+/* —— Cards —— */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--s-20);
+}
+
+/* —— Lucide Icons —— */
+[data-lucide] {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  flex-shrink: 0;
+}

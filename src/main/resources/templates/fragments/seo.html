@@ -1,0 +1,12 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="hreflang(path)">
+  <link rel="canonical"
+        th:href="|${siteBaseUrl}${path}?lang=en|"/>
+  <link rel="alternate" hreflang="en"
+        th:href="|${siteBaseUrl}${path}?lang=en|"/>
+  <link rel="alternate" hreflang="ru"
+        th:href="|${siteBaseUrl}${path}?lang=ru|"/>
+  <link rel="alternate" hreflang="hy"
+        th:href="|${siteBaseUrl}${path}?lang=hy|"/>
+  <link rel="alternate" hreflang="x-default"
+        th:href="|${siteBaseUrl}${path}?lang=en|"/>
+</th:block>

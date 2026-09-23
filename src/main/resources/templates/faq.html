@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
+<head>
+  <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <title th:text="|#{faq.title} — #{app.title}|">FAQ</title>
+  <th:block th:replace="~{fragments/seo :: hreflang('/faq')}"></th:block>
+  <script th:src="@{/js/assistant.js}" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: sidebar('faq')}"></div>
+  <div th:replace="~{fragments/sidebar :: mobile('faq')}"></div>
+
+  <main class="content">
+    <section class="page-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-16);border-bottom:1px solid var(--line);padding-bottom:var(--s-16)">
+        <div>
+          <h1 th:text="#{faq.title}">Rules & FAQ</h1>
+          <p class="muted" style="margin:var(--s-4) 0 0" th:text="#{faq.subtitle}">Frequently asked questions</p>
+        </div>
+        <a class="btn btn-ghost btn-sm" th:href="@{/(lang=${currentLocale})}">
+          <i data-lucide="arrow-left"></i>
+          <span th:text="#{faq.back}">Lobby</span>
+        </a>
+      </div>
+
+      <div class="faq-list">
+        <article class="faq-item" th:each="entry : ${faqEntries}">
+          <h3 th:text="${entry.question}">Question</h3>
+          <p th:text="${entry.answer}">Answer</p>
+        </article>
+      </div>
+
+      <div style="margin-top:var(--s-24);text-align:center">
+        <a class="btn btn-primary" th:href="@{/play(lang=${currentLocale})}">
+          <i data-lucide="play"></i>
+          <span th:text="#{nav.play}">Play Now</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast-root" aria-live="polite"></div>
+<div th:replace="~{fragments/assistant :: widget}"></div>
+</body>
+</html>
