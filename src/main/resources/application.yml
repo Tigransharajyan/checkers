@@ -73,9 +73,8 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    # Render provides SPRING_DATASOURCE_URL via Blueprint fromDatabase.connectionString
-    # DatabaseUrlConfig converts postgres:// → jdbc:postgresql:// before Hikari connects
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/checkers}
+    # Configured programmatically in com.checkers.config.DatabaseConfig
+    # Supports Render connectionString (postgresql://...), DATABASE_URL, and DB_* variables
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
