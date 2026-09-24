@@ -25,7 +25,7 @@ app:
   jwt:
     secret: ${JWT_SECRET:dev-only-change-me-to-a-long-enough-secret-key-for-hs256-checkers-online}
     access-token-ttl-minutes: 30
-    refresh-token-ttl-days: 14
+    refresh-token-ttl-days: 3
   site:
     # Must match host used in static/sitemap.xml (update both for production)
     base-url: ${SITE_BASE_URL:http://localhost:8080}

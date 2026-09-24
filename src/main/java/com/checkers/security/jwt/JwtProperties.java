@@ -11,5 +11,5 @@ public class JwtProperties {
 
     private String secret = "change-me-to-a-long-enough-secret-key-for-hs256-checkers";
     private long accessTokenTtlMinutes = 30;
-    private long refreshTokenTtlDays = 14;
+    private long refreshTokenTtlDays = 3;
 }

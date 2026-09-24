@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let stompClient = null;
   let boardUi = null;
   let disconnectTimer = null;
+  let startSoundPlayed = false;
+  let endSoundPlayed = false;
 
   function setStatus(text, kind) {
     if (!statusEl) return;
@@ -206,11 +208,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function applyGame(g) {
+    const previousStatus = game && game.status;
     game = g;
     renderPlayers();
     boardUi.setBoard(game.boardState, lastMoveFromGame());
     renderLog();
     await loadLegal();
+    if (game.status === 'IN_PROGRESS' && !startSoundPlayed) {
+      startSoundPlayed = true;
+      Checkers.Sound.play('start');
+    }
+    if (game.status === 'FINISHED' && previousStatus !== 'FINISHED' && !endSoundPlayed) {
+      endSoundPlayed = true;
+      Checkers.Sound.play('end');
+    }
   }
 
   function connectWs() {
@@ -271,6 +282,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (data.status) game.status = data.status;
       if (data.finishReason) game.finishReason = data.finishReason;
       if (data.winnerId !== undefined) game.winnerId = data.winnerId;
+
+      const path = Array.isArray(data.path)
+        ? data.path
+        : (typeof data.path === 'string' ? data.path.split(/[,-]/).filter(Boolean) : []);
+      if (path.length >= 2) {
+        Checkers.Sound.play(Checkers.BoardUI.isCapturePath(path) ? 'capture' : 'move');
+      }
+      if (game.status === 'FINISHED' && !endSoundPlayed) {
+        endSoundPlayed = true;
+        Checkers.Sound.play('end');
+      }
 
       await loadLegal();
       return;

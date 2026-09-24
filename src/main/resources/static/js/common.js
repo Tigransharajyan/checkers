@@ -31,8 +31,76 @@ Checkers.Auth = {
 
   isLoggedIn() {
     return !!this.token();
+  },
+
+  async refresh() {
+    const auth = this.load();
+    if (!auth || !auth.refreshToken) return false;
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: auth.refreshToken })
+      });
+      if (!response.ok) throw new Error('Refresh failed');
+      this.save(await response.json());
+      return true;
+    } catch (_) {
+      this.clear();
+      return false;
+    }
   }
 };
+
+Checkers.Sound = (function () {
+  let context = null;
+
+  function getContext() {
+    if (!context) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return null;
+      context = new AudioContext();
+    }
+    if (context.state === 'suspended') context.resume().catch(() => {});
+    return context;
+  }
+
+  function tone(frequency, duration, delay, type, volume) {
+    const audio = getContext();
+    if (!audio) return;
+    const start = audio.currentTime + (delay || 0);
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.type = type || 'sine';
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.07, start + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.02);
+  }
+
+  function play(kind) {
+    if (kind === 'capture') {
+      tone(155, 0.1, 0, 'triangle', 0.1);
+      tone(95, 0.16, 0.07, 'triangle', 0.08);
+    } else if (kind === 'start') {
+      tone(440, 0.08, 0, 'sine');
+      tone(660, 0.12, 0.1, 'sine');
+    } else if (kind === 'end') {
+      tone(392, 0.12, 0, 'sine');
+      tone(294, 0.2, 0.13, 'sine');
+    } else {
+      tone(245, 0.07, 0, 'triangle', 0.08);
+    }
+  }
+
+  ['pointerdown', 'keydown'].forEach((eventName) => {
+    document.addEventListener(eventName, getContext, { once: true });
+  });
+  return { play };
+})();
 
 Checkers.api = async function (path, options = {}) {
   const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
@@ -54,6 +122,10 @@ Checkers.api = async function (path, options = {}) {
     }
   }
   if (!res.ok) {
+    if (res.status === 401 && !options._retried && await Checkers.Auth.refresh()) {
+      const retryOptions = Object.assign({}, options, { _retried: true });
+      return Checkers.api(path, retryOptions);
+    }
     const code = body && body.errorCode ? body.errorCode : 'INTERNAL_ERROR';
     const err = new Error(code);
     err.errorCode = code;
@@ -62,6 +134,17 @@ Checkers.api = async function (path, options = {}) {
     throw err;
   }
   return body;
+};
+
+Checkers.restoreSession = async function () {
+  const auth = Checkers.Auth.load();
+  if (!auth || !auth.refreshToken) return false;
+  const token = auth.accessToken;
+  try {
+    const payload = token && JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload && payload.exp * 1000 > Date.now() + 60 * 1000) return true;
+  } catch (_) { /* Refresh malformed or legacy tokens. */ }
+  return Checkers.Auth.refresh();
 };
 
 Checkers.toast = function (message, type) {
@@ -230,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
   Checkers.initHeaderAuth();
   Checkers.initSidebar();
   Checkers.initIcons();
+  Checkers.restoreSession().then(() => Checkers.initHeaderAuth());
 });
 
 window.addEventListener('load', () => {

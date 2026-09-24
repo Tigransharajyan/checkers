@@ -127,32 +127,9 @@
             </a>
           </div>
 
-          <div class="recent-list static-recent" data-recent-placeholder>
-            <div class="recent-row">
-              <span class="recent-avatar"><i data-lucide="user"></i></span>
-              <strong>Player_123</strong>
-              <span class="recent-win" th:text="#{play.result.win}">You won</span>
-              <span th:text="#{lobby.recent.sample.time1}">5 min · 12:34</span>
-              <small th:text="#{mode.MATCHMAKING}">Random</small>
-            </div>
-            <div class="recent-row">
-              <span class="recent-avatar"><i data-lucide="user"></i></span>
-              <strong>DamaMaster</strong>
-              <span class="recent-loss" th:text="#{play.result.loss}">You lost</span>
-              <span th:text="#{lobby.recent.sample.time2}">10 min · 08:21</span>
-              <small th:text="#{mode.BOT}">Bot</small>
-            </div>
-            <div class="recent-row">
-              <span class="recent-avatar"><i data-lucide="user"></i></span>
-              <strong>GoodMove</strong>
-              <span th:text="#{play.result.draw}">Draw</span>
-              <span th:text="#{lobby.recent.sample.time3}">5 min · Yesterday</span>
-              <small th:text="#{mode.FRIEND}">Friend</small>
-            </div>
-          </div>
-
-          <div class="recent-list hidden" data-recent-games-box>
+          <div class="recent-list" data-recent-games-box>
             <div data-recent-games-list></div>
+            <p class="recent-empty" data-recent-empty th:text="#{lobby.recent.empty}">No games yet.</p>
           </div>
 
           <div class="active-games-panel hidden" data-active-games-box>

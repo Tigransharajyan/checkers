@@ -56,7 +56,11 @@ Checkers.BoardUI = (function () {
       lastFrom: null,
       lastTo: null,
       onMove: options && options.onMove,
-      animating: false
+      animating: false,
+      circles: new Set(),
+      arrows: new Set(),
+      rightStart: null,
+      rightStartPoint: null
     };
 
     function mandatoryCaptureSources() {
@@ -119,7 +123,112 @@ Checkers.BoardUI = (function () {
           root.appendChild(sq);
         });
       });
+      renderAnnotations();
     }
+
+    function arrowKey(from, to) { return from + ':' + to; }
+
+    function squareCenter(alg) {
+      const square = root.querySelector('[data-square="' + alg + '"]');
+      if (!square) return null;
+      const squareRect = square.getBoundingClientRect();
+      const boardRect = root.getBoundingClientRect();
+      return { x: squareRect.left - boardRect.left + squareRect.width / 2, y: squareRect.top - boardRect.top + squareRect.height / 2 };
+    }
+
+    function renderAnnotations() {
+      const namespace = 'http://www.w3.org/2000/svg';
+      const overlay = document.createElementNS(namespace, 'svg');
+      overlay.classList.add('board-annotations');
+      overlay.setAttribute('viewBox', '0 0 100 100');
+      overlay.setAttribute('preserveAspectRatio', 'none');
+      overlay.setAttribute('aria-hidden', 'true');
+      const defs = document.createElementNS(namespace, 'defs');
+      const marker = document.createElementNS(namespace, 'marker');
+      marker.setAttribute('id', 'board-arrowhead');
+      marker.setAttribute('viewBox', '0 0 10 10');
+      marker.setAttribute('refX', '8');
+      marker.setAttribute('refY', '5');
+      marker.setAttribute('markerWidth', '5');
+      marker.setAttribute('markerHeight', '5');
+      marker.setAttribute('orient', 'auto-start-reverse');
+      const tip = document.createElementNS(namespace, 'path');
+      tip.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+      tip.setAttribute('class', 'board-arrow-tip');
+      marker.appendChild(tip);
+      defs.appendChild(marker);
+      overlay.appendChild(defs);
+      const rect = root.getBoundingClientRect();
+      state.arrows.forEach((key) => {
+        const [from, to] = key.split(':');
+        const start = squareCenter(from);
+        const end = squareCenter(to);
+        if (!start || !end) return;
+        const line = document.createElementNS(namespace, 'line');
+        line.setAttribute('x1', String(start.x / rect.width * 100));
+        line.setAttribute('y1', String(start.y / rect.height * 100));
+        line.setAttribute('x2', String(end.x / rect.width * 100));
+        line.setAttribute('y2', String(end.y / rect.height * 100));
+        line.setAttribute('marker-end', 'url(#board-arrowhead)');
+        line.setAttribute('class', 'board-arrow');
+        overlay.appendChild(line);
+      });
+      state.circles.forEach((alg) => {
+        const center = squareCenter(alg);
+        if (!center) return;
+        const circle = document.createElementNS(namespace, 'circle');
+        circle.setAttribute('cx', String(center.x / rect.width * 100));
+        circle.setAttribute('cy', String(center.y / rect.height * 100));
+        circle.setAttribute('r', '5.15');
+        circle.setAttribute('class', 'board-circle');
+        overlay.appendChild(circle);
+      });
+      root.appendChild(overlay);
+    }
+
+    function clearAnnotations() {
+      if (!state.circles.size && !state.arrows.size) return;
+      state.circles.clear();
+      state.arrows.clear();
+      render();
+    }
+
+    function squareAtPoint(clientX, clientY) {
+      const target = document.elementFromPoint(clientX, clientY);
+      const square = target && target.closest && target.closest('[data-square]');
+      return square && root.contains(square) ? square.dataset.square : null;
+    }
+
+    root.addEventListener('contextmenu', (event) => event.preventDefault());
+    root.addEventListener('mousedown', (event) => {
+      if (event.button === 0) {
+        clearAnnotations();
+        return;
+      }
+      if (event.button !== 2) return;
+      const square = event.target.closest('[data-square]');
+      if (!square) return;
+      event.preventDefault();
+      state.rightStart = square.dataset.square;
+      state.rightStartPoint = { x: event.clientX, y: event.clientY };
+    });
+    root.addEventListener('mouseup', (event) => {
+      if (event.button !== 2 || !state.rightStart) return;
+      event.preventDefault();
+      const from = state.rightStart;
+      const to = squareAtPoint(event.clientX, event.clientY);
+      const moved = Math.hypot(event.clientX - state.rightStartPoint.x, event.clientY - state.rightStartPoint.y) > 8;
+      state.rightStart = null;
+      state.rightStartPoint = null;
+      if (!to || (!moved && to !== from)) return;
+      if (!moved || to === from) {
+        state.circles.has(from) ? state.circles.delete(from) : state.circles.add(from);
+      } else {
+        const key = arrowKey(from, to);
+        state.arrows.has(key) ? state.arrows.delete(key) : state.arrows.add(key);
+      }
+      render();
+    });
 
     function highlightSet() {
       const dest = new Set();

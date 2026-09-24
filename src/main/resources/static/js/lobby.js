@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const activeGamesList = document.querySelector('[data-active-games-list]');
   const recentGamesBox = document.querySelector('[data-recent-games-box]');
   const recentGamesList = document.querySelector('[data-recent-games-list]');
-  const recentPlaceholder = document.querySelector('[data-recent-placeholder]');
+  const recentEmpty = document.querySelector('[data-recent-empty]');
   const lobbyBoardRoot = document.querySelector('[data-lobby-board]');
 
   function isInteractiveTarget(target) {
@@ -91,7 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (statsGrid) statsGrid.classList.add('hidden');
       if (activeGamesBox) activeGamesBox.classList.add('hidden');
-      if (recentGamesBox) recentGamesBox.classList.add('hidden');
+      if (recentGamesBox) recentGamesBox.classList.remove('hidden');
+      if (recentGamesList) recentGamesList.innerHTML = '';
+      if (recentEmpty) recentEmpty.classList.remove('hidden');
       return;
     }
 
@@ -109,7 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ratingHint.textContent = Checkers.t('lobby.rating.guestHint');
       }
       if (statsGrid) statsGrid.classList.add('hidden');
-      if (recentGamesBox) recentGamesBox.classList.add('hidden');
+      if (recentGamesBox) recentGamesBox.classList.remove('hidden');
+      if (recentGamesList) recentGamesList.innerHTML = '';
+      if (recentEmpty) recentEmpty.classList.remove('hidden');
     } else {
       if (statsGuest) statsGuest.classList.add('hidden');
       if (ratingHint) ratingHint.classList.add('hidden');
@@ -155,18 +159,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadRecentGames() {
     const user = Checkers.Auth.user();
-    if (!Checkers.Auth.isLoggedIn() || !user || user.guest) return;
+    if (!Checkers.Auth.isLoggedIn() || !user || user.guest) {
+      if (recentGamesList) recentGamesList.innerHTML = '';
+      if (recentEmpty) recentEmpty.classList.remove('hidden');
+      return;
+    }
     try {
       const page = await Checkers.api('/api/games/history?size=4');
       const items = page.content || [];
       if (!recentGamesBox || !recentGamesList) return;
       if (!items.length) {
-        recentGamesBox.classList.add('hidden');
-        if (recentPlaceholder) recentPlaceholder.classList.remove('hidden');
+        recentGamesList.innerHTML = '';
+        recentEmpty?.classList.remove('hidden');
         return;
       }
       recentGamesBox.classList.remove('hidden');
-      if (recentPlaceholder) recentPlaceholder.classList.add('hidden');
+      recentEmpty?.classList.add('hidden');
       recentGamesList.innerHTML = '';
       items.forEach((g) => {
         const row = document.createElement('div');
@@ -185,8 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (window.lucide) window.lucide.createIcons();
     } catch (_) {
-      if (recentGamesBox) recentGamesBox.classList.add('hidden');
-      if (recentPlaceholder) recentPlaceholder.classList.remove('hidden');
+      if (recentGamesBox) recentGamesBox.classList.remove('hidden');
+      if (recentGamesList) recentGamesList.innerHTML = '';
+      if (recentEmpty) recentEmpty.classList.remove('hidden');
     }
   }
 
