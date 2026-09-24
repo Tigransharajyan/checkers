@@ -49,6 +49,7 @@ public class SecurityConfig {
                                 "/history",
                                 "/css/**",
                                 "/js/**",
+                                "/images/**",
                                 "/robots.txt",
                                 "/sitemap.xml",
                                 "/h2-console/**",

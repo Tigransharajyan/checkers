@@ -6,6 +6,8 @@ import com.checkers.dto.response.GameResponse;
 import com.checkers.dto.response.GameSummaryResponse;
 import com.checkers.service.GameService;
 import com.checkers.service.MatchmakingService;
+import com.checkers.websocket.GameEventPublisher;
+import com.checkers.websocket.dto.GameEventMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ public class GameController {
 
     private final GameService gameService;
     private final MatchmakingService matchmakingService;
+    private final GameEventPublisher gameEventPublisher;
 
     @PostMapping
     public ResponseEntity<GameResponse> create(@Valid @RequestBody CreateGameRequest request) {
@@ -55,6 +58,13 @@ public class GameController {
     @GetMapping("/{id}/legal-moves")
     public ResponseEntity<List<List<String>>> legalMoves(@PathVariable Long id) {
         return ResponseEntity.ok(gameService.getLegalMovePaths(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> endActiveGame(@PathVariable Long id) {
+        GameEventMessage event = gameService.endActiveGame(id);
+        gameEventPublisher.publishToGame(id, event);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/invite/join")

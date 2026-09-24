@@ -137,6 +137,7 @@ Checkers.BoardUI = (function () {
     }
 
     function renderAnnotations() {
+      root.querySelector('.board-annotations')?.remove();
       const namespace = 'http://www.w3.org/2000/svg';
       const overlay = document.createElementNS(namespace, 'svg');
       overlay.classList.add('board-annotations');
@@ -179,7 +180,7 @@ Checkers.BoardUI = (function () {
         const circle = document.createElementNS(namespace, 'circle');
         circle.setAttribute('cx', String(center.x / rect.width * 100));
         circle.setAttribute('cy', String(center.y / rect.height * 100));
-        circle.setAttribute('r', '5.15');
+        circle.setAttribute('r', '3.35');
         circle.setAttribute('class', 'board-circle');
         overlay.appendChild(circle);
       });
@@ -190,7 +191,7 @@ Checkers.BoardUI = (function () {
       if (!state.circles.size && !state.arrows.size) return;
       state.circles.clear();
       state.arrows.clear();
-      render();
+      renderAnnotations();
     }
 
     function squareAtPoint(clientX, clientY) {
@@ -227,7 +228,7 @@ Checkers.BoardUI = (function () {
         const key = arrowKey(from, to);
         state.arrows.has(key) ? state.arrows.delete(key) : state.arrows.add(key);
       }
-      render();
+      renderAnnotations();
     });
 
     function highlightSet() {

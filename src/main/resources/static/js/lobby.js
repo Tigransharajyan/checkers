@@ -149,8 +149,27 @@ document.addEventListener('DOMContentLoaded', () => {
           <a class="btn btn-primary btn-sm" href="/play?id=${g.id}&lang=${Checkers.locale()}">
             ${Checkers.t('nav.play')}
           </a>
+          <button type="button" class="btn btn-ghost btn-sm active-game-end" data-end-active-game="${g.id}">
+            ${Checkers.t('lobby.active.end')}
+          </button>
         `;
         activeGamesList.appendChild(item);
+      });
+      activeGamesList.querySelectorAll('[data-end-active-game]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const gameId = button.getAttribute('data-end-active-game');
+          if (!gameId) return;
+          button.disabled = true;
+          try {
+            await Checkers.api('/api/games/' + gameId, { method: 'DELETE' });
+            Checkers.toast(Checkers.t('lobby.active.ended'));
+            await loadActiveGames();
+            await loadRecentGames();
+          } catch (e) {
+            button.disabled = false;
+            Checkers.toast(Checkers.apiErrorMessage(e), 'error');
+          }
+        });
       });
     } catch (_) {
       if (activeGamesBox) activeGamesBox.classList.add('hidden');

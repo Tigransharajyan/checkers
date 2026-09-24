@@ -219,6 +219,46 @@ public class GameService {
                 .build();
     }
 
+    /**
+     * Ends a game from the active-games list. A started game is a resignation;
+     * a waiting game is aborted and its pending invite becomes unusable.
+     */
+    @Transactional
+    public GameEventMessage endActiveGame(Long gameId) {
+        Game game = requireGame(gameId);
+        assertParticipant(game);
+
+        if (game.getStatus() == GameStatus.IN_PROGRESS) {
+            return resign(gameId);
+        }
+        if (game.getStatus() != GameStatus.WAITING) {
+            throw new BusinessException(ErrorCode.INVALID_MOVE);
+        }
+
+        gameInviteRepository.findByGameId(gameId)
+                .filter(invite -> invite.getStatus() == InviteStatus.PENDING)
+                .ifPresent(invite -> {
+                    invite.setStatus(InviteStatus.CANCELLED);
+                    gameInviteRepository.save(invite);
+                });
+        game.setStatus(GameStatus.ABORTED);
+        game.setFinishReason("CANCELLED");
+        game.setFinishedAt(Instant.now());
+        game.setCurrentTurn(null);
+        gameRepository.save(game);
+
+        return GameEventMessage.builder()
+                .type(EventType.GAME_CANCELLED)
+                .gameId(gameId)
+                .timestamp(Instant.now())
+                .data(Map.of(
+                        "userId", CustomUserDetailsService.requireCurrentUserId(),
+                        "status", game.getStatus().name(),
+                        "reason", "CANCELLED"
+                ))
+                .build();
+    }
+
     @Transactional
     public GameEventMessage offerDraw(Long gameId) {
         requireGame(gameId);

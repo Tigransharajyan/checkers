@@ -11,12 +11,12 @@
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
   <script th:src="@{/js/play.js}" defer></script>
 </head>
-<body>
-<div class="app-shell">
+<body class="game-page">
+<div class="app-shell game-shell">
   <div th:replace="~{fragments/sidebar :: sidebar('play')}"></div>
   <div th:replace="~{fragments/sidebar :: mobile('play')}"></div>
 
-  <main class="content">
+  <main class="content game-content">
     <div class="play-layout">
       <!-- 8x8 Board Column -->
       <div class="board-column">
@@ -84,7 +84,7 @@
 
         <!-- Move Log in 2-column notation -->
         <div class="move-log-panel">
-          <h3 th:text="#{play.moveLog}">Notation</h3>
+          <h3><i data-lucide="notebook-tabs"></i><span th:text="#{play.moveLog}">Notation</span></h3>
           <div class="move-log" data-move-log></div>
         </div>
       </aside>
