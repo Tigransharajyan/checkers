@@ -2,6 +2,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap");
 
 :root {
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.28) transparent;
   /* Chess.com Classic Green Board Palette */
   --board-light: #ebecd0;
   --board-dark: #779556;
@@ -95,7 +98,8 @@
 
   --sidebar-width: 250px;
   --header-mobile: 52px;
-  --bottom-nav: 60px;
+  --bottom-nav-base: 60px;
+  --bottom-nav: calc(var(--bottom-nav-base) + env(safe-area-inset-bottom, 0px));
 }
 
 *,
@@ -143,6 +147,29 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.28);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
 }
 
 .hidden {
@@ -255,15 +282,16 @@ textarea {
 }
 
 .field input,
-.field select {
-  height: 42px;
+.field select,
+.field textarea {
+  height: 44px;
   padding: 0 var(--s-12);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
   outline: none;
-  font-size: var(--fs-14);
+  font-size: 16px;
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 

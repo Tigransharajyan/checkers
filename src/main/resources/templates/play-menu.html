@@ -65,6 +65,15 @@
             <i data-lucide="chevron-right"></i>
           </button>
         </article>
+
+        <a class="mode-tile" th:href="@{/tasks(lang=${currentLocale})}">
+          <div class="mode-tile-icon"><i data-lucide="target"></i></div>
+          <div class="mode-tile-copy">
+            <h2 th:text="#{lobby.task.title}">Daily task</h2>
+            <p th:text="#{lobby.task.desc}">Find the best move</p>
+          </div>
+          <span class="mode-tile-action"><i data-lucide="chevron-right"></i></span>
+        </a>
       </div>
 
       <div class="invite-box dashboard-invite" data-invite-box>

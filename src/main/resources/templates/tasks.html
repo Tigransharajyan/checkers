@@ -29,10 +29,16 @@
           <h2 th:text="#{tasks.question}">White to move. What is best?</h2>
           <p class="task-instructions" data-task-instructions th:text="#{tasks.instructions}">Make the winning move on the board.</p>
           <div class="task-feedback hidden" data-task-feedback></div>
-          <a class="btn btn-ghost" th:href="@{/play(lang=${currentLocale})}">
-            <i data-lucide="gamepad-2"></i>
-            <span th:text="#{tasks.practice}">Practice after solving</span>
-          </a>
+          <div class="task-actions-row">
+            <button type="button" class="btn btn-ghost" data-reset-task>
+              <i data-lucide="rotate-ccw"></i>
+              <span th:text="#{tasks.reset}">Reset</span>
+            </button>
+            <a class="btn btn-primary" th:href="@{/play(lang=${currentLocale})}">
+              <i data-lucide="gamepad-2"></i>
+              <span th:text="#{tasks.practice}">Practice after solving</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>

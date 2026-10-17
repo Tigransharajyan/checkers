@@ -181,6 +181,23 @@ class CheckersRulesEngineTest {
         assertEquals(board.countPieces(PieceColor.BLACK), restored.countPieces(PieceColor.BLACK));
     }
 
+    @Test
+    void promotionDuringMultiJump_preservesPromotedFlag() {
+        Board board = emptyBoard(PieceColor.WHITE);
+        board.set(Square.parse("b6"), man(PieceColor.WHITE));
+        board.set(Square.parse("c7"), man(PieceColor.BLACK));
+        board.set(Square.parse("e7"), man(PieceColor.BLACK));
+
+        MoveResult result = engine.applyMove(board, List.of("b6", "d8", "f6"));
+
+        assertTrue(result.success(), () -> String.valueOf(result.error()));
+        assertTrue(result.move().promotion(), "Move should be marked as promoted");
+        assertNotNull(result.board().get(Square.parse("f6")));
+        assertTrue(result.board().get(Square.parse("f6")).isKing(), "Landing piece should be a King");
+        assertNull(result.board().get(Square.parse("c7")));
+        assertNull(result.board().get(Square.parse("e7")));
+    }
+
     private static Board emptyBoard(PieceColor turn) {
         return new Board(turn);
     }

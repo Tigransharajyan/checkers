@@ -62,11 +62,22 @@ public class InviteService {
         GameInvite invite = gameInviteRepository.findByCode(code)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_INVITE));
 
-        if (invite.getStatus() == InviteStatus.ACCEPTED) {
-            throw new BusinessException(ErrorCode.INVITE_ALREADY_USED);
-        }
         if (invite.getStatus() == InviteStatus.CANCELLED) {
             throw new BusinessException(ErrorCode.INVALID_INVITE);
+        }
+
+        Game game = invite.getGame();
+
+        // If the current user is already the creator or the joined opponent, return game idempotently
+        boolean isCreator = invite.getCreator().getId().equals(userId);
+        boolean isExistingBlackPlayer = game.getBlackPlayer() != null && game.getBlackPlayer().getId().equals(userId);
+        if (isCreator || isExistingBlackPlayer) {
+            return DtoMapper.toGameResponse(game, invite.getCode(),
+                    moveRepository.findByGameIdOrderByMoveNumberAsc(game.getId()));
+        }
+
+        if (invite.getStatus() == InviteStatus.ACCEPTED) {
+            throw new BusinessException(ErrorCode.INVITE_ALREADY_USED);
         }
         if (invite.getExpiresAt().isBefore(Instant.now()) || invite.getStatus() == InviteStatus.EXPIRED) {
             invite.setStatus(InviteStatus.EXPIRED);
@@ -77,7 +88,6 @@ public class InviteService {
             throw new BusinessException(ErrorCode.GAME_NOT_JOINABLE);
         }
 
-        Game game = invite.getGame();
         if (game.getStatus() == GameStatus.IN_PROGRESS
                 || game.getStatus() == GameStatus.FINISHED
                 || game.getStatus() == GameStatus.ABORTED) {

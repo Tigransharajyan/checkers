@@ -35,6 +35,17 @@
 
       <!-- Side Control Panel -->
       <aside class="side-panel">
+        <div class="side-panel-header">
+          <div class="game-badge-wrap">
+            <span class="game-mode-indicator"><i data-lucide="swords"></i></span>
+            <span class="game-mode-text" th:text="#{play.title}">Game</span>
+          </div>
+          <a class="btn btn-ghost btn-sm" th:href="@{/(lang=${currentLocale})}">
+            <i data-lucide="arrow-left"></i>
+            <span th:text="#{play.backLobby}">Lobby</span>
+          </a>
+        </div>
+
         <!-- Opponent Card -->
         <div class="player-card" data-opp-card>
           <div class="avatar" data-opp-avatar aria-hidden="true">?</div>
@@ -57,7 +68,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="actions-row">
+        <div class="actions-row game-actions-row">
           <button type="button" class="btn btn-danger" data-resign-btn>
             <i data-lucide="flag"></i>
             <span th:text="#{play.resign}">Resign</span>
@@ -66,10 +77,6 @@
             <i data-lucide="handshake"></i>
             <span th:text="#{play.drawOffer}">Draw</span>
           </button>
-          <a class="btn btn-ghost" th:href="@{/(lang=${currentLocale})}">
-            <i data-lucide="home"></i>
-            <span th:text="#{play.backLobby}">Lobby</span>
-          </a>
         </div>
 
         <!-- Draw Offer Alert Box (for opponent) -->
@@ -110,6 +117,7 @@
     <h2 data-gameover-title>Game Over</h2>
     <p data-gameover-reason></p>
     <div class="actions-row" style="margin-top:var(--s-8)">
+      <button type="button" class="btn btn-secondary" data-dismiss-gameover th:text="#{play.reviewBoard}">Review Board</button>
       <button type="button" class="btn btn-primary" data-new-game-btn th:text="#{play.newGame}">New Game</button>
       <a class="btn btn-ghost" th:href="@{/(lang=${currentLocale})}" th:text="#{play.backLobby}">Lobby</a>
     </div>

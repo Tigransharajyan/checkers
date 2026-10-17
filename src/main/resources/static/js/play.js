@@ -1,5 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!Checkers.requireAuth(location.pathname + location.search)) return;
+  if (!Checkers.Auth.isLoggedIn()) {
+    try {
+      const res = await Checkers.api('/api/auth/guest', { method: 'POST' });
+      Checkers.Auth.save(res);
+      Checkers.initHeaderAuth();
+    } catch (_) {
+      if (!Checkers.requireAuth(location.pathname + location.search)) return;
+    }
+  }
 
   const params = new URLSearchParams(location.search);
   let gameId = params.get('id');
@@ -15,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const oppCard = document.querySelector('[data-opp-card]');
   const drawOfferBox = document.querySelector('[data-draw-offer]');
   const drawOfferBtn = document.querySelector('[data-draw-offer-btn]');
+  const resignBtn = document.querySelector('[data-resign-btn]');
   const boardRoot = document.querySelector('[data-board]');
 
   // Modals
@@ -120,11 +129,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     gameoverModal.classList.remove('hidden');
   }
 
+  function updateActionButtons() {
+    const isPlaying = game && game.status === 'IN_PROGRESS';
+    const isBot = game && game.mode === 'BOT';
+    if (resignBtn) resignBtn.disabled = !isPlaying;
+    if (drawOfferBtn) {
+      drawOfferBtn.disabled = !isPlaying || isBot;
+      if (isBot) {
+        drawOfferBtn.style.display = 'none';
+      } else {
+        drawOfferBtn.style.display = '';
+      }
+    }
+  }
+
   function updateTurnBanner(hasCaptures) {
     if (!game) return;
 
     if (game.status === 'WAITING') {
       setStatus(Checkers.t('play.waitingOpponent'), 'warn');
+      youCard?.classList.remove('is-active-turn');
+      oppCard?.classList.remove('is-active-turn');
+      return;
+    }
+
+    if (game.status === 'ABORTED' || game.status === 'CANCELLED') {
+      setStatus(Checkers.t('lobby.active.ended') || 'Game ended', 'warn');
       youCard?.classList.remove('is-active-turn');
       oppCard?.classList.remove('is-active-turn');
       return;
@@ -142,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         isWin = true;
       } else if (game.winnerId) {
         result = Checkers.t('play.result.loss');
-      } else if (game.mode === 'BOT' && game.finishReason === 'RESIGN') {
+      } else if (game.mode === 'BOT') {
         result = Checkers.t('play.result.loss');
       }
 
@@ -247,6 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     boardUi.setBoard(game.boardState, lastMoveFromGame());
     renderLog();
     await loadLegal();
+    updateActionButtons();
     if (game.status === 'IN_PROGRESS' && !startSoundPlayed) {
       startSoundPlayed = true;
       Checkers.Sound.play('start');
@@ -455,6 +486,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (_) {}
     }
     location.href = '/?lang=' + Checkers.locale();
+  });
+
+  // Dismiss Game Over Modal (review board)
+  document.querySelector('[data-dismiss-gameover]')?.addEventListener('click', () => {
+    gameoverModal?.classList.add('hidden');
+  });
+
+  gameoverModal?.addEventListener('click', (e) => {
+    if (e.target === gameoverModal) {
+      gameoverModal.classList.add('hidden');
+    }
+  });
+
+  window.addEventListener('checkers:localechange', () => {
+    if (game) {
+      renderPlayers();
+      updateTurnBanner(false);
+      updateActionButtons();
+    }
   });
 
   boardUi = Checkers.BoardUI.create(boardRoot, {

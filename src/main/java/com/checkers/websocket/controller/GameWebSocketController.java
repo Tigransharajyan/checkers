@@ -50,27 +50,45 @@ public class GameWebSocketController {
     @MessageMapping("/game/{gameId}/resign")
     public void resign(@DestinationVariable Long gameId, java.security.Principal principal) {
         setAuthFromPrincipal(principal);
-        GameEventMessage event = gameService.resign(gameId);
-        messagingTemplate.convertAndSend(topic(gameId), event);
+        try {
+            GameEventMessage event = gameService.resign(gameId);
+            messagingTemplate.convertAndSend(topic(gameId), event);
+        } catch (Exception ex) {
+            log.warn("resign failed for game {}: {}", gameId, ex.getMessage(), ex);
+            String user = principal != null ? principal.getName() : currentUsername();
+            messagingTemplate.convertAndSendToUser(user, "/queue/errors", errorEvent(gameId, ex));
+        }
     }
 
     @MessageMapping("/game/{gameId}/draw")
     public void draw(@DestinationVariable Long gameId, @Payload DrawOfferMessage message, java.security.Principal principal) {
         setAuthFromPrincipal(principal);
-        GameEventMessage event;
-        if (message != null && message.getAccept() != null) {
-            event = gameService.respondToDraw(gameId, message.getAccept());
-        } else {
-            event = gameService.offerDraw(gameId);
+        try {
+            GameEventMessage event;
+            if (message != null && message.getAccept() != null) {
+                event = gameService.respondToDraw(gameId, message.getAccept());
+            } else {
+                event = gameService.offerDraw(gameId);
+            }
+            messagingTemplate.convertAndSend(topic(gameId), event);
+        } catch (Exception ex) {
+            log.warn("draw failed for game {}: {}", gameId, ex.getMessage(), ex);
+            String user = principal != null ? principal.getName() : currentUsername();
+            messagingTemplate.convertAndSendToUser(user, "/queue/errors", errorEvent(gameId, ex));
         }
-        messagingTemplate.convertAndSend(topic(gameId), event);
     }
 
     @MessageMapping("/game/{gameId}/presence")
     public void presence(@DestinationVariable Long gameId, java.security.Principal principal) {
         setAuthFromPrincipal(principal);
-        GameEventMessage event = gameService.presence(gameId);
-        messagingTemplate.convertAndSend(topic(gameId), event);
+        try {
+            GameEventMessage event = gameService.presence(gameId);
+            if (event != null) {
+                messagingTemplate.convertAndSend(topic(gameId), event);
+            }
+        } catch (Exception ex) {
+            log.warn("presence failed for game {}: {}", gameId, ex.getMessage(), ex);
+        }
     }
 
     private void setAuthFromPrincipal(java.security.Principal principal) {

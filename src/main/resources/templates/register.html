@@ -4,7 +4,6 @@
   <th:block th:replace="~{fragments/head :: meta}"></th:block>
   <title th:text="|#{auth.register.title} — #{app.title}|">Register</title>
   <th:block th:replace="~{fragments/seo :: hreflang('/register')}"></th:block>
-  <script th:src="@{/js/assistant.js}" defer></script>
   <script th:src="@{/js/auth.js}" defer></script>
 </head>
 <body class="auth-page">
@@ -49,6 +48,5 @@
   </div>
 
   <div id="toast-root" aria-live="polite"></div>
-  <div th:replace="~{fragments/assistant :: widget}"></div>
 </body>
 </html>

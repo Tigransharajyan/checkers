@@ -3,6 +3,7 @@ package com.checkers.service;
 import com.checkers.config.GameProperties;
 import com.checkers.model.entity.Game;
 import com.checkers.model.enums.EventType;
+import com.checkers.model.enums.GameMode;
 import com.checkers.model.enums.GameStatus;
 import com.checkers.repository.GameRepository;
 import com.checkers.security.SecurityUser;
@@ -40,17 +41,20 @@ public class PresenceService {
 
     private final GameRepository gameRepository;
     private final GameService gameService;
+    private final MatchmakingService matchmakingService;
     private final GameEventPublisher eventPublisher;
     private final GameProperties gameProperties;
     private final ThreadPoolTaskScheduler taskScheduler;
 
     public PresenceService(GameRepository gameRepository,
                            @Lazy GameService gameService,
+                           @Lazy MatchmakingService matchmakingService,
                            GameEventPublisher eventPublisher,
                            GameProperties gameProperties,
                            ThreadPoolTaskScheduler taskScheduler) {
         this.gameRepository = gameRepository;
         this.gameService = gameService;
+        this.matchmakingService = matchmakingService;
         this.eventPublisher = eventPublisher;
         this.gameProperties = gameProperties;
         this.taskScheduler = taskScheduler;
@@ -98,7 +102,7 @@ public class PresenceService {
 
         if (wasDisconnected) {
             gameRepository.findById(gameId).ifPresent(game -> {
-                if (game.getStatus() == GameStatus.IN_PROGRESS) {
+                if (game.getStatus() == GameStatus.IN_PROGRESS && game.getMode() != GameMode.BOT) {
                     eventPublisher.publishToGame(gameId, EventType.OPPONENT_RECONNECTED, Map.of(
                             "userId", userId,
                             "gameId", gameId,
@@ -118,6 +122,9 @@ public class PresenceService {
         }
 
         Long userId = sessionUsers.remove(sessionId);
+        if (userId != null) {
+            matchmakingService.removeFromQueue(userId);
+        }
         Set<Long> games = sessionGames.remove(sessionId);
         if (userId == null || games == null || games.isEmpty()) {
             return;
@@ -128,21 +135,16 @@ public class PresenceService {
         }
     }
 
-    public void markPresent(Long gameId, Long userId) {
+    public boolean markPresent(Long gameId, Long userId) {
         String key = key(gameId, userId);
         boolean wasDisconnected = pendingDefeats.containsKey(key) || disconnectedAt.containsKey(key);
         cancelDefeat(key);
-        if (wasDisconnected) {
-            eventPublisher.publishToGame(gameId, EventType.OPPONENT_RECONNECTED, Map.of(
-                    "userId", userId,
-                    "gameId", gameId
-            ));
-        }
+        return wasDisconnected;
     }
 
     private void handlePlayerLeft(Long gameId, Long userId) {
         Game game = gameRepository.findById(gameId).orElse(null);
-        if (game == null || game.getStatus() != GameStatus.IN_PROGRESS) {
+        if (game == null || game.getStatus() != GameStatus.IN_PROGRESS || game.getMode() == GameMode.BOT) {
             return;
         }
         if (!isParticipant(game, userId)) {

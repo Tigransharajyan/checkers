@@ -261,7 +261,11 @@ public class GameService {
 
     @Transactional
     public GameEventMessage offerDraw(Long gameId) {
-        requireGame(gameId);
+        Game game = requireGame(gameId);
+        assertParticipant(game);
+        if (game.getStatus() != GameStatus.IN_PROGRESS || game.getMode() == GameMode.BOT) {
+            throw new BusinessException(ErrorCode.INVALID_MOVE);
+        }
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
         return GameEventMessage.builder()
                 .type(EventType.DRAW_OFFERED)
@@ -277,6 +281,10 @@ public class GameService {
     @Transactional
     public GameEventMessage respondToDraw(Long gameId, boolean accept) {
         Game game = requireGame(gameId);
+        assertParticipant(game);
+        if (game.getStatus() != GameStatus.IN_PROGRESS || game.getMode() == GameMode.BOT) {
+            throw new BusinessException(ErrorCode.INVALID_MOVE);
+        }
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
         if (accept) {
             finishGame(game, null, "DRAW");
@@ -303,7 +311,10 @@ public class GameService {
     public GameEventMessage presence(Long gameId) {
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
         requireGame(gameId);
-        presenceService.markPresent(gameId, principal.getId());
+        boolean wasDisconnected = presenceService.markPresent(gameId, principal.getId());
+        if (!wasDisconnected) {
+            return null;
+        }
         return GameEventMessage.builder()
                 .type(EventType.OPPONENT_RECONNECTED)
                 .gameId(gameId)

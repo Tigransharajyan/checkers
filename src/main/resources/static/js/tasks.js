@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let selected = null;
   let solved = isSolvedToday();
 
+  let stepIndex = 0;
+
   function show(message, ok) {
     if (!feedback) return;
     feedback.textContent = message;
@@ -38,10 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function samePath(a, b) {
-    return a.length === b.length && a.every((square, index) => square === b[index]);
-  }
-
   function midpoint(from, to) {
     const files = 'abcdefgh';
     const fromFile = files.indexOf(from[0]);
@@ -52,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetAfterWrong() {
+    stepIndex = 0;
     board = cloneSquares(task.squares);
     selected = null;
     render();
@@ -60,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function completeTask() {
     solved = true;
+    stepIndex = 0;
     selected = null;
     try {
       localStorage.setItem(storageKey, '1');
@@ -69,31 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (instructions) instructions.textContent = Checkers.t('tasks.completed');
   }
 
-  function handleMove(path) {
-    if (solved) {
-      show(Checkers.t('tasks.alreadySolved'), true);
-      return;
-    }
-
-    const directSolution = path.length === 2
-      && path[0] === task.solution[0]
-      && path[1] === task.solution[task.solution.length - 1];
-    if (!samePath(path, task.solution) && !directSolution) {
-      resetAfterWrong();
-      return;
-    }
-
-    for (let i = 0; i < task.solution.length - 1; i++) {
-      delete board[midpoint(task.solution[i], task.solution[i + 1])];
-    }
-    delete board[task.solution[0]];
-    board[task.solution[task.solution.length - 1]] = 'WM';
-    completeTask();
-  }
-
   function nextSquares(from) {
-    if (from !== task.solution[0]) return [];
-    return [task.solution[task.solution.length - 1]];
+    if (from !== task.solution[stepIndex]) return [];
+    const next = task.solution[stepIndex + 1];
+    return next ? [next] : [];
   }
 
   function onSquareClick(alg) {
@@ -104,10 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!selected) {
       if (!board[alg]) return;
-      if (alg !== task.solution[0] || board[alg][0] !== 'W') {
-        resetAfterWrong();
-        return;
-      }
+      if (board[alg][0] !== 'W') return;
       selected = alg;
       render();
       return;
@@ -119,7 +95,40 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    handleMove([selected, alg]);
+    if (board[alg] && board[alg][0] === 'W') {
+      if (stepIndex > 0) {
+        resetAfterWrong();
+        return;
+      }
+      selected = alg;
+      render();
+      return;
+    }
+
+    if (selected !== task.solution[stepIndex]) {
+      resetAfterWrong();
+      return;
+    }
+
+    const expectedNext = task.solution[stepIndex + 1];
+    if (alg !== expectedNext) {
+      resetAfterWrong();
+      return;
+    }
+
+    // Valid step in multi-jump sequence
+    const currentPos = task.solution[stepIndex];
+    delete board[midpoint(currentPos, alg)];
+    delete board[currentPos];
+    board[alg] = 'WM';
+    stepIndex++;
+
+    if (stepIndex >= task.solution.length - 1) {
+      completeTask();
+    } else {
+      selected = alg;
+      render();
+    }
   }
 
   function render() {
@@ -167,6 +176,26 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     ];
   }
+
+  document.querySelector('[data-reset-task]')?.addEventListener('click', () => {
+    solved = false;
+    stepIndex = 0;
+    try { localStorage.removeItem(storageKey); } catch (_) {}
+    board = cloneSquares(task.squares);
+    selected = null;
+    render();
+    if (instructions) instructions.textContent = Checkers.t('tasks.instructions');
+    if (feedback) feedback.className = 'task-feedback hidden';
+  });
+
+  window.addEventListener('checkers:localechange', () => {
+    if (solved) {
+      show(Checkers.t('tasks.alreadySolved'), true);
+      if (instructions) instructions.textContent = Checkers.t('tasks.completed');
+    } else {
+      if (instructions) instructions.textContent = Checkers.t('tasks.instructions');
+    }
+  });
 
   render();
   if (solved) {

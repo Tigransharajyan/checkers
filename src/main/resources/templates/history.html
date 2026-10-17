@@ -25,7 +25,7 @@
       <!-- Guest Blocked Banner -->
       <div class="card hidden" data-history-guest style="text-align:center;padding:var(--s-32)">
         <h2 style="font-size:var(--fs-18);margin-bottom:var(--s-8)" th:text="#{history.guestBlocked}">History is only for registered users</h2>
-        <p class="muted" style="margin:0 0 var(--s-20)" th:text="#{auth.guestHint}">Sign in to track your game stats and win history.</p>
+        <p class="muted" style="margin:0 0 var(--s-20)" th:text="#{history.guestSubtitle}">Sign in to track your game stats and win history.</p>
         <div style="display:flex;gap:var(--s-12);justify-content:center">
           <a class="btn btn-primary" th:href="@{/login(lang=${currentLocale})}" th:text="#{nav.login}">Log in</a>
           <a class="btn btn-ghost" th:href="@{/register(lang=${currentLocale})}" th:text="#{nav.register}">Sign up</a>
@@ -39,12 +39,12 @@
       </div>
 
       <!-- History Table -->
-      <div data-history-table-wrap>
+      <div class="history-table-container" data-history-table-wrap>
         <table class="history-table">
           <thead>
           <tr>
             <th th:text="#{history.mode}">Mode</th>
-            <th>Игроки</th>
+            <th th:text="#{history.players}">Players</th>
             <th th:text="#{history.winner}">Winner</th>
             <th th:text="#{history.result}">Result</th>
             <th></th>

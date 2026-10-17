@@ -16,6 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (err) err.textContent = message || Checkers.t('common.error');
   }
 
+  function sanitizeNext(next) {
+    if (!next || typeof next !== 'string') return '/';
+    if (!next.startsWith('/') || next.startsWith('//') || next.includes('://') || next.includes('\\')) {
+      return '/';
+    }
+    return next;
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearErrors();
@@ -25,7 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let valid = true;
     form.querySelectorAll('[required]').forEach((input) => {
       if (!String(input.value || '').trim()) {
-        showFieldError(input.name, Checkers.t('common.error'));
+        let msg = Checkers.t('validation.required');
+        if (input.name === 'usernameOrEmail' || input.name === 'username') {
+          msg = Checkers.t('validation.usernameRequired');
+        } else if (input.name === 'password') {
+          msg = Checkers.t('validation.passwordRequired');
+        } else if (input.name === 'email') {
+          msg = Checkers.t('validation.emailRequired');
+        }
+        showFieldError(input.name, msg);
         valid = false;
       }
     });
@@ -53,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       Checkers.Auth.save(body);
       const params = new URLSearchParams(location.search);
-      const next = params.get('next') || '/';
+      const next = sanitizeNext(params.get('next'));
       location.href = next.includes('lang=') ? next : (next + (next.includes('?') ? '&' : '?') + 'lang=' + Checkers.locale());
     } catch (err) {
       const msg = Checkers.apiErrorMessage(err);
@@ -70,7 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const body = await Checkers.api('/api/auth/guest', { method: 'POST' });
       Checkers.Auth.save(body);
-      location.href = '/?lang=' + Checkers.locale();
+      const params = new URLSearchParams(location.search);
+      const next = sanitizeNext(params.get('next'));
+      location.href = next.includes('lang=') ? next : (next + (next.includes('?') ? '&' : '?') + 'lang=' + Checkers.locale());
     } catch (err) {
       Checkers.toast(Checkers.apiErrorMessage(err), 'error');
     }

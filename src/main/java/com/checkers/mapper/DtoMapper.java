@@ -7,6 +7,7 @@ import com.checkers.dto.response.UserResponse;
 import com.checkers.model.entity.Game;
 import com.checkers.model.entity.Move;
 import com.checkers.model.entity.User;
+import com.checkers.model.enums.GameMode;
 
 import java.util.List;
 
@@ -51,7 +52,7 @@ public final class DtoMapper {
                 .mode(game.getMode())
                 .status(game.getStatus())
                 .whiteUsername(game.getWhitePlayer() != null ? game.getWhitePlayer().getUsername() : null)
-                .blackUsername(game.getBlackPlayer() != null ? game.getBlackPlayer().getUsername() : "BOT")
+                .blackUsername(game.getBlackPlayer() != null ? game.getBlackPlayer().getUsername() : (game.getMode() == GameMode.BOT ? "BOT" : null))
                 .winnerUsername(game.getWinner() != null ? game.getWinner().getUsername() : null)
                 .finishReason(game.getFinishReason())
                 .startedAt(game.getStartedAt())

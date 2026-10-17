@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
 <head>
   <th:block th:replace="~{fragments/head :: meta}"></th:block>
-  <title th:text="|#{faq.title} — #{app.title}|">FAQ</title>
+  <title th:text="|#{faq.title} — #{app.title}|">Rules & FAQ</title>
   <th:block th:replace="~{fragments/seo :: hreflang('/faq')}"></th:block>
   <script th:src="@{/js/assistant.js}" defer></script>
 </head>
@@ -12,11 +12,11 @@
   <div th:replace="~{fragments/sidebar :: mobile('faq')}"></div>
 
   <main class="content">
-    <section class="page-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-16);border-bottom:1px solid var(--line);padding-bottom:var(--s-16)">
+    <section class="page-panel faq-page-panel">
+      <div class="faq-head-bar">
         <div>
           <h1 th:text="#{faq.title}">Rules & FAQ</h1>
-          <p class="muted" style="margin:var(--s-4) 0 0" th:text="#{faq.subtitle}">Frequently asked questions</p>
+          <p class="muted" th:text="#{faq.subtitle}">Common questions about Russian draughts rules and features</p>
         </div>
         <a class="btn btn-ghost btn-sm" th:href="@{/(lang=${currentLocale})}">
           <i data-lucide="arrow-left"></i>
@@ -24,16 +24,28 @@
         </a>
       </div>
 
-      <div class="faq-list">
-        <article class="faq-item" th:each="entry : ${faqEntries}">
-          <h3 th:text="${entry.question}">Question</h3>
-          <p th:text="${entry.answer}">Answer</p>
-        </article>
+      <div class="faq-search-wrapper">
+        <i data-lucide="search" class="faq-search-icon"></i>
+        <input type="search" class="faq-search-input" data-faq-search th:placeholder="#{faq.search.placeholder}" autocomplete="off" />
       </div>
 
-      <div style="margin-top:var(--s-24);text-align:center">
+      <div class="faq-list" data-faq-list>
+        <details class="faq-accordion" th:each="entry : ${faqEntries}" data-faq-item>
+          <summary class="faq-summary">
+            <span class="faq-question-text" th:text="${entry.question}">Question</span>
+            <span class="faq-icon-wrapper" aria-hidden="true"><i data-lucide="chevron-down"></i></span>
+          </summary>
+          <div class="faq-answer-content">
+            <p th:text="${entry.answer}">Answer</p>
+          </div>
+        </details>
+      </div>
+
+      <p class="faq-empty hidden" data-faq-empty th:text="#{faq.search.empty}">No matching questions found.</p>
+
+      <div class="faq-cta-bar">
         <a class="btn btn-primary" th:href="@{/play(lang=${currentLocale})}">
-          <i data-lucide="play"></i>
+          <i data-lucide="gamepad-2"></i>
           <span th:text="#{nav.play}">Play Now</span>
         </a>
       </div>
@@ -43,5 +55,28 @@
 
 <div id="toast-root" aria-live="polite"></div>
 <div th:replace="~{fragments/assistant :: widget}"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.querySelector('[data-faq-search]');
+  const items = document.querySelectorAll('[data-faq-item]');
+  const emptyEl = document.querySelector('[data-faq-empty]');
+
+  searchInput?.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    let visibleCount = 0;
+    items.forEach((item) => {
+      const text = item.textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      item.classList.toggle('hidden', !match);
+      if (match) {
+        visibleCount++;
+        if (q) item.open = true;
+      }
+    });
+    emptyEl?.classList.toggle('hidden', visibleCount > 0);
+  });
+});
+</script>
 </body>
 </html>

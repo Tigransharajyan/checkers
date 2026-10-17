@@ -87,11 +87,11 @@
             </button>
           </article>
 
-          <a class="mode-tile" th:href="@{/play(lang=${currentLocale})}">
+          <a class="mode-tile" th:href="@{/faq(lang=${currentLocale})}">
             <div class="mode-tile-icon"><i data-lucide="book-open"></i></div>
             <div class="mode-tile-copy">
-              <h2 th:text="#{lobby.mode.learn.title}">Learn rules</h2>
-              <p th:text="#{lobby.mode.learn.desc}">Choose game mode</p>
+              <h2 th:text="#{lobby.mode.learn.title}">Rules & FAQ</h2>
+              <p th:text="#{lobby.mode.learn.desc}">Rules, piece moves, and strategy</p>
             </div>
             <span class="mode-tile-action"><i data-lucide="chevron-right"></i></span>
           </a>
@@ -179,7 +179,7 @@
               <span th:text="#{lobby.stats.draws}">Draws</span>
             </div>
           </div>
-          <a th:href="@{/history(lang=${currentLocale})}">
+          <a th:href="@{/rating(lang=${currentLocale})}">
             <span th:text="#{lobby.rating.more}">Details</span>
             <i data-lucide="arrow-right"></i>
           </a>

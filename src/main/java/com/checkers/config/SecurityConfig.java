@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/guest",
                                 "/api/auth/refresh",
+                                "/api/auth/logout",
                                 "/api/assistant/chat"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/i18n").permitAll()

@@ -122,7 +122,7 @@ public final class CheckersRulesEngine {
     private List<EngineMove> allCaptures(Board board, PieceColor side) {
         List<EngineMove> moves = new ArrayList<>();
         forEachPiece(board, side, (sq, piece) ->
-                exploreCaptures(board, sq, piece, List.of(sq), List.of(), Set.of(), moves));
+                exploreCaptures(board, sq, piece, List.of(sq), List.of(), Set.of(), false, moves));
         return moves;
     }
 
@@ -155,6 +155,7 @@ public final class CheckersRulesEngine {
                                  List<Square> pathSoFar,
                                  List<Square> capturedSoFar,
                                  Set<Square> capturedSet,
+                                 boolean promotedSoFar,
                                  List<EngineMove> out) {
         List<CaptureStep> steps = findCaptureSteps(board, current, piece, capturedSet);
         if (steps.isEmpty()) {
@@ -167,7 +168,7 @@ public final class CheckersRulesEngine {
             nextBoard.clear(step.captured());
 
             Piece moving = piece;
-            boolean promoted = false;
+            boolean promoted = promotedSoFar;
             if (!moving.isKing() && isPromotionRank(step.landing(), moving.color())) {
                 moving = moving.promote();
                 promoted = true;
@@ -187,7 +188,7 @@ public final class CheckersRulesEngine {
             if (further.isEmpty()) {
                 out.add(new EngineMove(nextPath, nextCaptured, promoted));
             } else {
-                exploreCaptures(nextBoard, step.landing(), moving, nextPath, nextCaptured, nextSet, out);
+                exploreCaptures(nextBoard, step.landing(), moving, nextPath, nextCaptured, nextSet, promoted, out);
             }
         }
     }

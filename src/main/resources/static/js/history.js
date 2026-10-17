@@ -1,48 +1,81 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!Checkers.requireAuth('/history')) return;
   const tableWrap = document.querySelector('[data-history-table-wrap]');
   const empty = document.querySelector('[data-history-empty]');
   const guest = document.querySelector('[data-history-guest]');
   const tbody = document.querySelector('[data-history-body]');
 
-  const user = Checkers.Auth.user();
-  if (user && user.guest) {
-    guest?.classList.remove('hidden');
-    tableWrap?.classList.add('hidden');
-    empty?.classList.add('hidden');
-    return;
-  }
+  let cachedItems = null;
 
-  try {
-    const page = await Checkers.api('/api/games/history?size=30');
-    const items = page.content || [];
-    if (!items.length) {
-      empty?.classList.remove('hidden');
-      tableWrap?.classList.add('hidden');
-      return;
-    }
-    empty?.classList.add('hidden');
-    tableWrap?.classList.remove('hidden');
+  function renderRows(items, user) {
     tbody.innerHTML = '';
     items.forEach((g) => {
       const tr = document.createElement('tr');
       const reasonKey = 'reason.' + (g.finishReason || '');
       const reason = g.finishReason ? Checkers.t(reasonKey) : '—';
       const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.blackUsername || '—');
+
+      let resultBadge = '';
+      if (g.winnerUsername) {
+        if (g.winnerUsername === user.username) {
+          resultBadge = `<span class="res-badge res-win">${Checkers.t('play.result.win')}</span>`;
+        } else {
+          resultBadge = `<span class="res-badge res-loss">${Checkers.t('play.result.loss')}</span>`;
+        }
+      } else if (g.finishReason) {
+        resultBadge = `<span class="res-badge res-draw">${Checkers.t('play.result.draw')}</span>`;
+      }
+
       tr.innerHTML = `
         <td><span class="mode-badge">${Checkers.t('mode.' + g.mode)}</span></td>
         <td style="font-weight:var(--fw-medium)">${vs}</td>
         <td><strong>${g.winnerUsername || '—'}</strong></td>
-        <td>${reason === reasonKey ? g.finishReason : reason}</td>
+        <td>${resultBadge || (reason === reasonKey ? g.finishReason : reason)}</td>
         <td>
           <a class="btn btn-ghost btn-sm" href="/play?id=${g.id}&lang=${Checkers.locale()}">
-            ${Checkers.t('history.open')}
+            <i data-lucide="eye"></i>
+            <span>${Checkers.t('history.open')}</span>
           </a>
         </td>
       `;
       tbody.appendChild(tr);
     });
-  } catch (e) {
-    Checkers.toast(Checkers.apiErrorMessage(e), 'error');
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   }
+
+  async function loadHistory() {
+    const user = Checkers.Auth.user();
+    if (!user || user.guest) {
+      guest?.classList.remove('hidden');
+      tableWrap?.classList.add('hidden');
+      empty?.classList.add('hidden');
+      return;
+    }
+
+    try {
+      if (!cachedItems) {
+        const page = await Checkers.api('/api/games/history?size=30');
+        cachedItems = page.content || [];
+      }
+      if (!cachedItems.length) {
+        empty?.classList.remove('hidden');
+        tableWrap?.classList.add('hidden');
+        return;
+      }
+      empty?.classList.add('hidden');
+      tableWrap?.classList.remove('hidden');
+      renderRows(cachedItems, user);
+    } catch (e) {
+      Checkers.toast(Checkers.apiErrorMessage(e), 'error');
+    }
+  }
+
+  loadHistory();
+  window.addEventListener('checkers:localechange', () => {
+    const user = Checkers.Auth.user();
+    if (user && !user.guest && cachedItems && cachedItems.length) {
+      renderRows(cachedItems, user);
+    }
+  });
 });

@@ -38,8 +38,32 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiErrorResponse.builder()
+                .errorCode("NOT_FOUND")
+                .timestamp(Instant.now())
+                .details(Map.of("resourcePath", ex.getResourcePath()))
+                .build());
+    }
+
+    @ExceptionHandler({
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+            org.springframework.web.bind.MissingServletRequestParameterException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class,
+            jakarta.validation.ConstraintViolationException.class
+    })
+    public ResponseEntity<ApiErrorResponse> handleBadRequest(Exception ex) {
+        return ResponseEntity.badRequest().body(ApiErrorResponse.builder()
+                .errorCode(ErrorCode.VALIDATION_FAILED.name())
+                .timestamp(Instant.now())
+                .details(Map.of("message", ex.getMessage() != null ? ex.getMessage() : "Invalid request parameter or payload"))
+                .build());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex) {
+        org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class).error("Unhandled exception in API request: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiErrorResponse.builder()
                 .errorCode(ErrorCode.INTERNAL_ERROR.name())
                 .timestamp(Instant.now())
