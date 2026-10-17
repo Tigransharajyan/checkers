@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let disconnectTimer = null;
   let startSoundPlayed = false;
   let endSoundPlayed = false;
+  let premoveSending = false;
 
   function setStatus(text, kind) {
     if (!statusEl) return;
@@ -176,14 +177,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function loadLegal() {
-    if (!game || game.status !== 'IN_PROGRESS' || game.currentTurn !== myColor) {
+    if (!game || game.status !== 'IN_PROGRESS' || !myColor) {
+      premoveSending = false;
+      boardUi.setPremoveMode(false);
+      boardUi.clearPremove();
       boardUi.setLegal([]);
       updateTurnBanner(false);
       return;
     }
+
+    // Opponent's turn — allow queuing a premove.
+    if (game.currentTurn !== myColor) {
+      premoveSending = false;
+      boardUi.setLegal([]);
+      boardUi.setPremoveMode(true, myColor);
+      updateTurnBanner(false);
+      return;
+    }
+
+    boardUi.setPremoveMode(false);
     try {
       const paths = await Checkers.api('/api/games/' + game.id + '/legal-moves');
+      if (!game || game.status !== 'IN_PROGRESS' || game.currentTurn !== myColor) {
+        return;
+      }
+
+      const premove = boardUi.getPremove();
       boardUi.setLegal(paths);
+
+      if (premove && !premoveSending) {
+        const match = Checkers.BoardUI.matchPremove(paths, premove);
+        boardUi.clearPremove();
+        if (match) {
+          premoveSending = true;
+          boardUi.setLegal([]);
+          updateTurnBanner(false);
+          sendMove(match);
+          return;
+        }
+      }
+
       const hasCaptures = paths.some(Checkers.BoardUI.isCapturePath);
       updateTurnBanner(hasCaptures);
     } catch (_) {
@@ -237,6 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stompClient.subscribe('/user/queue/errors', (frame) => {
           const msg = JSON.parse(frame.body);
           const moveErr = msg.data && msg.data.moveError;
+          premoveSending = false;
           if (moveErr) {
             Checkers.toast(Checkers.t('error.move.' + moveErr), 'error');
           } else if (msg.data && msg.data.errorCode) {

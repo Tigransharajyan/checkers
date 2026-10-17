@@ -690,6 +690,21 @@ body.sidebar-open .sidebar-backdrop {
   width: 100%;
   height: 100%;
   position: relative;
+  touch-action: none;
+}
+
+.board.is-dragging,
+.board.is-dragging .sq {
+  cursor: grabbing;
+}
+
+body.board-piece-dragging {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+body.board-piece-dragging .piece {
+  transition: none;
 }
 
 .board-annotations {
@@ -725,6 +740,10 @@ body.sidebar-open .sidebar-backdrop {
   cursor: pointer;
 }
 
+.sq.can-move {
+  cursor: grab;
+}
+
 .sq.selected {
   background-color: #bbc759 !important;
 }
@@ -732,6 +751,50 @@ body.sidebar-open .sidebar-backdrop {
 .sq.last-from,
 .sq.last-to {
   background-color: var(--sq-last-move) !important;
+}
+
+.sq.premove-from,
+.sq.premove-to {
+  background-color: rgba(235, 97, 80, 0.78) !important;
+}
+
+.sq.premove-path:not(.premove-from):not(.premove-to) {
+  background-color: rgba(235, 97, 80, 0.38) !important;
+}
+
+.sq.premove-hl::after {
+  content: "";
+  position: absolute;
+  inset: 34%;
+  border-radius: 50%;
+  background: rgba(220, 60, 50, 0.45);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.sq.premove-cap::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 4px solid rgba(220, 60, 50, 0.85);
+  background: transparent;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.sq.drag-over.drop-target {
+  background-color: #cdd86a !important;
+}
+
+.sq.drag-over.drop-target.premove-hl,
+.sq.drag-over.drop-target.premove-cap {
+  background-color: rgba(235, 97, 80, 0.55) !important;
+}
+
+.sq.hl,
+.sq.cap {
+  transition: background-color 0.12s ease;
 }
 
 /* Valid move hint dot */
@@ -764,11 +827,56 @@ body.sidebar-open .sidebar-backdrop {
   border-radius: 50%;
   z-index: 2;
   pointer-events: none;
-  transition: transform 0.18s cubic-bezier(0.2, 0, 0.2, 1), opacity 0.15s ease;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.16s ease,
+    box-shadow 0.16s ease;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
+  will-change: transform;
+}
+
+.piece.is-drag-source {
+  opacity: 0.22;
+  transform: scale(0.92);
+  box-shadow: none;
+  transition: opacity 0.1s ease, transform 0.1s ease;
+}
+
+.piece.is-moving {
+  z-index: 30;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.38);
+  pointer-events: none;
+}
+
+.piece.is-landing {
+  animation: piece-land 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes piece-land {
+  0% { transform: scale(1); }
+  55% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.piece.piece-ghost,
+body.game-page .piece.piece-ghost {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 2000;
+  margin: 0;
+  pointer-events: none;
+  transition: none !important;
+  animation: none !important;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
+  will-change: transform;
+  transform-origin: top left;
 }
 
 /* White piece */
@@ -827,12 +935,17 @@ body.sidebar-open .sidebar-backdrop {
 }
 
 .piece.capturing {
-  animation: piece-capture 0.22s ease forwards;
+  animation: piece-capture 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 25;
 }
 
 @keyframes piece-capture {
-  to {
-    transform: scale(0.15);
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.12);
     opacity: 0;
   }
 }
@@ -1386,8 +1499,10 @@ body.sidebar-open .sidebar-backdrop {
 
 .game-page .game-content {
   min-height: 100vh;
+  min-width: 0;
   margin-left: 272px;
   padding: 32px 36px;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 50% -20%, rgba(30, 76, 96, 0.22), transparent 46%),
     #07121c;
@@ -1398,16 +1513,23 @@ body.sidebar-open .sidebar-backdrop {
 }
 
 .game-page .play-layout {
-  grid-template-columns: minmax(560px, 760px) minmax(390px, 526px);
-  gap: 44px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 32px;
   max-width: 1330px;
+  width: 100%;
   margin: 0 auto;
   align-items: stretch;
 }
 
-.game-page .board-column { justify-content: center; }
+.game-page .board-column {
+  justify-content: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .game-page .board-frame {
   width: min(100%, calc(100vh - 118px), 760px);
+  max-width: 100%;
   padding: 18px 14px 10px;
   grid-template-columns: 26px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) 24px;
@@ -1433,6 +1555,7 @@ body.sidebar-open .sidebar-backdrop {
 
 .game-page .side-panel {
   height: min(calc(100vh - 64px), 724px);
+  min-width: 0;
   min-height: 0;
   padding: 18px;
   gap: 14px;
@@ -1526,14 +1649,73 @@ body.sidebar-open .sidebar-backdrop {
 
 @media (max-width: 1450px) {
   .game-page .game-content { padding: 28px 24px; }
-  .game-page .play-layout { grid-template-columns: minmax(460px, 1fr) minmax(330px, 410px); gap: 26px; }
+  .game-page .play-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+    gap: 24px;
+  }
+}
+
+/*
+ * Play page: collapse the left sidebar before the board is crushed under it.
+ * Board stays fully playable; menu opens via the mobile top bar.
+ */
+@media (max-width: 1200px) {
+  .game-page .sidebar {
+    width: min(292px, calc(100vw - 42px));
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+  }
+
+  body.game-page.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .game-page .mobile-top {
+    display: flex;
+  }
+
+  .game-page .game-content {
+    margin-left: 0;
+    padding: 18px 16px 28px;
+  }
+
+  .game-page .play-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+    gap: 18px;
+  }
+
+  .game-page .board-frame {
+    width: min(100%, calc(100vh - 140px), 640px);
+  }
 }
 
 @media (max-width: 980px) {
-  .game-page .game-content { margin-left: 0; padding: 70px 16px 82px; }
-  .game-page .play-layout { grid-template-columns: 1fr; }
-  .game-page .side-panel { height: auto; min-height: 0; }
-  .game-page .move-log-panel { min-height: 260px; }
+  .game-page .game-content {
+    margin-left: 0;
+    padding: 16px 14px calc(var(--bottom-nav) + 20px);
+  }
+
+  .game-page .bottom-nav {
+    display: flex;
+  }
+
+  .game-page .play-layout {
+    grid-template-columns: 1fr;
+    max-width: 640px;
+  }
+
+  .game-page .side-panel {
+    height: auto;
+    min-height: 0;
+  }
+
+  .game-page .move-log-panel {
+    min-height: 220px;
+  }
+
+  .game-page .board-frame {
+    width: min(100%, calc(100vw - 28px), calc(100vh - 160px));
+  }
 }
 
 @media (max-width: 700px) {
@@ -1889,11 +2071,17 @@ body.sidebar-open .sidebar-backdrop {
 
 @media (prefers-reduced-motion: reduce) {
   .piece,
+  .piece-ghost,
   .btn,
   .toast,
   .sidebar {
     transition: none !important;
     animation: none !important;
+  }
+
+  .piece.is-moving,
+  .piece.is-drag-source {
+    transform: none !important;
   }
 }
 

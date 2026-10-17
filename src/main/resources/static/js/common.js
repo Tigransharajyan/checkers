@@ -289,7 +289,9 @@ Checkers.initSidebar = function () {
     link.addEventListener('click', close);
   });
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) close();
+    // Game page collapses the sidebar earlier so the board stays playable.
+    const limit = document.body.classList.contains('game-page') ? 1200 : 768;
+    if (window.innerWidth > limit) close();
   });
 };
 
