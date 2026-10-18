@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  await Checkers.sessionReady;
   if (!Checkers.Auth.isLoggedIn()) {
     try {
       const res = await Checkers.api('/api/auth/guest', { method: 'POST' });
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let startSoundPlayed = false;
   let endSoundPlayed = false;
   let premoveSending = false;
+  let eventQueue = Promise.resolve();
 
   function setStatus(text, kind) {
     if (!statusEl) return;
@@ -247,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
-      const hasCaptures = paths.some(Checkers.BoardUI.isCapturePath);
+      const hasCaptures = paths.some(path => Checkers.BoardUI.isCapturePath(path, boardUi.getBoard()));
       updateTurnBanner(hasCaptures);
     } catch (_) {
       boardUi.setLegal([]);
@@ -267,14 +269,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         to = parts[parts.length - 1];
       }
     }
-    return from && to ? { from, to } : null;
+    return from && to ? { from, to, path: Array.isArray(m.path) ? m.path : String(m.path || '').split(/[,-]/).filter(Boolean) } : null;
   }
 
   async function applyGame(g) {
     const previousStatus = game && game.status;
     game = g;
     renderPlayers();
-    boardUi.setBoard(game.boardState, lastMoveFromGame());
+    await boardUi.setBoard(game.boardState, lastMoveFromGame());
     renderLog();
     await loadLegal();
     updateActionButtons();
@@ -299,6 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         Checkers.toast(Checkers.t('toast.connected'));
         stompClient.subscribe('/topic/game/' + gameId, onGameEvent);
         stompClient.subscribe('/user/queue/errors', (frame) => {
+          boardUi.cancelPendingMove();
           const msg = JSON.parse(frame.body);
           const moveErr = msg.data && msg.data.moveError;
           premoveSending = false;
@@ -317,14 +320,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
   }
 
-  async function onGameEvent(frame) {
+  function onGameEvent(frame) {
+    eventQueue = eventQueue.then(() => handleGameEvent(frame)).catch(error => {
+      boardUi.cancelPendingMove();
+      Checkers.toast(Checkers.apiErrorMessage(error), 'error');
+    });
+  }
+
+  async function handleGameEvent(frame) {
     const msg = JSON.parse(frame.body);
     const type = msg.type;
     const data = msg.data || {};
     const me = Checkers.Auth.user();
 
     if (type === 'MOVE_MADE' || type === 'GAME_FINISHED') {
-      if (data.path) {
+      const positionChanged = data.boardState && data.boardState !== game.boardState;
+      if (data.path && positionChanged) {
         if (!game.moves) game.moves = [];
         game.moves.push({
           moveNumber: game.moves.length + 1,
@@ -341,7 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           : (typeof data.path === 'string' ? data.path.split(/[,-]/).filter(Boolean) : []);
         const from = data.fromSquare || pathArr[0];
         const to = data.toSquare || pathArr[pathArr.length - 1];
-        boardUi.setBoard(data.boardState, from && to ? { from, to } : lastMoveFromGame());
+        await boardUi.setBoard(data.boardState, from && to ? { from, to, path: pathArr } : lastMoveFromGame());
       }
       if (data.currentTurn) game.currentTurn = data.currentTurn;
       if (data.status) game.status = data.status;
@@ -351,8 +362,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const path = Array.isArray(data.path)
         ? data.path
         : (typeof data.path === 'string' ? data.path.split(/[,-]/).filter(Boolean) : []);
-      if (path.length >= 2) {
-        Checkers.Sound.play(Checkers.BoardUI.isCapturePath(path) ? 'capture' : 'move');
+      if (path.length >= 2 && positionChanged) {
+        Checkers.Sound.play(data.capturedSquares ? 'capture' : 'move');
       }
       if (game.status === 'FINISHED' && !endSoundPlayed) {
         endSoundPlayed = true;
@@ -431,13 +442,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   function sendMove(path) {
     if (!stompClient || !stompClient.connected) {
       Checkers.toast(Checkers.t('toast.disconnected'), 'error');
-      return;
+      return false;
     }
     stompClient.send('/app/game/' + gameId + '/move', {}, JSON.stringify({
       path,
       fromSquare: path[0],
       toSquare: path[path.length - 1]
     }));
+    return true;
   }
 
   // Resign Modal handling
@@ -508,7 +520,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   boardUi = Checkers.BoardUI.create(boardRoot, {
-    onMove: sendMove
+    onMove: sendMove,
+    onSyncNeeded: () => Checkers.api('/api/games/' + gameId).then(applyGame).catch(error => Checkers.toast(Checkers.apiErrorMessage(error), 'error'))
   });
 
   try {

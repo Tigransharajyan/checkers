@@ -41,6 +41,16 @@ H2 console: **http://localhost:8080/h2-console** (JDBC URL: `jdbc:h2:mem:checker
 ./mvnw test
 ```
 
+Browser regression checks (with the local dev server running):
+
+```bash
+npm ci
+npx playwright install chromium
+npm run test:browser
+```
+
+See [daily puzzles and move animation](docs/daily-puzzles-and-motion.md) for the shared engine, puzzle proofs, API contract and browser test setup.
+
 ### Build JAR
 
 ```bash

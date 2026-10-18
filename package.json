@@ -1,0 +1,10 @@
+{
+  "name": "checkers-browser-regressions",
+  "private": true,
+  "scripts": {
+    "test:browser": "node --test --test-concurrency=1 src/test/browser/*.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

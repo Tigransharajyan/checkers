@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface GameRepository extends JpaRepository<Game, Long> {
 
+    long countByStatus(GameStatus status);
+
     @Query("""
             SELECT g FROM Game g
             WHERE (g.whitePlayer.id = :userId OR g.blackPlayer.id = :userId)

@@ -12,23 +12,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tr = document.createElement('tr');
       const reasonKey = 'reason.' + (g.finishReason || '');
       const reason = g.finishReason ? Checkers.t(reasonKey) : '—';
-      const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.blackUsername || '—');
+      const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.mode === 'BOT' ? Checkers.t('common.bot') : (g.blackUsername || '—'));
 
       let resultBadge = '';
+      const winner = g.winnerUsername || (g.mode === 'BOT' && g.finishReason !== 'DRAW' ? Checkers.t('common.bot') : '—');
       if (g.winnerUsername) {
         if (g.winnerUsername === user.username) {
           resultBadge = `<span class="res-badge res-win">${Checkers.t('play.result.win')}</span>`;
         } else {
           resultBadge = `<span class="res-badge res-loss">${Checkers.t('play.result.loss')}</span>`;
         }
-      } else if (g.finishReason) {
+      } else if (g.mode === 'BOT' && g.finishReason !== 'DRAW') {
+        resultBadge = `<span class="res-badge res-loss">${Checkers.t('play.result.loss')}</span>`;
+      } else if (g.finishReason === 'DRAW') {
         resultBadge = `<span class="res-badge res-draw">${Checkers.t('play.result.draw')}</span>`;
       }
 
       tr.innerHTML = `
         <td><span class="mode-badge">${Checkers.t('mode.' + g.mode)}</span></td>
-        <td style="font-weight:var(--fw-medium)">${vs}</td>
-        <td><strong>${g.winnerUsername || '—'}</strong></td>
+        <td style="font-weight:var(--fw-medium)">${Checkers.escapeHtml(vs)}</td>
+        <td><strong>${Checkers.escapeHtml(winner)}</strong></td>
         <td>${resultBadge || (reason === reasonKey ? g.finishReason : reason)}</td>
         <td>
           <a class="btn btn-ghost btn-sm" href="/play?id=${g.id}&lang=${Checkers.locale()}">
@@ -71,6 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  await Checkers.sessionReady;
   loadHistory();
   window.addEventListener('checkers:localechange', () => {
     const user = Checkers.Auth.user();

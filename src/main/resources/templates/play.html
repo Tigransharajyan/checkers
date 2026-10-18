@@ -114,7 +114,7 @@
 <!-- Game Over Modal -->
 <div class="modal-backdrop hidden" data-gameover-modal>
   <div class="modal-dialog">
-    <h2 data-gameover-title>Game Over</h2>
+    <h2 data-gameover-title th:text="#{play.finished}">Game Over</h2>
     <p data-gameover-reason></p>
     <div class="actions-row" style="margin-top:var(--s-8)">
       <button type="button" class="btn btn-secondary" data-dismiss-gameover th:text="#{play.reviewBoard}">Review Board</button>

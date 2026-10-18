@@ -22,3 +22,8 @@ application-local.properties
 !.mvn/
 !.mvn/wrapper/
 !.mvn/wrapper/maven-wrapper.properties
+
+# Browser regression dependencies and artifacts
+node_modules/
+test-results/
+playwright-report/

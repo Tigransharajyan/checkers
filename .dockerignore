@@ -33,3 +33,8 @@ logs/
 # Git
 .git/
 .gitignore
+
+# Browser test dependencies and generated reports
+node_modules/
+test-results/
+playwright-report/

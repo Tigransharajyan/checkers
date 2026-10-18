@@ -74,6 +74,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function refreshStats() {
+    const personal = Checkers.personalStats(Checkers.Auth.user());
+    document.querySelector('[data-personal-metrics]')?.classList.toggle('hidden', !personal);
+    document.querySelector('[data-progress-summary]')?.classList.toggle('hidden', !personal);
+    document.querySelector('[data-progress-track]')?.classList.toggle('hidden', !personal);
+    if (personal) {
+      const number = new Intl.NumberFormat(Checkers.locale());
+      const rate = personal.winRate == null ? '—' : number.format(personal.winRate) + '%';
+      const fields = { 'personal-games': number.format(personal.total), 'personal-wins': number.format(personal.wins),
+        'personal-rate': rate, 'progress-rate': rate };
+      Object.entries(fields).forEach(([key, value]) => {
+        const el = document.querySelector('[data-' + key + ']');
+        if (el) el.textContent = value;
+      });
+      const bar = document.querySelector('[data-progress-track] span');
+      if (bar) bar.style.width = (personal.winRate || 0) + '%';
+    }
     const user = Checkers.Auth.user();
     const loggedIn = Checkers.Auth.isLoggedIn() && !!user;
 
@@ -140,11 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
       games.forEach((g) => {
         const item = document.createElement('div');
         item.className = 'active-game-item';
-        const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.blackUsername || '—');
+        const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.mode === 'BOT' ? Checkers.t('common.bot') : (g.blackUsername || '—'));
         item.innerHTML = `
           <div class="active-game-info">
             <strong>${Checkers.t('mode.' + g.mode)}</strong>
-            <span>${vs}</span>
+            <span>${Checkers.escapeHtml(vs)}</span>
           </div>
           <a class="btn btn-primary btn-sm" href="/play?id=${g.id}&lang=${Checkers.locale()}">
             ${Checkers.t('nav.play')}
@@ -198,20 +214,21 @@ document.addEventListener('DOMContentLoaded', () => {
       items.forEach((g) => {
         const row = document.createElement('div');
         row.className = 'recent-row';
-        const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.blackUsername || '—');
+        const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.mode === 'BOT' ? Checkers.t('common.bot') : (g.blackUsername || '—'));
         const reasonKey = 'reason.' + (g.finishReason || '');
         const reason = g.finishReason ? Checkers.t(reasonKey) : '—';
         row.innerHTML = `
           <span class="recent-avatar"><i data-lucide="user"></i></span>
-          <strong>${vs}</strong>
+          <strong>${Checkers.escapeHtml(vs)}</strong>
           <span>${Checkers.t('mode.' + g.mode)}</span>
           <span>${reason === reasonKey ? g.finishReason : reason}</span>
-          <small>${g.createdAt ? new Date(g.createdAt).toLocaleDateString() : ''}</small>
+          <small>${g.createdAt ? new Date(g.finishedAt || g.createdAt).toLocaleDateString(Checkers.locale()) : ''}</small>
         `;
         recentGamesList.appendChild(row);
       });
       if (window.lucide) window.lucide.createIcons();
     } catch (_) {
+      if (recentEmpty) recentEmpty.textContent = Checkers.t('common.loadFailed');
       if (recentGamesBox) recentGamesBox.classList.remove('hidden');
       if (recentGamesList) recentGamesList.innerHTML = '';
       if (recentEmpty) recentEmpty.classList.remove('hidden');
@@ -219,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function ensureAuth() {
+    await Checkers.sessionReady;
     if (Checkers.Auth.isLoggedIn()) return true;
     // Auto guest start if user hasn't explicitly signed in
     try {
@@ -254,8 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Create Friend Game
-  document.querySelector('[data-create-friend]')?.addEventListener('click', async () => {
-    if (!(await ensureAuth())) return;
+  document.querySelector('[data-create-friend]')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    if (button.disabled) return;
+    button.disabled = true;
+    if (!(await ensureAuth())) { button.disabled = false; return; }
     try {
       const game = await Checkers.api('/api/games', {
         method: 'POST',
@@ -264,13 +285,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inviteBox && inviteLink && game.inviteCode) {
         const link = location.origin + '/play?code=' + encodeURIComponent(game.inviteCode) + '&lang=' + Checkers.locale();
         inviteLink.textContent = link;
+        inviteBox.classList.remove('hidden');
         inviteBox.classList.add('is-visible');
         inviteBox.dataset.gameId = game.id;
       }
       Checkers.toast(Checkers.t('lobby.invite.created'));
     } catch (e) {
       Checkers.toast(Checkers.apiErrorMessage(e), 'error');
-    }
+    } finally { button.disabled = false; }
   });
 
   // Copy Invite Link
@@ -409,8 +431,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Play with Bot
-  document.querySelector('[data-start-bot]')?.addEventListener('click', async () => {
-    if (!(await ensureAuth())) return;
+  document.querySelector('[data-start-bot]')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    if (button.disabled) return;
+    button.disabled = true;
+    if (!(await ensureAuth())) { button.disabled = false; return; }
     const diff = document.querySelector('[data-bot-diff]')?.value || 'MEDIUM';
     try {
       const game = await Checkers.api('/api/games', {
@@ -420,8 +445,10 @@ document.addEventListener('DOMContentLoaded', () => {
       location.href = '/play?id=' + game.id + '&lang=' + Checkers.locale();
     } catch (e) {
       Checkers.toast(Checkers.apiErrorMessage(e), 'error');
-    }
+    } finally { button.disabled = false; }
   });
 
-  refreshMe().then(refreshUI);
+  Promise.resolve(Checkers.sessionReady).then(refreshMe).then(refreshUI);
+  Checkers.DailyTask.renderPreview(document.querySelector('[data-task-preview]'));
+
 });

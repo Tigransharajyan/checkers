@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
         return switch (code) {
             case UNAUTHORIZED, INVALID_CREDENTIALS, INVALID_REFRESH_TOKEN -> HttpStatus.UNAUTHORIZED;
             case FORBIDDEN, GUEST_LOCALE_NOT_PERSISTED, GUEST_HISTORY_FORBIDDEN -> HttpStatus.FORBIDDEN;
-            case USER_NOT_FOUND, GAME_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case USER_NOT_FOUND, GAME_NOT_FOUND, TASK_NOT_FOUND -> HttpStatus.NOT_FOUND;
             case USERNAME_TAKEN, EMAIL_TAKEN, INVITE_ALREADY_USED, GAME_ALREADY_STARTED -> HttpStatus.CONFLICT;
             default -> HttpStatus.BAD_REQUEST;
         };

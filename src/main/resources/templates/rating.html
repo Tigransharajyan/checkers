@@ -34,25 +34,24 @@
           <h2 th:text="#{lobby.stats.title}">Your stats</h2>
           <div class="stats-grid">
             <div class="stat-box">
-              <strong data-rating-wins>0</strong>
+              <strong data-rating-wins>—</strong>
               <span th:text="#{lobby.stats.wins}">Wins</span>
             </div>
             <div class="stat-box">
-              <strong data-rating-losses>0</strong>
+              <strong data-rating-losses>—</strong>
               <span th:text="#{lobby.stats.losses}">Losses</span>
             </div>
             <div class="stat-box">
-              <strong data-rating-draws>0</strong>
+              <strong data-rating-draws>—</strong>
               <span th:text="#{lobby.stats.draws}">Draws</span>
             </div>
           </div>
         </article>
 
         <article class="rating-levels-card">
-          <h2 th:text="#{rating.levels}">Levels</h2>
-          <div class="rating-level-row"><span>1200</span><strong th:text="#{rating.level.beginner}">Beginner</strong></div>
-          <div class="rating-level-row"><span>1500</span><strong th:text="#{rating.level.club}">Club player</strong></div>
-          <div class="rating-level-row"><span>1800</span><strong th:text="#{rating.level.master}">Master</strong></div>
+          <div class="widget-title"><i data-lucide="chart-no-axes-combined"></i><h2 th:text="#{rating.about.title}">Every game counts</h2></div>
+          <p class="muted" th:text="#{rating.about.text}">Statistics are based on your completed games.</p>
+          <div class="progress-track"><span data-rating-progress></span></div>
         </article>
       </div>
     </section>

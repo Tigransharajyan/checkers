@@ -220,17 +220,8 @@ Checkers.initLangSwitch = function () {
         } catch (_) { /* still switch via cookie */ }
       }
 
-      try {
-        const messages = await Checkers.api('/api/i18n?lang=' + encodeURIComponent(lang));
-        Checkers.setLocaleMessages(messages);
-        window.history.replaceState(window.history.state, '', url.toString());
-        markActive(lang);
-        updateLangLinks(lang);
-        window.dispatchEvent(new CustomEvent('checkers:localechange', { detail: { lang } }));
-        Checkers.toast(Checkers.t('toast.localeSaved'));
-      } catch (e) {
-        Checkers.toast(Checkers.apiErrorMessage(e), 'error');
-      }
+      // Server-rendered templates, FAQ content, titles and ARIA labels must switch together.
+      window.location.assign(url.toString());
     });
   });
 
@@ -315,9 +306,49 @@ document.addEventListener('DOMContentLoaded', () => {
   Checkers.initHeaderAuth();
   Checkers.initSidebar();
   Checkers.initIcons();
-  Checkers.restoreSession().then(() => Checkers.initHeaderAuth());
+  Checkers.sessionReady = Checkers.restoreSession().then(() => Checkers.initHeaderAuth());
+  Checkers.initSitePresence();
 });
 
 window.addEventListener('load', () => {
   Checkers.initIcons();
 });
+
+// Count real active browsers on every screen, including visitors without an account.
+Checkers.initSitePresence = function () {
+  let pending = false;
+  async function heartbeat() {
+    if (pending || document.visibilityState === 'hidden') return;
+    pending = true;
+    try {
+      await Checkers.sessionReady;
+      await Checkers.api('/api/site/presence', { method: 'POST' });
+      if (document.querySelector('[data-site-online]')) {
+        const stats = await Checkers.api('/api/site/stats');
+        const number = new Intl.NumberFormat(Checkers.locale());
+        document.querySelector('[data-site-online]').textContent = number.format(stats.online);
+        document.querySelector('[data-site-games]').textContent = number.format(stats.completedGames);
+      }
+    } catch (_) {
+      // A failed request is unknown, never a fabricated zero or a stale live count.
+      document.querySelectorAll('[data-site-online], [data-site-games]').forEach(el => { el.textContent = '—'; });
+    } finally { pending = false; }
+  }
+  heartbeat();
+  setInterval(heartbeat, 15000);
+  document.addEventListener('visibilitychange', heartbeat);
+  window.addEventListener('online', heartbeat);
+};
+
+Checkers.personalStats = function (user) {
+  if (!user || user.guest) return null;
+  const total = user.wins + user.losses + user.draws;
+  return { total, wins: user.wins, losses: user.losses, draws: user.draws,
+    winRate: total ? Math.round(user.wins / total * 100) : null };
+};
+
+Checkers.escapeHtml = function (value) {
+  const element = document.createElement('span');
+  element.textContent = value;
+  return element.innerHTML;
+};

@@ -22,15 +22,21 @@
 
       <div class="task-board-layout">
         <div class="task-board-card">
-          <div class="task-board-interactive" data-task-board></div>
+          <div class="board-frame task-board-frame">
+            <div class="rank-labels" data-rank-labels><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span></div>
+            <div class="board-wrap"><div class="board" data-task-board th:aria-label="#{play.board}"></div></div>
+            <div class="file-labels" data-file-labels><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
+          </div>
         </div>
 
         <div class="task-answer-card">
+          <div class="task-meta"><span><i data-lucide="calendar-days"></i><time data-task-date></time></span><span data-task-progress></span></div>
           <h2 th:text="#{tasks.question}">White to move. What is best?</h2>
           <p class="task-instructions" data-task-instructions th:text="#{tasks.instructions}">Make the winning move on the board.</p>
-          <div class="task-feedback hidden" data-task-feedback></div>
+          <div class="task-feedback hidden" data-task-feedback role="status" aria-live="polite"></div>
           <div class="task-actions-row">
-            <button type="button" class="btn btn-ghost" data-reset-task>
+            <button type="button" class="btn btn-ghost hidden" data-retry-task th:text="#{tasks.retry}">Retry</button>
+            <button type="button" class="btn btn-ghost" data-reset-task disabled>
               <i data-lucide="rotate-ccw"></i>
               <span th:text="#{tasks.reset}">Reset</span>
             </button>

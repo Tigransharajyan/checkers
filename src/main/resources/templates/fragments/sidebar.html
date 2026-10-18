@@ -1,10 +1,10 @@
 <aside class="sidebar" xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar(active)" data-sidebar>
   <a class="sidebar-brand" th:href="@{/(lang=${currentLocale})}">
-    <span class="logo-mark" aria-hidden="true"><i data-lucide="circle-dot"></i></span>
+    <span class="logo-mark" aria-hidden="true"><i></i><i></i></span>
     <span th:text="#{app.title}">Checkers Online</span>
   </a>
 
-  <nav class="sidebar-nav" aria-label="Main">
+  <nav class="sidebar-nav" th:aria-label="#{nav.main}">
     <a class="nav-link"
        th:classappend="${active == 'home'} ? ' is-active'"
        th:href="@{/(lang=${currentLocale})}">
@@ -73,16 +73,16 @@
 
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="mobile(active)">
   <header class="mobile-top">
-    <button type="button" class="icon-btn" data-sidebar-toggle aria-label="Menu">
+    <button type="button" class="icon-btn" data-sidebar-toggle th:aria-label="#{nav.menu}">
       <i data-lucide="menu"></i>
     </button>
     <a class="brand-mini" th:href="@{/(lang=${currentLocale})}" th:text="#{app.title}">Checkers</a>
-    <a class="icon-btn" th:href="@{/faq(lang=${currentLocale})}" aria-label="FAQ">
+    <a class="icon-btn" th:href="@{/faq(lang=${currentLocale})}" th:aria-label="#{nav.faq}">
       <i data-lucide="help-circle"></i>
     </a>
   </header>
 
-  <nav class="bottom-nav" aria-label="Mobile">
+  <nav class="bottom-nav" th:aria-label="#{nav.main}">
     <a th:href="@{/(lang=${currentLocale})}"
        th:classappend="${active == 'home'} ? ' is-active'">
       <i data-lucide="home"></i>

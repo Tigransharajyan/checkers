@@ -1,0 +1,305 @@
+[
+  {
+    "id": "tactic-01",
+    "maxPlies": 5,
+    "squares": {
+      "c1": "WM",
+      "d2": "BM",
+      "e3": "BM",
+      "f4": "WM",
+      "a5": "BM",
+      "b6": "WM",
+      "c7": "WM",
+      "e7": "BM",
+      "g7": "BM"
+    }
+  },
+  {
+    "id": "tactic-02",
+    "maxPlies": 5,
+    "squares": {
+      "b2": "BM",
+      "h2": "WM",
+      "e3": "BM",
+      "h4": "BM",
+      "d6": "WM",
+      "h6": "WM",
+      "g7": "BM",
+      "f8": "BM"
+    }
+  },
+  {
+    "id": "tactic-03",
+    "maxPlies": 7,
+    "squares": {
+      "g1": "WM",
+      "g3": "BM",
+      "e5": "WM",
+      "g5": "BM",
+      "c7": "WM",
+      "g7": "BM",
+      "d8": "BM"
+    }
+  },
+  {
+    "id": "tactic-04",
+    "maxPlies": 5,
+    "squares": {
+      "b2": "BM",
+      "d2": "BM",
+      "h2": "BM",
+      "g3": "WM",
+      "f6": "WM",
+      "c7": "WM",
+      "b8": "BM"
+    }
+  },
+  {
+    "id": "tactic-05",
+    "maxPlies": 5,
+    "squares": {
+      "b2": "WM",
+      "d4": "BM",
+      "g5": "WM",
+      "c7": "WM",
+      "e7": "BM",
+      "g7": "BM",
+      "d8": "BM"
+    }
+  },
+  {
+    "id": "tactic-06",
+    "maxPlies": 7,
+    "squares": {
+      "h2": "WM",
+      "c3": "BM",
+      "e3": "BM",
+      "g3": "BM",
+      "f4": "BM",
+      "a5": "WM",
+      "c5": "BM",
+      "e5": "WM",
+      "g5": "WM",
+      "a7": "BM"
+    }
+  },
+  {
+    "id": "tactic-07",
+    "maxPlies": 7,
+    "squares": {
+      "b2": "WM",
+      "d2": "WM",
+      "e3": "BM",
+      "d4": "BM",
+      "f4": "WM",
+      "a5": "BM",
+      "g5": "WM",
+      "d6": "BM",
+      "g7": "BM"
+    }
+  },
+  {
+    "id": "tactic-08",
+    "maxPlies": 5,
+    "squares": {
+      "b2": "BM",
+      "h2": "BM",
+      "g3": "WM",
+      "g5": "WM",
+      "b6": "WM",
+      "d6": "BM",
+      "g7": "BM",
+      "d8": "BM"
+    }
+  },
+  {
+    "id": "tactic-09",
+    "maxPlies": 7,
+    "squares": {
+      "b2": "BM",
+      "d2": "WM",
+      "h2": "BM",
+      "g3": "WM",
+      "b4": "BM",
+      "a5": "BM",
+      "a7": "WM",
+      "c7": "BM",
+      "g7": "WM",
+      "h8": "BM"
+    }
+  },
+  {
+    "id": "tactic-10",
+    "maxPlies": 5,
+    "squares": {
+      "f2": "WM",
+      "e5": "WM",
+      "g5": "WM",
+      "d6": "BM",
+      "c7": "BM",
+      "e7": "BM",
+      "g7": "BM"
+    }
+  },
+  {
+    "id": "tactic-11",
+    "maxPlies": 5,
+    "squares": {
+      "a1": "WM",
+      "e3": "BM",
+      "g3": "WM",
+      "h4": "WM",
+      "b6": "BM",
+      "a7": "BM",
+      "e7": "BM"
+    }
+  },
+  {
+    "id": "tactic-12",
+    "maxPlies": 5,
+    "squares": {
+      "d2": "BM",
+      "g3": "BM",
+      "h4": "BM",
+      "c5": "WM",
+      "e5": "WM",
+      "g5": "WM",
+      "b6": "BM",
+      "a7": "WM",
+      "e7": "BM"
+    }
+  },
+  {
+    "id": "tactic-13",
+    "maxPlies": 7,
+    "squares": {
+      "f2": "BM",
+      "d4": "BM",
+      "h4": "BM",
+      "d6": "WM",
+      "a7": "WM",
+      "g7": "WM",
+      "d8": "BM"
+    }
+  },
+  {
+    "id": "tactic-14",
+    "maxPlies": 7,
+    "squares": {
+      "f2": "WM",
+      "h2": "BM",
+      "b4": "WM",
+      "a5": "BM",
+      "b6": "BM",
+      "a7": "BM",
+      "e7": "WM",
+      "g7": "BM"
+    }
+  },
+  {
+    "id": "tactic-15",
+    "maxPlies": 7,
+    "squares": {
+      "f2": "WM",
+      "h4": "BM",
+      "a5": "BM",
+      "g5": "WM",
+      "e7": "WM",
+      "g7": "BM",
+      "f8": "BM"
+    }
+  },
+  {
+    "id": "tactic-16",
+    "maxPlies": 7,
+    "squares": {
+      "b2": "BM",
+      "d2": "BM",
+      "e3": "BM",
+      "g3": "WM",
+      "b4": "BM",
+      "f4": "WM",
+      "b6": "WM",
+      "e7": "WM",
+      "f8": "BM"
+    }
+  },
+  {
+    "id": "tactic-17",
+    "maxPlies": 5,
+    "squares": {
+      "e3": "BM",
+      "a5": "BM",
+      "b6": "WM",
+      "f6": "WM",
+      "c7": "BM",
+      "d8": "BM"
+    }
+  },
+  {
+    "id": "tactic-18",
+    "maxPlies": 7,
+    "squares": {
+      "g1": "WM",
+      "e3": "BM",
+      "g3": "BM",
+      "f4": "BM",
+      "e5": "BM",
+      "g5": "WM",
+      "d6": "BM",
+      "h6": "WM"
+    }
+  },
+  {
+    "id": "tactic-19",
+    "maxPlies": 7,
+    "squares": {
+      "b2": "BM",
+      "c3": "BM",
+      "b4": "BM",
+      "d4": "WM",
+      "h4": "BM",
+      "e5": "WM",
+      "h6": "WM"
+    }
+  },
+  {
+    "id": "tactic-20",
+    "maxPlies": 7,
+    "squares": {
+      "g3": "WM",
+      "b4": "WM",
+      "f4": "BM",
+      "e5": "WM",
+      "g5": "BM",
+      "c7": "BM",
+      "e7": "BM"
+    }
+  },
+  {
+    "id": "tactic-21",
+    "maxPlies": 7,
+    "squares": {
+      "e1": "WM",
+      "b2": "BM",
+      "f2": "BM",
+      "g3": "WM",
+      "b4": "BM",
+      "a7": "WM",
+      "c7": "BM"
+    }
+  },
+  {
+    "id": "tactic-22",
+    "maxPlies": 7,
+    "squares": {
+      "d2": "BM",
+      "b4": "WM",
+      "e5": "WM",
+      "f6": "BM",
+      "c7": "BM",
+      "e7": "BM",
+      "g7": "WM"
+    }
+  }
+]

@@ -63,7 +63,8 @@ public class SecurityConfig {
                                 "/api/auth/logout",
                                 "/api/assistant/chat"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/i18n").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/i18n", "/api/site/stats", "/api/tasks/daily").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/site/presence", "/api/tasks/*/moves").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
