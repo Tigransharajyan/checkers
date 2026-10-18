@@ -1,15 +1,19 @@
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="meta">
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}"/>
+  <meta name="theme-color" content="#020f18"/>
+  <th:block th:replace="~{fragments/seo :: metadata}"></th:block>
+  <link th:if="${seo.preloadHero}" rel="preload" as="image" type="image/webp" fetchpriority="high" th:href="@{/images/checkers-hero.webp}"/>
+  <link rel="stylesheet" th:href="@{/css/fonts.css}"/>
+  <link rel="stylesheet" th:href="@{/css/design-system.css}"/>
   <link rel="stylesheet" th:href="@{/css/app.css}"/>
   <link rel="stylesheet" th:href="@{/css/theme.css}"/>
-  <script th:src="@{/js/daily-task.js}"></script>
   <script th:inline="javascript">
     window.i18n = /*[[${i18nMap}]]*/ {};
   </script>
-  <script th:src="@{/js/i18n.js}"></script>
-  <script th:src="@{/js/common.js}"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <script th:src="@{/js/i18n.js}" defer></script>
+  <script th:src="@{/js/common.js}" defer></script>
+  <script th:src="@{/js/daily-task.js}" defer></script>
+  <script th:src="@{/js/vendor/icons-0.468.0.min.js}" defer></script>
 </th:block>

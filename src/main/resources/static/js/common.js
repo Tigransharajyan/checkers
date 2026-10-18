@@ -182,6 +182,7 @@ Checkers.initLangSwitch = function () {
   function updateLangLinks(lang) {
     document.querySelectorAll('a[href]').forEach((link) => {
       const raw = link.getAttribute('href');
+      if (link.hasAttribute('data-lang')) return;
       if (!raw || raw.startsWith('#') || raw.startsWith('mailto:') || raw.startsWith('tel:')) return;
       let url;
       try {
@@ -189,7 +190,7 @@ Checkers.initLangSwitch = function () {
       } catch (_) {
         return;
       }
-      if (url.origin !== window.location.origin) return;
+      if (url.origin !== window.location.origin || !['/', '/index', '/play', '/tasks', '/rating', '/history', '/faq', '/login', '/register'].includes(url.pathname)) return;
       url.searchParams.set('lang', lang);
       link.setAttribute('href', url.pathname + url.search + url.hash);
     });
@@ -197,12 +198,17 @@ Checkers.initLangSwitch = function () {
 
   function markActive(lang) {
     document.querySelectorAll('[data-lang]').forEach((btn) => {
-      btn.classList.toggle('is-active', btn.getAttribute('data-lang') === lang);
+      const active = btn.getAttribute('data-lang') === lang;
+      btn.classList.toggle('is-active', active);
+      if (active) btn.setAttribute('aria-current', 'page');
+      else btn.removeAttribute('aria-current');
     });
   }
 
   document.querySelectorAll('[data-lang]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', async (event) => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
       const lang = btn.getAttribute('data-lang');
       if (!lang || lang === Checkers.locale()) return;
       const url = new URL(window.location.href);

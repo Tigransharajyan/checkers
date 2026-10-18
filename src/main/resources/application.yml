@@ -19,6 +19,10 @@ spring:
           time_zone: UTC
 
 server:
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: text/html,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml,image/svg+xml
   port: ${PORT:8080}
 
 app:
@@ -27,8 +31,11 @@ app:
     access-token-ttl-minutes: 30
     refresh-token-ttl-days: 3
   site:
-    # Must match host used in static/sitemap.xml (update both for production)
-    base-url: ${SITE_BASE_URL:http://localhost:8080}
+    # Render provides its real public URL; a custom domain can override it.
+    base-url: ${SITE_BASE_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}
+    indexing-enabled: ${SITE_INDEXING_ENABLED:true}
+    google-verification: ${GOOGLE_SITE_VERIFICATION:}
+    bing-verification: ${BING_SITE_VERIFICATION:}
   game:
     reconnect-timeout-seconds: 60
     # In-memory queue; for multi-instance deploy prefer Redis LIST/ZSET + pub-sub
@@ -87,6 +94,17 @@ spring:
       hibernate:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  web:
+    resources:
+      chain:
+        strategy:
+          content:
+            enabled: true
+            paths: /css/**,/js/**,/images/**,/fonts/**
+      cache:
+        cachecontrol:
+          max-age: 365d
+          cache-public: true
   thymeleaf:
     cache: true
 

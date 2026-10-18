@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
  * Exposes the full message bundle for the active locale so templates can
  * inline {@code window.i18n = {...}} without duplicating translations in JS.
  */
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = com.checkers.controller.PageController.class)
 @Configuration
 public class I18nModelAdvice {
 

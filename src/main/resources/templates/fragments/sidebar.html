@@ -64,9 +64,9 @@
     </div>
 
     <div class="lang-switch" th:aria-label="#{lang.label}">
-      <button type="button" data-lang="en" th:text="#{lang.en}">EN</button>
-      <button type="button" data-lang="ru" th:text="#{lang.ru}">RU</button>
-      <button type="button" data-lang="hy" th:text="#{lang.hy}">HY</button>
+      <a data-lang="en" hreflang="en" lang="en" th:href="${languageLinks.en}" th:text="#{lang.en}">EN</a>
+      <a data-lang="ru" hreflang="ru" lang="ru" th:href="${languageLinks.ru}" th:text="#{lang.ru}">RU</a>
+      <a data-lang="hy" hreflang="hy" lang="hy" th:href="${languageLinks.hy}" th:text="#{lang.hy}">HY</a>
     </div>
   </div>
 </aside>

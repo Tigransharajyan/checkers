@@ -2,8 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
 <head>
   <th:block th:replace="~{fragments/head :: meta}"></th:block>
-  <title th:text="|#{faq.title} — #{app.title}|">Rules & FAQ</title>
-  <th:block th:replace="~{fragments/seo :: hreflang('/faq')}"></th:block>
   <script th:src="@{/js/assistant.js}" defer></script>
 </head>
 <body>
@@ -32,7 +30,7 @@
       <div class="faq-list" data-faq-list>
         <details class="faq-accordion" th:each="entry : ${faqEntries}" data-faq-item>
           <summary class="faq-summary">
-            <span class="faq-question-text" th:text="${entry.question}">Question</span>
+            <h2 class="faq-question-text" th:text="${entry.question}">Question</h2>
             <span class="faq-icon-wrapper" aria-hidden="true"><i data-lucide="chevron-down"></i></span>
           </summary>
           <div class="faq-answer-content">

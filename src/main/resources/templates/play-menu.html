@@ -2,12 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
 <head>
   <th:block th:replace="~{fragments/head :: meta}"></th:block>
-  <title th:text="|#{play.menu.title} — #{app.title}|">Choose game</title>
-  <meta name="robots" content="noindex, nofollow"/>
   <script th:src="@{/js/assistant.js}" defer></script>
   <script>var global = window;</script>
-  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script th:src="@{/js/vendor/sockjs-1.6.1.min.js}" defer></script>
+  <script th:src="@{/js/vendor/stomp-2.3.3.min.js}" defer></script>
   <script th:src="@{/js/lobby.js}" defer></script>
 </head>
 <body>

@@ -56,8 +56,8 @@ svg { flex-shrink: 0; }
 .account-meta strong { font-size: 14px; }
 .account-avatar, .profile-avatar { background: linear-gradient(135deg, #9aadc1, #536276); border: 1px solid #d2dff74d; box-shadow: inset 0 1px 2px #fff3, 0 6px 15px #0003; }
 .lang-switch { height: 48px; padding: 4px; border: 1px solid #203e52; border-radius: 12px; background: #041521; }
-.lang-switch button { color: #a8c8e1; border-radius: 8px; font-size: 12px; font-weight: 700; }
-.lang-switch button.is-active { color: #00251a; background: linear-gradient(145deg, #47fba1, #00c776); border: 1px solid #6effb9; box-shadow: 0 0 18px #00df7940; }
+.lang-switch [data-lang] { color: #a8c8e1; border-radius: 8px; font-size: 12px; font-weight: 700; }
+.lang-switch [data-lang].is-active { color: #00251a; background: linear-gradient(145deg, #47fba1, #00c776); border: 1px solid #6effb9; box-shadow: 0 0 18px #00df7940; }
 .btn { border-radius: 10px; min-height: 42px; height: auto; padding-block: 10px; line-height: 1.25; }
 .btn-primary { color: #f4fff8; background: linear-gradient(140deg, #2ee382, #00c574); border: 1px solid #49f69d; box-shadow: inset 0 1px 1px #dcffe650, 0 0 19px #00d87925, 0 4px 12px #0002; }
 .btn-primary:hover:not(:disabled) { background: linear-gradient(140deg, #53f89c, #00d680); border-color: #8bffc3; box-shadow: 0 0 24px #00d87944; }
@@ -212,7 +212,7 @@ svg { flex-shrink: 0; }
 .auth-board-backdrop::after { background: linear-gradient(90deg, #02121be6, #02121b44); }
 .auth-page .auth-card { background: #061b27ed; border-color: #277b62; box-shadow: 0 24px 80px #0007, inset 0 1px 0 #84f7cc12; backdrop-filter: blur(18px); }
 .auth-input-control { border-color: #2b5068; background: #061723; }
-.auth-top-lang .lang-switch button.is-active { color: #002a1b; background: linear-gradient(135deg, #53f5a0, #00ca78); }
+.auth-top-lang .lang-switch [data-lang].is-active { color: #002a1b; background: linear-gradient(135deg, #53f5a0, #00ca78); }
 .assistant-toggle { background: linear-gradient(135deg, #12c97d, #008d64); border: 1px solid #51e9a9; box-shadow: 0 5px 22px #00d58322; }
 .assistant-panel { border-color: #2a5e64; }
 .assistant-header { background: #102e3d; border-color: #29536a; }
@@ -327,7 +327,7 @@ svg { flex-shrink: 0; }
 .mini-board > span:nth-child(16n + 5), .mini-board > span:nth-child(16n + 7),
 .mini-board > span:nth-child(16n + 10), .mini-board > span:nth-child(16n + 12),
 .mini-board > span:nth-child(16n + 14), .mini-board > span:nth-child(16n + 16) { background: #ecc993; }
-.auth-page .auth-top-lang .lang-switch button.is-active { color: #002a1b; background: linear-gradient(135deg, #53f5a0, #00ca78); }
+.auth-page .auth-top-lang .lang-switch [data-lang].is-active { color: #002a1b; background: linear-gradient(135deg, #53f5a0, #00ca78); }
 /* Long Armenian words must not impose the grid's minimum width. */
 .rating-grid > *, .task-board-layout > *, .widget-title h2 { min-width: 0; }
 .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -395,3 +395,9 @@ svg { flex-shrink: 0; }
 .mini-board.is-unavailable { display: grid; place-items: center; padding: 20px; border-color: #294d64; background: #081f2b; color: var(--muted); font-size: 12px; }
 @media (max-width: 768px) { .task-board-card .task-board-frame { padding: 6px 4px 2px; grid-template-columns: 17px minmax(0,1fr); grid-template-rows: minmax(0,1fr) 17px; } }
 .piece.is-drag-source { transform: none; transition: opacity .1s ease; }
+/* Language choices remain ordinary crawlable links with the same button layout. */
+.lang-switch a[data-lang] { display: flex; align-items: center; justify-content: center; min-height: 38px; }
+/* Reserve the real count's line height before the presence request completes. */
+.site-stat strong { min-width: 3ch; min-height: 1.45em; }
+
+.faq-summary .faq-question-text { margin: 0; font-size: inherit; font-weight: inherit; line-height: inherit; }

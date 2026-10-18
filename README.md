@@ -51,6 +51,8 @@ npm run test:browser
 
 See [daily puzzles and move animation](docs/daily-puzzles-and-motion.md) for the shared engine, puzzle proofs, API contract and browser test setup.
 
+See the [technical SEO report](docs/seo-report.md) for indexing rules, multilingual metadata, measured performance, asset provenance and search-engine setup.
+
 ### Build JAR
 
 ```bash
@@ -110,7 +112,10 @@ SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
 | `SPRING_PROFILES_ACTIVE` | ✅ | Must be `prod` on Render | No |
 | `SPRING_DATASOURCE_URL` | ✅ | PostgreSQL JDBC URL (injected by Render Blueprint) | Yes |
 | `JWT_SECRET` | ✅ | JWT signing key, min 32 chars | Yes — auto-generated |
-| `SITE_BASE_URL` | ✅ | Your Render app URL (e.g. `https://checkers.onrender.com`) | No |
+| `SITE_BASE_URL` | Optional | Canonical HTTPS origin for a custom domain; otherwise uses Render's `RENDER_EXTERNAL_URL` | No |
+| `SITE_INDEXING_ENABLED` | Optional | Defaults to `true`; set `false` on staging. Dev/localhost are always excluded | No |
+| `GOOGLE_SITE_VERIFICATION` | Optional | Google Search Console HTML verification token (content value only) | No |
+| `BING_SITE_VERIFICATION` | Optional | Bing Webmaster Tools HTML verification token (content value only) | No |
 | `ASSISTANT_LLM_API_KEY` | ❌ | Only if `app.assistant.provider=llm` | Yes |
 | `PORT` | — | Injected by Render automatically, do not set manually | — |
 
@@ -138,11 +143,13 @@ SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
    - `SPRING_DATASOURCE_URL` linked automatically
    - `JWT_SECRET` generated randomly
 
-3. **After first deploy — set SITE_BASE_URL:**
+3. **After first deploy — verify the public origin:**
    - Go to your Web Service → **Environment**
-   - Find `SITE_BASE_URL` (marked as `sync: false`)
-   - Set it to your Render URL: `https://checkers-online-xxxx.onrender.com`
-   - Click **Save Changes** → service redeploys automatically
+   - Render's `RENDER_EXTERNAL_URL` supplies the actual service origin automatically
+   - For a custom domain, set `SITE_BASE_URL` to its HTTPS origin without a path or query
+   - Remove any empty or obsolete `SITE_BASE_URL` override; invalid origins fail startup
+   - Verify canonical URLs, `/robots.txt` and `/sitemap.xml` on the deployed domain
+   - For staging, set `SITE_INDEXING_ENABLED=false`
 
 4. **Optional — set LLM key:**
    - If you want the AI assistant, set `ASSISTANT_LLM_API_KEY`

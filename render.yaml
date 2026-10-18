@@ -25,9 +25,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-      # Production site URL — set this after first deploy to your Render URL
-      - key: SITE_BASE_URL
-        sync: false
+      # Canonicals use Render's real RENDER_EXTERNAL_URL automatically.
+      # For a custom domain, add SITE_BASE_URL with its HTTPS origin in Dashboard.
+      # Staging: set SITE_INDEXING_ENABLED=false.
+      # Optional GOOGLE_SITE_VERIFICATION / BING_SITE_VERIFICATION take meta-tag content tokens.
 
       # LLM API key — optional, only needed if provider=llm
       - key: ASSISTANT_LLM_API_KEY

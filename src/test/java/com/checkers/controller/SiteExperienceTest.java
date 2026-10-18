@@ -24,6 +24,19 @@ class SiteExperienceTest {
     @Autowired GameRepository games;
 
     @Test
+    void developmentPagesAndSitemapCannotBeIndexed() throws Exception {
+        mvc.perform(get("/").param("lang", "ru"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Robots-Tag", "noindex, follow"))
+                .andExpect(content().string(containsString("content=\"noindex,follow\"")));
+        mvc.perform(get("/robots.txt"))
+                .andExpect(content().string("User-agent: *\nDisallow: /\n"));
+        mvc.perform(get("/sitemap.xml"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("<loc>"))));
+    }
+
+    @Test
     void rendersEveryScreenInAllThreeLanguages() throws Exception {
         for (String lang : new String[]{"en", "ru", "hy"}) {
             for (String path : new String[]{"/", "/play", "/play?id=1", "/tasks", "/rating", "/history", "/faq", "/login", "/register"}) {

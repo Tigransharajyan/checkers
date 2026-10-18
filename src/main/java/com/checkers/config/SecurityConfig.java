@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/fonts/**",
                                 "/robots.txt",
                                 "/sitemap.xml",
                                 "/h2-console/**",
@@ -67,7 +68,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/site/presence", "/api/tasks/*/moves").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .userDetailsService(userDetailsService)
                 .httpBasic(AbstractHttpConfigurer::disable)

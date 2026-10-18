@@ -2,10 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
 <head>
   <th:block th:replace="~{fragments/head :: meta}"></th:block>
-  <title th:text="|#{tasks.title} — #{app.title}|">Tasks</title>
-  <meta name="robots" content="noindex, nofollow"/>
   <script th:src="@{/js/assistant.js}" defer></script>
-  <script th:src="@{/js/board.js}"></script>
+  <script th:src="@{/js/board.js}" defer></script>
   <script th:src="@{/js/tasks.js}" defer></script>
 </head>
 <body>

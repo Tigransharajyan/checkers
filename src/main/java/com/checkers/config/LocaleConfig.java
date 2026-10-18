@@ -22,7 +22,14 @@ public class LocaleConfig implements WebMvcConfigurer {
 
     @Bean
     public LocaleResolver localeResolver() {
-        CookieLocaleResolver resolver = new CookieLocaleResolver(LOCALE_COOKIE_NAME);
+        CookieLocaleResolver resolver = new CookieLocaleResolver(LOCALE_COOKIE_NAME) {
+            @Override
+            public Locale resolveLocale(jakarta.servlet.http.HttpServletRequest request) {
+                Locale locale = super.resolveLocale(request);
+                return com.checkers.seo.SeoService.LANGUAGES.contains(locale.getLanguage())
+                        ? Locale.forLanguageTag(locale.getLanguage()) : Locale.ENGLISH;
+            }
+        };
         resolver.setDefaultLocale(Locale.ENGLISH);
         resolver.setCookieMaxAge(Duration.ofDays(365));
         resolver.setCookieHttpOnly(false);
@@ -34,6 +41,7 @@ public class LocaleConfig implements WebMvcConfigurer {
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
         interceptor.setParamName("lang");
+        interceptor.setIgnoreInvalidLocale(true);
         return interceptor;
     }
 
