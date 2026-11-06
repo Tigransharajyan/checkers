@@ -34,6 +34,14 @@ Checkers.Auth = {
   },
 
   async refresh() {
+    // Several requests can discover the same expired session at once.
+    if (this._refreshPromise) return this._refreshPromise;
+    this._refreshPromise = this.refreshSession();
+    try { return await this._refreshPromise; }
+    finally { this._refreshPromise = null; }
+  },
+
+  async refreshSession() {
     const auth = this.load();
     if (!auth || !auth.refreshToken) return false;
     try {
@@ -42,62 +50,81 @@ Checkers.Auth = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: auth.refreshToken })
       });
-      if (!response.ok) throw new Error('Refresh failed');
+      if (!response.ok) {
+        if (response.status === 401) {
+          const problem = await response.json().catch(() => null);
+          if ((problem?.errorCode === 'INVALID_REFRESH_TOKEN' || problem?.errorCode === 'UNAUTHORIZED')
+              && this.load()?.refreshToken === auth.refreshToken) this.clear();
+        }
+        return false;
+      }
       this.save(await response.json());
       return true;
-    } catch (_) {
-      this.clear();
-      return false;
-    }
+    } catch (_) { return false; }
   }
 };
 
 Checkers.Sound = (function () {
   let context = null;
+  let moveIndex = 0;
+  const buffers = new Map();
+  const moves = ['move-1', 'move-2', 'move-3'];
+  const clips = [...moves, 'capture', 'start', 'end'];
 
   function getContext() {
     if (!context) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!AudioContext) return null;
-      context = new AudioContext();
+      try { context = new AudioContext(); } catch (_) { return null; }
     }
     if (context.state === 'suspended') context.resume().catch(() => {});
     return context;
   }
 
-  function tone(frequency, duration, delay, type, volume) {
+  function load(name, audio) {
+    if (!buffers.has(name)) {
+      const pending = fetch('/sounds/board/' + name + '.wav')
+        .then(response => {
+          if (!response.ok) throw new Error('Board sound unavailable');
+          return response.arrayBuffer();
+        })
+        .then(bytes => audio.decodeAudioData(bytes))
+        .catch(() => { buffers.delete(name); return null; });
+      buffers.set(name, pending);
+    }
+    return buffers.get(name);
+  }
+
+  function warm() {
+    if (!document.querySelector('[data-board], [data-task-board]')) return;
     const audio = getContext();
-    if (!audio) return;
-    const start = audio.currentTime + (delay || 0);
-    const oscillator = audio.createOscillator();
-    const gain = audio.createGain();
-    oscillator.type = type || 'sine';
-    oscillator.frequency.setValueAtTime(frequency, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(volume || 0.07, start + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-    oscillator.connect(gain).connect(audio.destination);
-    oscillator.start(start);
-    oscillator.stop(start + duration + 0.02);
+    if (audio) clips.forEach(name => load(name, audio));
   }
 
   function play(kind) {
-    if (kind === 'capture') {
-      tone(155, 0.1, 0, 'triangle', 0.1);
-      tone(95, 0.16, 0.07, 'triangle', 0.08);
-    } else if (kind === 'start') {
-      tone(440, 0.08, 0, 'sine');
-      tone(660, 0.12, 0.1, 'sine');
-    } else if (kind === 'end') {
-      tone(392, 0.12, 0, 'sine');
-      tone(294, 0.2, 0.13, 'sine');
-    } else {
-      tone(245, 0.07, 0, 'triangle', 0.08);
-    }
+    if (document.visibilityState === 'hidden') return;
+    const audio = getContext();
+    if (!audio) return;
+    const name = kind === 'move' || !clips.includes(kind)
+      ? moves[moveIndex++ % moves.length] : kind;
+    const requested = performance.now();
+    load(name, audio).then(buffer => {
+      // Never replay an old click after a slow download or an autoplay unlock.
+      if (!buffer || audio.state !== 'running' || document.visibilityState === 'hidden'
+          || performance.now() - requested > 250) return;
+      const source = audio.createBufferSource();
+      const gain = audio.createGain();
+      source.buffer = buffer;
+      gain.gain.value = .85;
+      source.connect(gain);
+      gain.connect(audio.destination);
+      source.onended = () => { source.disconnect(); gain.disconnect(); };
+      source.start();
+    });
   }
 
-  ['pointerdown', 'keydown'].forEach((eventName) => {
-    document.addEventListener(eventName, getContext, { once: true });
+  ['pointerdown', 'keydown'].forEach(eventName => {
+    document.addEventListener(eventName, warm, { once: true });
   });
   return { play };
 })();
@@ -122,9 +149,13 @@ Checkers.api = async function (path, options = {}) {
     }
   }
   if (!res.ok) {
-    if (res.status === 401 && !options._retried && await Checkers.Auth.refresh()) {
-      const retryOptions = Object.assign({}, options, { _retried: true });
-      return Checkers.api(path, retryOptions);
+    if (res.status === 401 && !options._retried) {
+      const recovered = token !== Checkers.Auth.token()
+        ? !!Checkers.Auth.token() : await Checkers.Auth.refresh();
+      if (recovered) {
+        const retryOptions = Object.assign({}, options, { _retried: true });
+        return Checkers.api(path, retryOptions);
+      }
     }
     const code = body && body.errorCode ? body.errorCode : 'INTERNAL_ERROR';
     const err = new Error(code);
@@ -190,7 +221,7 @@ Checkers.initLangSwitch = function () {
       } catch (_) {
         return;
       }
-      if (url.origin !== window.location.origin || !['/', '/index', '/play', '/tasks', '/rating', '/history', '/faq', '/login', '/register'].includes(url.pathname)) return;
+      if (url.origin !== window.location.origin || !['/', '/index', '/home', '/play', '/tasks', '/rating', '/history', '/faq', '/login', '/register'].includes(url.pathname)) return;
       url.searchParams.set('lang', lang);
       link.setAttribute('href', url.pathname + url.search + url.hash);
     });
@@ -244,7 +275,7 @@ Checkers.initHeaderAuth = function () {
   userEls.forEach((el) => el.classList.toggle('hidden', !loggedIn));
   const u = loggedIn ? Checkers.Auth.user() : null;
   if (u) {
-    const label = u.username + (u.guest ? ' (' + Checkers.t('common.guest') + ')' : '');
+    const label = u.guest ? Checkers.t('common.guest') : u.username;
     nameEls.forEach((el) => { el.textContent = label; });
   }
   const avatars = document.querySelectorAll('[data-account-avatar]');
@@ -269,27 +300,99 @@ Checkers.initHeaderAuth = function () {
         });
       } catch (_) { /* ignore */ }
       Checkers.Auth.clear();
-      window.location.href = '/?lang=' + Checkers.locale();
+      window.location.href = '/home?lang=' + Checkers.locale();
     });
   });
 };
 
+// One owner for focus, background inertness and Escape across all overlays.
+Checkers.Overlay = (() => {
+  let active = null;
+  const focusable = root => [...root.querySelectorAll('a[href],button,input,select,textarea,[tabindex]')]
+    .filter(el => el.tabIndex >= 0 && !el.disabled && !el.closest('[inert]') && el.getClientRects().length);
+  const focusReturn = trigger => {
+    const target = trigger?.isConnected && trigger.getClientRects().length && !trigger.disabled && !trigger.closest('[inert]')
+      ? trigger : document.querySelector('#main-content');
+    target?.focus({ preventScroll: true });
+  };
+  function close(restore = true) {
+    if (!active) return;
+    const previous = active;
+    active = null;
+    previous.inert.forEach(([element, value]) => { element.inert = value; });
+    document.body.classList.remove('overlay-open');
+    previous.onClose?.();
+    if (restore) focusReturn(previous.trigger);
+  }
+  function open(root, options = {}) {
+    if (!root) return;
+    close(false);
+    const entry = { root, trigger: options.trigger || document.activeElement, inert: [], ...options };
+    active = entry;
+    options.onOpen?.();
+    if (options.modal !== false) {
+      let branch = root;
+      while (branch.parentElement) {
+        [...branch.parentElement.children].forEach(sibling => {
+          if (sibling !== branch && sibling !== entry.dismissSurface && !['SCRIPT','STYLE','LINK'].includes(sibling.tagName)) {
+            entry.inert.push([sibling, sibling.inert]); sibling.inert = true;
+          }
+        });
+        branch = branch.parentElement;
+        if (branch === document.body) break;
+      }
+      document.body.classList.add('overlay-open');
+    }
+    (options.initial || focusable(root)[0] || root.querySelector('[role=dialog]') || root).focus({ preventScroll: true });
+  }
+  document.addEventListener('keydown', event => {
+    if (!active) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      if (!active.canClose || active.canClose()) close();
+    } else if (event.key === 'Tab' && active.modal !== false) {
+      const items = focusable(active.root);
+      if (!items.length) { event.preventDefault(); return; }
+      const first = items[0], last = items.at(-1);
+      if (event.shiftKey && (document.activeElement === first || !active.root.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !active.root.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
+    }
+  }, true);
+  return { open, close, isOpen: root => active?.root === root };
+})();
+
 Checkers.initSidebar = function () {
+  const sidebar = document.querySelector('[data-sidebar]');
+  if (!sidebar) return;
   const toggle = document.querySelector('[data-sidebar-toggle]');
   const backdrop = document.querySelector('[data-sidebar-backdrop]');
-  const close = () => document.body.classList.remove('sidebar-open');
+  const closeButton = document.querySelector('[data-sidebar-close]');
+  // Must match app.css: ordinary900px, game1200px.
+  const media = matchMedia(document.body.classList.contains('game-page') ? '(min-width: 0px)' : '(max-width: 900px)');
+  const hide = () => {
+    document.body.classList.remove('sidebar-open');
+    toggle?.setAttribute('aria-expanded', 'false');
+    sidebar.inert = media.matches;
+    sidebar.removeAttribute('role'); sidebar.removeAttribute('aria-modal');
+  };
+  const close = () => { if (Checkers.Overlay.isOpen(sidebar)) Checkers.Overlay.close(); else hide(); };
   toggle?.addEventListener('click', () => {
-    document.body.classList.toggle('sidebar-open');
+    if (Checkers.Overlay.isOpen(sidebar)) { close(); return; }
+    Checkers.Overlay.open(sidebar, {
+      trigger: toggle, initial: closeButton, dismissSurface: backdrop,
+      onOpen: () => { sidebar.inert = false; document.body.classList.add('sidebar-open'); toggle.setAttribute('aria-expanded', 'true'); sidebar.setAttribute('role', 'dialog'); sidebar.setAttribute('aria-modal', 'true'); sidebar.setAttribute('aria-label', Checkers.t('nav.main')); },
+      onClose: hide
+    });
   });
+  closeButton?.addEventListener('click', close);
   backdrop?.addEventListener('click', close);
-  document.querySelectorAll('.sidebar .nav-link').forEach((link) => {
-    link.addEventListener('click', close);
+  sidebar.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { if (media.matches && !link.classList.contains('skip-link')) close(); }));
+  media.addEventListener('change', () => {
+    const hadFocus = sidebar.contains(document.activeElement);
+    close(); sidebar.inert = media.matches;
+    if (hadFocus && media.matches) toggle?.focus({ preventScroll: true });
   });
-  window.addEventListener('resize', () => {
-    // Game page collapses the sidebar earlier so the board stays playable.
-    const limit = document.body.classList.contains('game-page') ? 1200 : 768;
-    if (window.innerWidth > limit) close();
-  });
+  hide();
 };
 
 Checkers.initIcons = function () {
@@ -311,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
   Checkers.initLangSwitch();
   Checkers.initHeaderAuth();
   Checkers.initSidebar();
+  document.querySelectorAll(".is-active[href]").forEach(link => link.setAttribute("aria-current", "page"));
   Checkers.initIcons();
   Checkers.sessionReady = Checkers.restoreSession().then(() => Checkers.initHeaderAuth());
   Checkers.initSitePresence();
@@ -348,9 +452,9 @@ Checkers.initSitePresence = function () {
 
 Checkers.personalStats = function (user) {
   if (!user || user.guest) return null;
-  const total = user.wins + user.losses + user.draws;
-  return { total, wins: user.wins, losses: user.losses, draws: user.draws,
-    winRate: total ? Math.round(user.wins / total * 100) : null };
+  const wins = Number(user.wins) || 0, losses = Number(user.losses) || 0, draws = Number(user.draws) || 0;
+  const total = wins + losses + draws;
+  return { total, wins, losses, draws, winRate: total ? Math.round(wins / total * 100) : null };
 };
 
 Checkers.escapeHtml = function (value) {

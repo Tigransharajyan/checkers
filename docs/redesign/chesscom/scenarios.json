@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "registered bot, resignation, saved loss/history/progress",
+    "friend invitation and assistant response",
+    "FAQ answer search and empty state",
+    "puzzle incorrect feedback and complete real solution",
+    "field validation and persistent network error",
+    "real matchmaking between independent sessions"
+  ],
+  "errors": []
+}

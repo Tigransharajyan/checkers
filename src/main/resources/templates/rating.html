@@ -9,53 +9,27 @@
 <div class="app-shell">
   <div th:replace="~{fragments/sidebar :: sidebar('rating')}"></div>
   <div th:replace="~{fragments/sidebar :: mobile('rating')}"></div>
-
-  <main class="content">
-    <section class="rating-page">
-      <div class="mode-page-head">
-        <h1 th:text="#{rating.title}">Rating</h1>
-        <p th:text="#{rating.subtitle}">Your progress and current form.</p>
+  <main class="content progress-content" id="main-content" tabindex="-1">
+    <section class="progress-page">
+      <header class="mode-page-head progress-heading"><h1 th:text="#{rating.title}">Your progress</h1><p th:text="#{rating.subtitle}">Your results, drawn from completed games.</p></header>
+      <p class="progress-status" data-rating-status role="status" th:text="#{common.loading}">Loading…</p>
+      <div class="inline-load-error hidden" data-rating-error role="status"><span data-rating-error-text></span><button type="button" class="text-button" data-rating-retry th:text="#{tasks.retry}">Retry</button></div>
+      <div class="progress-layout hidden" data-progress-content>
+        <section class="progress-rate" data-progress-rate aria-labelledby="progress-rate-title">
+          <span class="progress-label" id="progress-rate-title" th:text="#{rating.current}">Win rate</span>
+          <strong class="progress-score" data-rating-score>—</strong>
+          <p class="progress-note" data-rating-note th:text="#{rating.guest}">Sign in to save your results and game history.</p>
+          <div class="actions-row progress-actions"><a class="btn btn-primary" data-rating-login th:href="@{/login(lang=${currentLocale})}" th:text="#{nav.login}">Log in</a><a class="btn btn-ghost hidden" data-rating-register th:href="@{/register(lang=${currentLocale})}" th:text="#{nav.register}">Create account</a></div>
+        </section>
+        <section class="progress-results" data-progress-private aria-labelledby="progress-results-title">
+          <div><h2 id="progress-results-title" th:text="#{lobby.stats.title}">Your results</h2><p th:text="#{rating.results.subtitle}">Counts from completed games saved to this account.</p></div>
+          <dl class="progress-record"><div><dt th:text="#{rating.totalGames}">Completed games</dt><dd data-rating-total>0</dd></div><div><dt th:text="#{lobby.stats.wins}">Wins</dt><dd data-rating-wins>0</dd></div><div><dt th:text="#{lobby.stats.losses}">Losses</dt><dd data-rating-losses>0</dd></div><div><dt th:text="#{lobby.stats.draws}">Draws</dt><dd data-rating-draws>0</dd></div></dl>
+        </section>
       </div>
-
-      <div class="rating-grid">
-        <article class="rating-summary-card">
-          <span class="rating-kicker" th:text="#{rating.current}">Current rating</span>
-          <strong data-rating-score>—</strong>
-          <p data-rating-note th:text="#{rating.guest}">Sign in to save rating and history.</p>
-          <a class="btn btn-primary" th:href="@{/play(lang=${currentLocale})}">
-            <i data-lucide="gamepad-2"></i>
-            <span th:text="#{nav.play}">Play</span>
-          </a>
-        </article>
-
-        <article class="rating-stats-card">
-          <h2 th:text="#{lobby.stats.title}">Your stats</h2>
-          <div class="stats-grid">
-            <div class="stat-box">
-              <strong data-rating-wins>—</strong>
-              <span th:text="#{lobby.stats.wins}">Wins</span>
-            </div>
-            <div class="stat-box">
-              <strong data-rating-losses>—</strong>
-              <span th:text="#{lobby.stats.losses}">Losses</span>
-            </div>
-            <div class="stat-box">
-              <strong data-rating-draws>—</strong>
-              <span th:text="#{lobby.stats.draws}">Draws</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="rating-levels-card">
-          <div class="widget-title"><i data-lucide="chart-no-axes-combined"></i><h2 th:text="#{rating.about.title}">Every game counts</h2></div>
-          <p class="muted" th:text="#{rating.about.text}">Statistics are based on your completed games.</p>
-          <div class="progress-track"><span data-rating-progress></span></div>
-        </article>
-      </div>
+      <section class="progress-method" aria-labelledby="progress-method-title"><h2 id="progress-method-title" th:text="#{rating.about.title}">How win rate is calculated</h2><p th:text="#{rating.about.text}">Win rate is based on completed games saved to your account.</p></section>
     </section>
   </main>
 </div>
-
 <div id="toast-root" aria-live="polite"></div>
 <div th:replace="~{fragments/assistant :: widget}"></div>
 </body>

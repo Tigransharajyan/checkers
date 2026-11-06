@@ -1,55 +1,59 @@
-<aside class="sidebar" xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar(active)" data-sidebar>
-  <a class="sidebar-brand" th:href="@{/(lang=${currentLocale})}">
-    <span class="logo-mark" aria-hidden="true"><i></i><i></i></span>
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar(active)">
+<a class="skip-link" href="#main-content" th:text="#{redesign.skip}">Skip to content</a>
+<aside class="sidebar" data-sidebar id="main-sidebar">
+  <button type="button" class="icon-btn sidebar-close" data-sidebar-close th:aria-label="#{common.close}"><i aria-hidden="true" data-lucide="x"></i></button>
+  <a class="sidebar-brand" th:href="@{/home(lang=${currentLocale})}">
+    <img class="brand-checkers" th:src="@{/images/modes/checkers.svg}" width="36" height="36" alt=""/>
     <span th:text="#{app.title}">Checkers Online</span>
   </a>
 
   <nav class="sidebar-nav" th:aria-label="#{nav.main}">
     <a class="nav-link"
        th:classappend="${active == 'home'} ? ' is-active'"
-       th:href="@{/(lang=${currentLocale})}">
-      <i data-lucide="home"></i>
+       th:href="@{/home(lang=${currentLocale})}">
+      <img class="nav-color-icon" th:src="@{/images/modes/home.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.home}">Home</span>
     </a>
 
     <a class="nav-link"
        th:classappend="${active == 'play'} ? ' is-active'"
        th:href="@{/play(lang=${currentLocale})}">
-      <i data-lucide="gamepad-2"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/play.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.play}">Play</span>
     </a>
 
     <a class="nav-link"
        th:classappend="${active == 'tasks'} ? ' is-active'"
        th:href="@{/tasks(lang=${currentLocale})}">
-      <i data-lucide="target"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/puzzle.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.tasks}">Tasks</span>
     </a>
 
     <a class="nav-link"
        th:classappend="${active == 'rating'} ? ' is-active'"
        th:href="@{/rating(lang=${currentLocale})}">
-      <i data-lucide="trophy"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/rating.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.rating}">Rating</span>
     </a>
 
     <a class="nav-link"
        th:classappend="${active == 'faq'} ? ' is-active'"
        th:href="@{/faq(lang=${currentLocale})}">
-      <i data-lucide="book-open"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/learn.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.faq}">Rules & FAQ</span>
     </a>
 
     <a class="nav-link"
        th:classappend="${active == 'history'} ? ' is-active'"
        th:href="@{/history(lang=${currentLocale})}">
-      <i data-lucide="history"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/history.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.history}">History</span>
     </a>
   </nav>
 
   <div class="sidebar-foot">
-    <div class="account-block">
+    <div class="sidebar-auth" data-auth="guest"><a class="btn btn-primary btn-block" th:href="@{/register(lang=${currentLocale})}" th:text="#{nav.register}">Sign Up</a><a class="btn btn-ghost btn-block" th:href="@{/login(lang=${currentLocale})}" th:text="#{nav.login}">Log In</a></div>
+    <div class="account-block hidden" data-auth="user">
       <div class="account-avatar" data-account-avatar aria-hidden="true">?</div>
       <div class="account-meta">
         <strong data-auth="user" data-user-name class="hidden">User</strong>
@@ -63,55 +67,56 @@
       </div>
     </div>
 
-    <div class="lang-switch" th:aria-label="#{lang.label}">
+    <div class="lang-switch" role="group" th:aria-label="#{lang.label}">
       <a data-lang="en" hreflang="en" lang="en" th:href="${languageLinks.en}" th:text="#{lang.en}">EN</a>
       <a data-lang="ru" hreflang="ru" lang="ru" th:href="${languageLinks.ru}" th:text="#{lang.ru}">RU</a>
       <a data-lang="hy" hreflang="hy" lang="hy" th:href="${languageLinks.hy}" th:text="#{lang.hy}">HY</a>
     </div>
   </div>
 </aside>
+</th:block>
 
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="mobile(active)">
   <header class="mobile-top">
-    <button type="button" class="icon-btn" data-sidebar-toggle th:aria-label="#{nav.menu}">
-      <i data-lucide="menu"></i>
+    <button type="button" class="icon-btn" data-sidebar-toggle aria-controls="main-sidebar" aria-expanded="false" th:aria-label="#{nav.menu}">
+      <i aria-hidden="true" data-lucide="menu"></i>
     </button>
-    <a class="brand-mini" th:href="@{/(lang=${currentLocale})}" th:text="#{app.title}">Checkers</a>
+    <a class="brand-mini" th:href="@{/home(lang=${currentLocale})}"><img class="brand-checkers" th:src="@{/images/modes/checkers.svg}" width="36" height="36" alt=""/><span th:text="#{app.title}">Checkers</span></a>
     <a class="icon-btn" th:href="@{/faq(lang=${currentLocale})}" th:aria-label="#{nav.faq}">
-      <i data-lucide="help-circle"></i>
+      <i aria-hidden="true" data-lucide="help-circle"></i>
     </a>
   </header>
 
   <nav class="bottom-nav" th:aria-label="#{nav.main}">
-    <a th:href="@{/(lang=${currentLocale})}"
+    <a th:href="@{/home(lang=${currentLocale})}"
        th:classappend="${active == 'home'} ? ' is-active'">
-      <i data-lucide="home"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/home.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.home}">Lobby</span>
     </a>
     <a th:href="@{/play(lang=${currentLocale})}"
        th:classappend="${active == 'play'} ? ' is-active'">
-      <i data-lucide="swords"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/play.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.play}">Play</span>
     </a>
     <a th:href="@{/tasks(lang=${currentLocale})}"
        th:classappend="${active == 'tasks'} ? ' is-active'">
-      <i data-lucide="target"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/puzzle.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.tasks}">Tasks</span>
     </a>
     <a th:href="@{/rating(lang=${currentLocale})}"
        th:classappend="${active == 'rating'} ? ' is-active'">
-      <i data-lucide="trophy"></i>
+      <img class="nav-color-icon" th:src="@{/images/modes/rating.svg}" width="28" height="28" alt=""/>
       <span th:text="#{nav.rating}">Rating</span>
     </a>
     <a data-auth="guest" th:href="@{/login(lang=${currentLocale})}">
-      <i data-lucide="log-in"></i>
+      <i aria-hidden="true" data-lucide="log-in"></i>
       <span th:text="#{nav.login}">Log in</span>
     </a>
     <a data-auth="user" class="hidden" href="#" data-logout>
-      <i data-lucide="log-out"></i>
+      <i aria-hidden="true" data-lucide="log-out"></i>
       <span th:text="#{nav.logout}">Log out</span>
     </a>
   </nav>
 
-  <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+  <div class="sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
 </th:block>

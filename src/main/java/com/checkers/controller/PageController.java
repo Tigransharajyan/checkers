@@ -18,7 +18,7 @@ public class PageController {
 
     private final FaqKnowledgeBase faqKnowledgeBase;
 
-    @GetMapping({"/", "/index"})
+    @GetMapping({"/", "/index", "/home"})
     public String index() {
         return "index";
     }

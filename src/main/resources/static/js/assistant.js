@@ -82,14 +82,19 @@ Checkers.initAssistant = function () {
   updateChromeText();
   renderHistory();
 
+  const panel = root.querySelector('[data-assistant-panel]');
+  const mobile = matchMedia('(max-width: 900px)');
+  const hide = () => { root.classList.remove('is-open'); toggle.setAttribute('aria-expanded','false'); panel.removeAttribute('aria-modal'); };
   toggle?.addEventListener('click', () => {
-    root.classList.toggle('is-open');
-    if (root.classList.contains('is-open')) {
-      setTimeout(() => input?.focus(), 100);
-    }
+    if (Checkers.Overlay.isOpen(panel)) { Checkers.Overlay.close(); return; }
+    Checkers.Overlay.open(panel, {
+      modal: mobile.matches, trigger: toggle, initial: input,
+      onOpen: () => { root.classList.add('is-open'); toggle.setAttribute('aria-expanded','true'); if (mobile.matches) panel.setAttribute('aria-modal','true'); },
+      onClose: hide
+    });
   });
-
-  close?.addEventListener('click', () => root.classList.remove('is-open'));
+  close?.addEventListener('click', () => { if (Checkers.Overlay.isOpen(panel)) Checkers.Overlay.close(); });
+  mobile.addEventListener('change', () => { if (Checkers.Overlay.isOpen(panel)) Checkers.Overlay.close(); });
 
   // Quick FAQ Chips
   root.querySelectorAll('[data-chip]').forEach((btn) => {

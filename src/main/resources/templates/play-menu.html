@@ -2,107 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
 <head>
   <th:block th:replace="~{fragments/head :: meta}"></th:block>
-  <script th:src="@{/js/assistant.js}" defer></script>
-  <script>var global = window;</script>
-  <script th:src="@{/js/vendor/sockjs-1.6.1.min.js}" defer></script>
-  <script th:src="@{/js/vendor/stomp-2.3.3.min.js}" defer></script>
-  <script th:src="@{/js/lobby.js}" defer></script>
+  <script th:src="@{/js/assistant.js}" defer></script><script>var global = window;</script>
+  <script th:src="@{/js/vendor/sockjs-1.6.1.min.js}" defer></script><script th:src="@{/js/vendor/stomp-2.3.3.min.js}" defer></script><script th:src="@{/js/lobby.js}" defer></script>
 </head>
 <body>
-<div class="app-shell">
-  <div th:replace="~{fragments/sidebar :: sidebar('play')}"></div>
-  <div th:replace="~{fragments/sidebar :: mobile('play')}"></div>
-
-  <main class="content">
-    <section class="mode-page">
-      <div class="mode-page-head">
-        <h1 th:text="#{play.menu.title}">Choose game mode</h1>
-        <p th:text="#{play.menu.subtitle}">Start a random match, invite a friend, or train with the bot.</p>
-      </div>
-
-      <div class="mode-strip mode-strip-page" th:aria-label="#{lobby.modes.title}">
-        <article class="mode-tile mode-tile-primary" id="mode-random" data-mode-card data-mode-action="[data-find-random]">
-          <div class="mode-tile-icon"><i data-lucide="zap"></i></div>
-          <div class="mode-tile-copy">
-            <h2 th:text="#{lobby.mode.random.title}">Random opponent</h2>
-            <p th:text="#{lobby.mode.random.desc}">Find an online player.</p>
-          </div>
-          <button type="button" class="mode-tile-action" data-find-random th:aria-label="#{lobby.mode.random.cta}">
-              <span th:text="#{lobby.mode.random.cta}">Play</span>
-            <i data-lucide="chevron-right"></i>
-          </button>
-          <div class="mm-search-box hidden" data-mm-search-state>
-            <div class="spinner"></div>
-            <div data-mm-status th:text="#{lobby.matchmaking.queued}">Searching...</div>
-            <button type="button" class="btn btn-ghost btn-sm" data-cancel-random th:text="#{lobby.mode.random.cancel}">Cancel</button>
-          </div>
-        </article>
-
-        <article class="mode-tile" id="mode-bot" data-mode-card data-mode-action="[data-start-bot]">
-          <div class="mode-tile-icon"><i data-lucide="bot"></i></div>
-          <div class="mode-tile-copy">
-            <h2 th:text="#{lobby.mode.bot.title}">Play bot</h2>
-            <p th:text="#{lobby.mode.bot.desc}">Practice at your level.</p>
-          </div>
-          <button type="button" class="mode-tile-action" data-start-bot th:aria-label="#{lobby.mode.bot.cta}">
-              <span th:text="#{lobby.mode.bot.cta}">Play</span>
-            <i data-lucide="chevron-right"></i>
-          </button>
-          <select data-bot-diff class="difficulty-select" th:aria-label="#{lobby.difficulty}">
-            <option value="EASY" th:text="#{lobby.difficulty.EASY}">Easy</option>
-            <option value="MEDIUM" selected th:text="#{lobby.difficulty.MEDIUM}">Medium</option>
-            <option value="HARD" th:text="#{lobby.difficulty.HARD}">Hard</option>
-          </select>
-        </article>
-
-        <article class="mode-tile" id="mode-friend" data-mode-card data-mode-action="[data-create-friend]">
-          <div class="mode-tile-icon"><i data-lucide="users"></i></div>
-          <div class="mode-tile-copy">
-            <h2 th:text="#{lobby.mode.friend.title}">Play a friend</h2>
-            <p th:text="#{lobby.mode.friend.desc}">Create and share an invite.</p>
-          </div>
-          <button type="button" class="mode-tile-action" data-create-friend th:aria-label="#{lobby.mode.friend.cta}">
-              <span th:text="#{lobby.mode.friend.cta}">Play</span>
-            <i data-lucide="chevron-right"></i>
-          </button>
-        </article>
-
-        <a class="mode-tile" th:href="@{/tasks(lang=${currentLocale})}">
-          <div class="mode-tile-icon"><i data-lucide="target"></i></div>
-          <div class="mode-tile-copy">
-            <h2 th:text="#{lobby.task.title}">Daily task</h2>
-            <p th:text="#{lobby.task.desc}">Find the best move</p>
-          </div>
-          <span class="mode-tile-action"><span th:text="#{common.open}">Open</span><i data-lucide="arrow-right"></i></span>
-        </a>
-      </div>
-
-      <div class="invite-box dashboard-invite hidden" data-invite-box>
-        <strong th:text="#{lobby.invite.link}">Invite Link</strong>
-        <code data-invite-link></code>
-        <div class="actions-row">
-          <button type="button" class="btn btn-ghost" data-copy-invite>
-            <i data-lucide="copy"></i>
-            <span th:text="#{common.copy}">Copy</span>
-          </button>
-          <button type="button" class="btn btn-primary" data-open-invite-game th:text="#{nav.play}">Play</button>
-        </div>
-      </div>
-
-      <div class="join-code-row">
-          <div class="join-code-copy"><i data-lucide="link"></i><div><strong th:text="#{lobby.invite.code}">Invite code</strong><span th:text="#{lobby.invite.hint}">Have an invite? Join your friend.</span></div></div>
-        <input type="text" data-join-code maxlength="16" autocomplete="off"
-               th:placeholder="#{lobby.mode.friend.codePlaceholder}" th:aria-label="#{lobby.mode.friend.codePlaceholder}"/>
-        <button type="button" class="btn btn-ghost" data-join-friend>
-          <i data-lucide="log-in"></i>
-          <span th:text="#{lobby.mode.friend.join}">Join</span>
-        </button>
-      </div>
-    </section>
-  </main>
-</div>
-
-<div id="toast-root" aria-live="polite"></div>
-<div th:replace="~{fragments/assistant :: widget}"></div>
+<div class="app-shell play-launcher-shell"><div th:replace="~{fragments/sidebar :: sidebar('play')}"></div><div th:replace="~{fragments/sidebar :: mobile('play')}"></div>
+<main class="content play-launcher-content" id="main-content" tabindex="-1"><div class="inline-load-error hidden" data-account-refresh-error role="status"><span th:text="#{common.accountCheckFailed}">Your saved session could not be checked. Retry.</span><button type="button" class="text-button" data-account-refresh-retry th:text="#{tasks.retry}">Retry</button></div><div class="play-launcher-grid"><div class="play-launcher-board"><div th:replace="~{fragments/position :: preview}"></div></div><section class="play-launcher-options" aria-labelledby="play-launcher-title"><header class="play-launcher-heading"><img th:src="@{/images/modes/checkers.svg}" width="40" height="40" alt=""/><div><h1 id="play-launcher-title" th:text="#{redesign.play.title}">Play Russian checkers</h1><p th:text="#{play.launcher.subtitle}">Russian checkers · 8×8. Choose how you want to play.</p></div></header><div th:replace="~{fragments/modes :: selector(false)}"></div></section></div></main></div>
+<div id="toast-root" aria-live="polite"></div><div th:replace="~{fragments/assistant :: widget}"></div>
 </body>
 </html>

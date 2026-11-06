@@ -29,6 +29,7 @@ test(
       await page.locator("[type=submit]").click();
       await page.waitForURL(base + "/?lang=en");
       await page.waitForLoadState("networkidle");
+      await page.goto(base + "/play?lang=en");
       await page.locator("[data-bot-diff]").selectOption("EASY");
       await page.locator("[data-start-bot]").click();
       await page.waitForURL("**/play?id=*&lang=en");
@@ -106,7 +107,7 @@ test(
         "You lost",
       );
 
-      await page.goto(base + "/?lang=en");
+      await page.goto(base + "/play?lang=en");
       await page.locator("[data-create-friend]").click();
       await page.waitForFunction(
         () =>
@@ -120,8 +121,18 @@ test(
       const friendId = new URL(other.url()).searchParams.get("id");
       await page.goto(base + "/play?id=" + friendId + "&lang=en");
       await page.waitForLoadState("networkidle");
+      // Selecting a premove must not cover every piece with a dark marker.
+      const piecesBeforePremove = await other.locator('[data-board] .sq > .piece').evaluateAll(pieces =>
+        pieces.map(piece => ({ square: piece.parentElement.dataset.square, code: piece.dataset.code,
+          paint: getComputedStyle(piece).backgroundImage })));
       // Black queues a legal premove while white is still thinking.
       await other.locator("[data-square=b6]").click();
+      assert.equal(await other.locator('.premove-hl, .premove-cap').count(), 0);
+      assert.deepEqual(await other.locator('[data-board] .sq > .piece').evaluateAll(pieces =>
+        pieces.map(piece => ({ square: piece.parentElement.dataset.square, code: piece.dataset.code,
+          paint: getComputedStyle(piece).backgroundImage }))), piecesBeforePremove);
+      assert(await other.locator('[data-board] .sq > .piece').evaluateAll(pieces =>
+        pieces.every(piece => getComputedStyle(piece.parentElement, '::after').content === 'none')));
       await other.locator("[data-square=a5]").click();
       assert(await other.locator(".premove-to").count());
       await page.locator("[data-square=a3]").click();

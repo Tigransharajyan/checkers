@@ -1,0 +1,8 @@
+<section xmlns:th="http://www.thymeleaf.org" th:fragment="preview" class="lobby-table" aria-labelledby="position-caption">
+  <div class="preview-player"><span class="preview-avatar" aria-hidden="true"><i data-lucide="user-round"></i></span><strong th:text="#{play.opponent}">Opponent</strong></div>
+  <div class="position-board" role="img" th:aria-label="#{redesign.preview.caption}">
+    <th:block th:each="row : ${#numbers.sequence(0,7)}"><div th:each="file : ${#numbers.sequence(0,7)}" class="position-square" th:classappend="${(row+file)%2 == 1 ? 'dark' : 'light'}"><span th:if="${file == 0}" class="position-rank" th:text="${8-row}" aria-hidden="true"></span><span th:if="${row == 7}" class="position-file" th:text="${#strings.substring('abcdefgh',file,file+1)}" aria-hidden="true"></span><span th:if="${(row+file)%2 == 1 and (row lt 3 or row gt 4)}" class="piece" th:classappend="${row lt 3 ? 'black' : 'white'}" aria-hidden="true"></span></div></th:block>
+  </div>
+  <div class="preview-player preview-player-self"><span class="preview-avatar" aria-hidden="true"><i data-lucide="user-round"></i></span><strong th:text="#{common.you}">You</strong><span class="preview-variant" th:text="#{play.variant.short}">Russian · 8×8</span></div>
+  <p class="sr-only" id="position-caption" th:text="#{redesign.preview.caption}">Initial position. Choose a game mode to start.</p>
+</section>

@@ -9,46 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const unauthBox = document.querySelector('[data-unauth-box]');
   const activeGamesBox = document.querySelector('[data-active-games-box]');
   const activeGamesList = document.querySelector('[data-active-games-list]');
+  const activeGamesLoading = document.querySelector('[data-active-games-loading]');
+  const activeGamesError = document.querySelector('[data-active-games-error]');
   const recentGamesBox = document.querySelector('[data-recent-games-box]');
   const recentGamesList = document.querySelector('[data-recent-games-list]');
+  const recentGamesLoading = document.querySelector('[data-recent-games-loading]');
   const recentEmpty = document.querySelector('[data-recent-empty]');
-  const lobbyBoardRoot = document.querySelector('[data-lobby-board]');
-
-  function isInteractiveTarget(target) {
-    return !!target.closest('button, a, input, select, textarea, label, [data-no-card-click]');
-  }
-
-  document.querySelectorAll('[data-mode-card]').forEach((card) => {
-    const run = () => {
-      const selector = card.getAttribute('data-mode-action');
-      const action = selector && card.querySelector(selector);
-      action?.click();
-    };
-    card.addEventListener('click', (event) => {
-      if (isInteractiveTarget(event.target)) return;
-      run();
-    });
-    card.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      if (isInteractiveTarget(event.target)) return;
-      event.preventDefault();
-      run();
-    });
-  });
-
-  // Initialize preview board
-  if (lobbyBoardRoot && Checkers.BoardUI) {
-    const initialSquares = {
-      a1: 'WM', c1: 'WM', e1: 'WM', g1: 'WM',
-      b2: 'WM', d2: 'WM', f2: 'WM', h2: 'WM',
-      a3: 'WM', c3: 'WM', e3: 'WM', g3: 'WM',
-      b6: 'BM', d6: 'BM', f6: 'BM', h6: 'BM',
-      a7: 'BM', c7: 'BM', e7: 'BM', g7: 'BM',
-      b8: 'BM', d8: 'BM', f8: 'BM', h8: 'BM'
-    };
-    const boardUi = Checkers.BoardUI.create(lobbyBoardRoot);
-    boardUi.setBoard({ turn: 'WHITE', squares: initialSquares });
-  }
+  const recentGamesError = document.querySelector('[data-recent-games-error]');
+  const accountRefreshError = document.querySelector('[data-account-refresh-error]');
+  const homeGrid = document.querySelector('.home-grid');
+  const personalRateRow = document.querySelector('[data-personal-rate-row]');
+  const personalEmpty = document.querySelector('[data-personal-empty]');
+  let accountDataConfirmed = true;
 
   // Difficulty pill tabs
   document.querySelectorAll('[data-diff-tab]').forEach((tab) => {
@@ -65,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await Checkers.api('/api/auth/guest', { method: 'POST' });
       Checkers.Auth.save(res);
+      accountDataConfirmed = true;
       Checkers.initHeaderAuth();
       refreshUI();
       Checkers.toast(Checkers.t('auth.guest') || 'Guest logged in');
@@ -74,24 +47,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function refreshStats() {
-    const personal = Checkers.personalStats(Checkers.Auth.user());
+    const personal = accountDataConfirmed ? Checkers.personalStats(Checkers.Auth.user()) : null;
     document.querySelector('[data-personal-metrics]')?.classList.toggle('hidden', !personal);
     document.querySelector('[data-progress-summary]')?.classList.toggle('hidden', !personal);
     document.querySelector('[data-progress-track]')?.classList.toggle('hidden', !personal);
     if (personal) {
       const number = new Intl.NumberFormat(Checkers.locale());
-      const rate = personal.winRate == null ? '—' : number.format(personal.winRate) + '%';
       const fields = { 'personal-games': number.format(personal.total), 'personal-wins': number.format(personal.wins),
-        'personal-rate': rate, 'progress-rate': rate };
+        'personal-losses': number.format(personal.losses), 'personal-draws': number.format(personal.draws) };
       Object.entries(fields).forEach(([key, value]) => {
         const el = document.querySelector('[data-' + key + ']');
         if (el) el.textContent = value;
       });
+      personalRateRow?.classList.toggle('hidden', personal.winRate == null);
+      personalEmpty?.classList.toggle('hidden', personal.total > 0);
+      const rate = document.querySelector('[data-personal-rate]');
+      if (rate && personal.winRate != null) rate.textContent = number.format(personal.winRate) + '%';
       const bar = document.querySelector('[data-progress-track] span');
       if (bar) bar.style.width = (personal.winRate || 0) + '%';
     }
     const user = Checkers.Auth.user();
     const loggedIn = Checkers.Auth.isLoggedIn() && !!user;
+    homeGrid?.classList.toggle('has-account', loggedIn && !user.guest);
+    homeGrid?.classList.toggle('has-active', loggedIn);
 
     if (unauthBox) {
       unauthBox.classList.toggle('hidden', loggedIn);
@@ -107,9 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (statsGrid) statsGrid.classList.add('hidden');
       if (activeGamesBox) activeGamesBox.classList.add('hidden');
-      if (recentGamesBox) recentGamesBox.classList.remove('hidden');
+      if (recentGamesBox) recentGamesBox.classList.add('hidden');
       if (recentGamesList) recentGamesList.innerHTML = '';
-      if (recentEmpty) recentEmpty.classList.remove('hidden');
+      activeGamesLoading?.classList.add('hidden');
+      recentGamesLoading?.classList.add('hidden');
+      if (recentEmpty) recentEmpty.classList.add('hidden');
       return;
     }
 
@@ -127,9 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ratingHint.textContent = Checkers.t('lobby.rating.guestHint');
       }
       if (statsGrid) statsGrid.classList.add('hidden');
-      if (recentGamesBox) recentGamesBox.classList.remove('hidden');
+      if (recentGamesBox) recentGamesBox.classList.add('hidden');
       if (recentGamesList) recentGamesList.innerHTML = '';
-      if (recentEmpty) recentEmpty.classList.remove('hidden');
+      activeGamesLoading?.classList.add('hidden');
+      recentGamesLoading?.classList.add('hidden');
+      if (recentEmpty) recentEmpty.classList.add('hidden');
     } else {
       if (statsGuest) statsGuest.classList.add('hidden');
       if (ratingHint) ratingHint.classList.add('hidden');
@@ -139,20 +121,28 @@ document.addEventListener('DOMContentLoaded', () => {
         statsGrid.querySelector('[data-stat="losses"]').textContent = user.losses ?? 0;
         statsGrid.querySelector('[data-stat="draws"]').textContent = user.draws ?? 0;
       }
+      recentGamesBox?.classList.remove('hidden');
     }
   }
 
   async function loadActiveGames() {
-    if (!Checkers.Auth.isLoggedIn()) return;
+    const user = Checkers.Auth.user();
+    if (!activeGamesBox || !activeGamesList || !Checkers.Auth.isLoggedIn() || !user) return;
+    activeGamesBox.classList.remove('hidden');
+    activeGamesBox.setAttribute('aria-busy', 'true');
+    activeGamesList.replaceChildren();
+    activeGamesLoading?.classList.remove('hidden');
+    activeGamesError?.classList.add('hidden');
     try {
       const games = await Checkers.api('/api/games/active');
-      if (!activeGamesBox || !activeGamesList) return;
+      activeGamesLoading?.classList.add('hidden');
+      activeGamesBox.setAttribute('aria-busy', 'false');
       if (!games || !games.length) {
         activeGamesBox.classList.add('hidden');
+        homeGrid?.classList.remove('has-active');
         return;
       }
-      activeGamesBox.classList.remove('hidden');
-      activeGamesList.innerHTML = '';
+      homeGrid?.classList.add('has-active');
       games.forEach((g) => {
         const item = document.createElement('div');
         item.className = 'active-game-item';
@@ -163,46 +153,49 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>${Checkers.escapeHtml(vs)}</span>
           </div>
           <a class="btn btn-primary btn-sm" href="/play?id=${g.id}&lang=${Checkers.locale()}">
-            ${Checkers.t('nav.play')}
+            ${Checkers.t('redesign.active.title')}
           </a>
           <button type="button" class="btn btn-ghost btn-sm active-game-end" data-end-active-game="${g.id}">
-            ${Checkers.t('lobby.active.end')}
+            ${Checkers.t(g.status === 'WAITING' ? 'redesign.active.cancel' : 'play.resign')}
           </button>
         `;
         activeGamesList.appendChild(item);
       });
-      activeGamesList.querySelectorAll('[data-end-active-game]').forEach((button) => {
-        button.addEventListener('click', async () => {
-          const gameId = button.getAttribute('data-end-active-game');
-          if (!gameId) return;
-          button.disabled = true;
-          try {
-            await Checkers.api('/api/games/' + gameId, { method: 'DELETE' });
-            Checkers.toast(Checkers.t('lobby.active.ended'));
-            await loadActiveGames();
-            await loadRecentGames();
-          } catch (e) {
-            button.disabled = false;
-            Checkers.toast(Checkers.apiErrorMessage(e), 'error');
-          }
+      activeGamesList.querySelectorAll('[data-end-active-game]').forEach(button => {
+        button.addEventListener('click', () => {
+          const selected = games.find(game => String(game.id) === button.dataset.endActiveGame);
+          if (selected) confirmEnd(selected, button);
         });
       });
     } catch (_) {
-      if (activeGamesBox) activeGamesBox.classList.add('hidden');
+      activeGamesBox.classList.remove('hidden');
+      homeGrid?.classList.add('has-active');
+      activeGamesBox.setAttribute('aria-busy', 'false');
+      activeGamesLoading?.classList.add('hidden');
+      activeGamesList.replaceChildren();
+      activeGamesError?.classList.remove('hidden');
     }
   }
 
   async function loadRecentGames() {
     const user = Checkers.Auth.user();
+    if (!recentGamesBox || !recentGamesList) return;
     if (!Checkers.Auth.isLoggedIn() || !user || user.guest) {
       if (recentGamesList) recentGamesList.innerHTML = '';
-      if (recentEmpty) recentEmpty.classList.remove('hidden');
+      recentGamesBox.classList.add('hidden');
       return;
     }
+    recentGamesBox.classList.remove('hidden');
+    recentGamesBox.setAttribute('aria-busy', 'true');
+    recentGamesList.replaceChildren();
+    recentEmpty?.classList.add('hidden');
+    recentGamesError?.classList.add('hidden');
+    recentGamesLoading?.classList.remove('hidden');
     try {
       const page = await Checkers.api('/api/games/history?size=4');
       const items = page.content || [];
-      if (!recentGamesBox || !recentGamesList) return;
+      recentGamesBox.setAttribute('aria-busy', 'false');
+      recentGamesLoading?.classList.add('hidden');
       if (!items.length) {
         recentGamesList.innerHTML = '';
         recentEmpty?.classList.remove('hidden');
@@ -213,27 +206,30 @@ document.addEventListener('DOMContentLoaded', () => {
       recentGamesList.innerHTML = '';
       items.forEach((g) => {
         const row = document.createElement('div');
-        row.className = 'recent-row';
+        row.className = 'recent-game-row';
         const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.mode === 'BOT' ? Checkers.t('common.bot') : (g.blackUsername || '—'));
         const reasonKey = 'reason.' + (g.finishReason || '');
         const reason = g.finishReason ? Checkers.t(reasonKey) : '—';
-        row.innerHTML = `
-          <span class="recent-avatar"><i data-lucide="user"></i></span>
-          <strong>${Checkers.escapeHtml(vs)}</strong>
-          <span>${Checkers.t('mode.' + g.mode)}</span>
-          <span>${reason === reasonKey ? g.finishReason : reason}</span>
-          <small>${g.createdAt ? new Date(g.finishedAt || g.createdAt).toLocaleDateString(Checkers.locale()) : ''}</small>
-        `;
+        row.innerHTML = `<div class="recent-game-info"><strong>${Checkers.escapeHtml(vs)}</strong><span>${Checkers.t('mode.' + g.mode)} · ${Checkers.escapeHtml(reason === reasonKey ? g.finishReason : reason)}</span></div><a class="btn btn-ghost btn-sm" href="/play?id=${g.id}&lang=${Checkers.locale()}">${Checkers.t('history.open')}</a>`;
         recentGamesList.appendChild(row);
       });
       if (window.lucide) window.lucide.createIcons();
     } catch (_) {
-      if (recentEmpty) recentEmpty.textContent = Checkers.t('common.loadFailed');
-      if (recentGamesBox) recentGamesBox.classList.remove('hidden');
-      if (recentGamesList) recentGamesList.innerHTML = '';
-      if (recentEmpty) recentEmpty.classList.remove('hidden');
+      recentGamesBox.setAttribute('aria-busy', 'false');
+      recentGamesLoading?.classList.add('hidden');
+      recentGamesList.replaceChildren();
+      recentEmpty?.classList.add('hidden');
+      recentGamesError?.classList.remove('hidden');
     }
   }
+  document.querySelector('[data-active-games-retry]')?.addEventListener('click', loadActiveGames);
+  document.querySelector('[data-recent-games-retry]')?.addEventListener('click', loadRecentGames);
+  document.querySelector('[data-account-refresh-retry]')?.addEventListener('click', async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try { await refreshMe(); refreshUI(); }
+    finally { button.disabled = false; }
+  });
 
   async function ensureAuth() {
     await Checkers.sessionReady;
@@ -252,16 +248,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function refreshMe() {
-    if (!Checkers.Auth.isLoggedIn()) return;
+    if (!Checkers.Auth.isLoggedIn()) { accountDataConfirmed = true; accountRefreshError?.classList.add('hidden'); return true; }
     try {
       const me = await Checkers.api('/api/auth/me');
       const auth = Checkers.Auth.load();
       auth.user = me;
       Checkers.Auth.save(auth);
+      accountDataConfirmed = true;
       Checkers.initHeaderAuth();
+      accountRefreshError?.classList.add('hidden');
+      return true;
     } catch (_) {
-      Checkers.Auth.clear();
+      accountDataConfirmed = !Checkers.Auth.isLoggedIn();
       Checkers.initHeaderAuth();
+      if (Checkers.Auth.isLoggedIn()) accountRefreshError?.classList.remove('hidden');
+      else accountRefreshError?.classList.add('hidden');
+      return false;
     }
   }
 
@@ -271,13 +273,41 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRecentGames();
   }
 
+  const endModal = document.querySelector('[data-end-modal]');
+  let endingGame = null, ending = false;
+  function confirmEnd(game, trigger) {
+    endingGame = game;
+    const waiting = game.status === 'WAITING';
+    const label = Checkers.t(waiting ? 'redesign.active.cancel' : 'play.resign');
+    document.querySelector('[data-end-title]').textContent = label;
+    document.querySelector('[data-end-description]').textContent = Checkers.t(waiting ? 'redesign.active.cancelConfirm' : 'redesign.active.resignConfirm') + ' ' + (game.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (game.mode === 'BOT' ? Checkers.t('common.bot') : (game.blackUsername || Checkers.t('play.waitingOpponent')));
+    document.querySelector('[data-end-error]').textContent = '';
+    document.querySelector('[data-confirm-end]').textContent = label;
+    Checkers.Overlay.open(endModal, { trigger, initial: document.querySelector('[data-cancel-end]'), canClose: () => !ending, onOpen: () => endModal.classList.remove('hidden'), onClose: () => endModal.classList.add('hidden') });
+  }
+  document.querySelector('[data-cancel-end]')?.addEventListener('click', () => { if (!ending) Checkers.Overlay.close(); });
+  document.querySelector('[data-confirm-end]')?.addEventListener('click', async event => {
+    if (ending || !endingGame) return;
+    ending = true; event.currentTarget.disabled = true;
+    const button = event.currentTarget;
+    endModal.setAttribute('aria-busy','true');
+    try {
+      await Checkers.api('/api/games/' + endingGame.id, { method:'DELETE' });
+      Checkers.Overlay.close();
+      Checkers.toast(Checkers.t('lobby.active.ended'));
+      await loadActiveGames(); await loadRecentGames();
+    } catch (failure) { document.querySelector('[data-end-error]').textContent = Checkers.apiErrorMessage(failure); }
+    finally { ending = false; button.disabled = false; endModal.setAttribute('aria-busy','false'); }
+  });
+
   // Create Friend Game
   document.querySelector('[data-create-friend]')?.addEventListener('click', async (event) => {
     const button = event.currentTarget;
     if (button.disabled) return;
     button.disabled = true;
-    if (!(await ensureAuth())) { button.disabled = false; return; }
     try {
+      if (!(await leaveSearchBeforeModeChange())) return;
+      if (!(await ensureAuth())) return;
       const game = await Checkers.api('/api/games', {
         method: 'POST',
         body: JSON.stringify({ mode: 'FRIEND' })
@@ -288,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inviteBox.classList.remove('hidden');
         inviteBox.classList.add('is-visible');
         inviteBox.dataset.gameId = game.id;
+        inviteBox.focus({ preventScroll: false });
       }
       Checkers.toast(Checkers.t('lobby.invite.created'));
     } catch (e) {
@@ -313,20 +344,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (id) location.href = '/play?id=' + id + '&lang=' + Checkers.locale();
   });
 
-  // Join Friend Game by code
-  document.querySelector('[data-join-friend]')?.addEventListener('click', async () => {
-    if (!(await ensureAuth())) return;
-    const code = document.querySelector('[data-join-code]')?.value?.trim();
-    if (!code) return;
+  // Native form submission also supports Enter on the invitation code.
+  document.querySelector('[data-join-form]')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const input = document.querySelector('[data-join-code]');
+    const button = document.querySelector('[data-join-friend]');
+    const error = document.querySelector('[data-join-error]');
+    if (button.disabled) return;
+    error.textContent = ''; input.removeAttribute('aria-invalid');
+    const code = input.value.trim();
+    if (!code) { error.textContent = Checkers.t('validation.required'); input.setAttribute('aria-invalid','true'); input.focus(); return; }
+    button.disabled = true;
     try {
-      const game = await Checkers.api('/api/games/invite/join', {
-        method: 'POST',
-        body: JSON.stringify({ code })
-      });
+      if (!(await leaveSearchBeforeModeChange())) return;
+      if (!(await ensureAuth())) return;
+      const game = await Checkers.api('/api/games/invite/join', { method:'POST', body:JSON.stringify({ code }) });
       location.href = '/play?id=' + game.id + '&lang=' + Checkers.locale();
-    } catch (e) {
-      Checkers.toast(Checkers.apiErrorMessage(e), 'error');
-    }
+    } catch (failure) { error.textContent = Checkers.apiErrorMessage(failure); input.setAttribute('aria-invalid','true'); input.focus(); }
+    finally { button.disabled = false; }
   });
 
   document.querySelector('[data-start-task]')?.addEventListener('click', async () => {
@@ -347,6 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelBtn = document.querySelector('[data-cancel-random]');
   let matchmakingSearching = false;
   let matchmakingJoining = false;
+  let matchmakingSwitching = false;
+  let pendingMatch = null;
 
   window.addEventListener('checkers:localechange', () => {
     const status = document.querySelector('[data-mm-status]');
@@ -367,10 +404,12 @@ document.addEventListener('DOMContentLoaded', () => {
       matchmakingSearching = true;
       findBtn.classList.add('hidden');
       if (mmSearchState) mmSearchState.classList.remove('hidden');
+      cancelBtn?.focus({ preventScroll: false });
       startMatchmakingWs();
     } catch (e) {
       matchmakingSearching = false;
       findBtn.classList.remove('hidden');
+      findBtn.focus({ preventScroll: true });
       Checkers.toast(Checkers.apiErrorMessage(e), 'error');
     } finally {
       matchmakingJoining = false;
@@ -378,17 +417,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  cancelBtn?.addEventListener('click', async () => {
+  async function leaveSearchBeforeModeChange({ restoreFocus = false } = {}) {
+    if (!matchmakingSearching && !matchmakingJoining) return true;
+    if (matchmakingSwitching) throw new Error('Search cancellation in progress');
+    matchmakingSwitching = true;
     try {
-      await Checkers.api('/api/games/matchmaking/leave', { method: 'DELETE' });
-    } catch (_) { /* ignore */ }
-    stopSearchUi();
-    Checkers.toast(Checkers.t('event.MATCHMAKING_CANCELLED'));
+      if (window._mmClient?.connected) await Checkers.api('/api/games/matchmaking/leave', { method: 'DELETE' });
+      if (pendingMatch) {
+        const matchedId = pendingMatch; stopSearchUi();
+        location.href = '/play?id=' + matchedId + '&lang=' + Checkers.locale();
+        return false;
+      }
+      stopSearchUi({ restoreFocus });
+      await loadActiveGames();
+      return true;
+    } catch (error) {
+      if (pendingMatch) location.href = '/play?id=' + pendingMatch + '&lang=' + Checkers.locale();
+      throw error;
+    } finally { matchmakingSwitching = false; }
+  }
+  cancelBtn?.addEventListener('click', async () => {
+    if (matchmakingSwitching) return;
+    cancelBtn.disabled = true;
+    try { await leaveSearchBeforeModeChange({ restoreFocus: true }); Checkers.toast(Checkers.t('event.MATCHMAKING_CANCELLED')); }
+    catch (error) { Checkers.toast(Checkers.apiErrorMessage(error), 'error'); }
+    finally { cancelBtn.disabled = false; }
   });
 
-  function stopSearchUi() {
+  function stopSearchUi({ restoreFocus = false } = {}) {
     matchmakingSearching = false;
     matchmakingJoining = false;
+    pendingMatch = null;
     findBtn?.classList.remove('hidden');
     if (findBtn) findBtn.disabled = false;
     mmSearchState?.classList.add('hidden');
@@ -396,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try { window._mmClient.disconnect(); } catch (_) {}
       window._mmClient = null;
     }
+    if (restoreFocus && findBtn) requestAnimationFrame(() => findBtn.focus({ preventScroll: true }));
   }
 
   function startMatchmakingWs() {
@@ -410,11 +470,14 @@ document.addEventListener('DOMContentLoaded', () => {
     client.connect(
       { Authorization: 'Bearer ' + Checkers.Auth.token() },
       () => {
+        if (!matchmakingSearching || window._mmClient !== client) { client.disconnect(); return; }
         client.subscribe('/user/queue/matchmaking', (frame) => {
+          if (!matchmakingSearching || window._mmClient !== client) return;
           const msg = JSON.parse(frame.body);
           Checkers.toast(Checkers.eventMessage(msg.type, msg.data));
           if (msg.type === 'MATCHMAKING_MATCHED' && msg.data && msg.data.gameId) {
-            stopSearchUi();
+            if (matchmakingSwitching) { pendingMatch = msg.data.gameId; return; }
+            stopSearchUi({ restoreFocus: true });
             location.href = '/play?id=' + msg.data.gameId + '&lang=' + Checkers.locale();
           }
           if (msg.type === 'MATCHMAKING_TIMEOUT' || msg.type === 'MATCHMAKING_CANCELLED') {
@@ -424,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         client.send('/app/matchmaking/join', {}, '{}');
       },
       () => {
-        stopSearchUi();
+        stopSearchUi({ restoreFocus: true });
         Checkers.toast(Checkers.t('toast.disconnected'), 'error');
       }
     );
@@ -435,9 +498,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = event.currentTarget;
     if (button.disabled) return;
     button.disabled = true;
-    if (!(await ensureAuth())) { button.disabled = false; return; }
     const diff = document.querySelector('[data-bot-diff]')?.value || 'MEDIUM';
     try {
+      if (!(await leaveSearchBeforeModeChange())) return;
+      if (!(await ensureAuth())) return;
       const game = await Checkers.api('/api/games', {
         method: 'POST',
         body: JSON.stringify({ mode: 'BOT', botDifficulty: diff })
@@ -450,5 +514,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   Promise.resolve(Checkers.sessionReady).then(refreshMe).then(refreshUI);
   Checkers.DailyTask.renderPreview(document.querySelector('[data-task-preview]'));
+  const anchor = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (anchor && ['mode-random', 'mode-bot', 'mode-friend'].includes(anchor.id)) {
+    requestAnimationFrame(() => { anchor.focus({ preventScroll: true }); anchor.scrollIntoView({ block: 'start' }); });
+  }
 
 });

@@ -2,13 +2,12 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}"/>
-  <meta name="theme-color" content="#020f18"/>
+  <meta name="theme-color" content="#302e2b"/>
   <th:block th:replace="~{fragments/seo :: metadata}"></th:block>
-  <link th:if="${seo.preloadHero}" rel="preload" as="image" type="image/webp" fetchpriority="high" th:href="@{/images/checkers-hero.webp}"/>
   <link rel="stylesheet" th:href="@{/css/fonts.css}"/>
   <link rel="stylesheet" th:href="@{/css/design-system.css}"/>
   <link rel="stylesheet" th:href="@{/css/app.css}"/>
-  <link rel="stylesheet" th:href="@{/css/theme.css}"/>
+  <link rel="stylesheet" th:href="@{/css/chess-layout.css}"/>
   <script th:inline="javascript">
     window.i18n = /*[[${i18nMap}]]*/ {};
   </script>

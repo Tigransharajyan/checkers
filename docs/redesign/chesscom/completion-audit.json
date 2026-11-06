@@ -1,0 +1,26 @@
+{
+  "layout": {
+    "board": {
+      "x": 253,
+      "width": 760,
+      "right": 1013
+    },
+    "menu": {
+      "x": 1085,
+      "width": 320
+    },
+    "background": "rgb(48, 46, 43)",
+    "darkSquare": "rgb(119, 149, 86)",
+    "lightSquare": "rgb(235, 236, 208)",
+    "sidebarWidth": 170,
+    "overflow": false,
+    "previewTabStops": 0
+  },
+  "mobile": {
+    "overflow": false,
+    "scrollY": 0,
+    "focused": "Найти соперника"
+  },
+  "gameRows": 8,
+  "runtimeErrors": []
+}

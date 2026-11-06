@@ -40,7 +40,7 @@ class SeoExperienceTest {
     void allPagesHaveUniqueLocalizedMetadataAndOnlyPublicContentIsIndexable() throws Exception {
         Set<String> titles = new HashSet<>(), descriptions = new HashSet<>();
         for (String language : SeoService.LANGUAGES) {
-            for (String path : SeoService.PAGES.keySet()) {
+            for (String path : SeoService.PAGES.keySet().stream().filter(page -> !page.equals("/home")).toList()) {
                 var response = mvc.perform(get(path).param("lang", language).param("utm_source", "test"))
                         .andExpect(status().isOk()).andExpect(header().string("Content-Language", language)).andReturn().getResponse();
                 String html = response.getContentAsString(StandardCharsets.UTF_8);
@@ -72,6 +72,18 @@ class SeoExperienceTest {
                     assertTrue(attribute(html, "a", "data-lang", alternate, "href").contains("lang=" + alternate));
                 }
             }
+        }
+    }
+
+    @Test
+    void homeAliasUsesTheSameScreenAndCanonicalHomeWithoutBecomingAnIndexableDuplicate() throws Exception {
+        for (String language : SeoService.LANGUAGES) {
+            var response = mvc.perform(get("/home").param("lang", language)).andExpect(status().isOk()).andReturn().getResponse();
+            String html = response.getContentAsString(StandardCharsets.UTF_8);
+            assertTrue(html.contains("data-find-random"));
+            assertEquals(ORIGIN + "/?lang=" + language, attribute(html, "link", "rel", "canonical", "href"));
+            assertEquals("noindex,follow", attribute(html, "meta", "name", "robots", "content"));
+            assertEquals(ORIGIN + "/?lang=en", attribute(html, "link", "hreflang", "en", "href"));
         }
     }
 
@@ -151,7 +163,7 @@ class SeoExperienceTest {
     void contentVersionedAssetsAreLocallyServedAndCacheable() throws Exception {
         String html = mvc.perform(get("/")).andReturn().getResponse().getContentAsString();
         assertFalse(html.contains("cdn.jsdelivr.net")); assertFalse(html.contains("fonts.googleapis.com"));
-        var stylesheet = Pattern.compile("href=\"(/css/theme-[a-f0-9]{32}\\.css)\"").matcher(html);
+        var stylesheet = Pattern.compile("href=\"(/css/app-[a-f0-9]{32}\\.css)\"").matcher(html);
         assertTrue(stylesheet.find(), "Fingerprinting must rewrite template links");
         mvc.perform(get(stylesheet.group(1))).andExpect(status().isOk()).andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("max-age=31536000")));
         String fonts = mvc.perform(get("/css/fonts.css")).andReturn().getResponse().getContentAsString();

@@ -1,6 +1,6 @@
 # Interface and real statistics
 
-The shared theme is `src/main/resources/static/css/theme.css`. It follows the supplied navy / emerald / warm wood reference and applies to the lobby, game mode menu, board, daily task, progress, history, rules, authentication, dialogs and assistant. English, Russian and Armenian use matching message bundles. Daily tasks now use the [shared game engine and board](daily-puzzles-and-motion.md). Language selection reloads the current URL with its game ID and other parameters, so server-rendered text, FAQ answers, document titles and accessible labels switch together.
+The current interface uses a dark graphite and olive draughts workspace, with solid surfaces, local Inter/Noto Armenian, and flat playable pieces. Foundations live in `design-system.css`; layouts and runtime board states live in `app.css`. The former `theme.css` override layer is removed. See [the redesign report](redesign/REPORT.md) for the audit, references, independent reviews and current validation.
 
 ## Data definitions
 
@@ -11,18 +11,10 @@ The shared theme is `src/main/resources/static/css/theme.css`. It follows the su
 - Personal progress uses the current `/api/auth/me` results. Win rate is `wins / (wins + losses + draws) × 100`, rounded to a whole percentage. Before the first completed game it displays `—`.
 - The development H2 profile is in memory and resets on restart. Production totals persist in the configured PostgreSQL database.
 
-## Illustration provenance
+## Asset provenance
 
-Workspace asset: `src/main/resources/static/images/checkers-hero.webp` (approximately 180 KB).
-Generated with the built-in imagegen tool, then converted to WebP. No text, counters or UI are embedded in the image. The same image supports the hero, page headers, sidebar atmosphere and authentication backdrop.
+The former `checkers-hero.webp` was generated with imagegen in an earlier revision. It and `login-board-scene.png` are no longer referenced or loaded by the UI. They remain unused historical files. The current interface uses no photographs or generated illustrations. The social JPEG is a deterministic draughts diagram rebuilt by `scripts/build-social.py`; the favicon is a flat SVG mark. Existing fonts and Lucide assets retain their licenses.
 
-Final generation prompt:
+## Current verification
 
-> Use case: stylized-concept. Asset type: wide website hero background, landscape 3:1 composition. Create a premium cinematic photorealistic 3D wooden Russian checkers board in a deep midnight navy and emerald scene, warm golden lamp light from upper right, soft dark forest leaves in background. Board at right two-thirds of image, angled perspective with luxurious walnut frame, precisely 8x8 alternating dark walnut and warm ivory squares and scattered black and ivory round draughts pieces (no chess pieces). Left third very dark deep teal negative space for website text. Similar mood to high-end game lobby: glossy dimensional pieces, subtle green atmosphere, warm wood, realistic beautiful detail. No text, no typography, no numbers, no logos, no UI, no watermark.
-
-## Verification
-
-- `./mvnw clean test`: 40 tests pass, including full application startup, 27 translated page renders, actual database totals, public API access, cookie flags, deduplication and presence expiry.
-- Browser checks cover registration, switching all three languages, solving a daily task, legal moves against a bot, resigning, creating and joining an invite, matchmaking between two browser sessions, history and saved personal results.
-- All nine page variants (including the active game board) were checked for horizontal overflow at 320, 390, 768, 1024, 1280, 1440 and 1774 pixels. Bot losses display as losses; bot labels are localized.
-- The browser confirmed that an extra tab does not increase online presence, failed statistics requests show `—`, and successful requests restore the database count. No JavaScript runtime errors were observed.
+See [the redesign report](redesign/REPORT.md) and its evidence files. Earlier verification figures described the preceding revision and have been superseded.

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const code = params.get('code');
 
   const statusEl = document.querySelector('[data-game-status]');
+  const moveAnnouncement = document.querySelector('[data-move-announcement]');
   const logEl = document.querySelector('[data-move-log]');
   const youName = document.querySelector('[data-you-name]');
   const oppName = document.querySelector('[data-opp-name]');
@@ -60,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const black = game.blackPlayer;
     myColor = white && white.id === me.id ? 'WHITE' : (black && black.id === me.id ? 'BLACK' : null);
 
-    if (youName) youName.textContent = me.username;
+    if (youName) youName.textContent = me.guest ? Checkers.t('common.guest') + ' · ' + Checkers.t('common.you') : me.username;
     if (youColor) {
       const dot = myColor === 'WHITE' ? '<span class="piece-dot white"></span>' : '<span class="piece-dot black"></span>';
       youColor.innerHTML = dot + ' ' + (myColor ? Checkers.t('play.color.' + myColor) : '');
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       logEl.appendChild(row);
     });
 
+    document.querySelector('[data-move-log-empty]')?.classList.toggle('hidden', pairs.length > 0);
     logEl.scrollTop = logEl.scrollHeight;
   }
 
@@ -128,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!gameoverModal) return;
     if (gameoverTitle) gameoverTitle.textContent = title;
     if (gameoverReason) gameoverReason.textContent = reason;
-    gameoverModal.classList.remove('hidden');
+    Checkers.Overlay.open(gameoverModal, { initial: document.querySelector('[data-dismiss-gameover]'), onOpen: () => gameoverModal.classList.remove('hidden'), onClose: () => gameoverModal.classList.add('hidden') });
   }
 
   function updateActionButtons() {
@@ -298,7 +300,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     stompClient.connect(
       { Authorization: 'Bearer ' + Checkers.Auth.token() },
       () => {
-        Checkers.toast(Checkers.t('toast.connected'));
         stompClient.subscribe('/topic/game/' + gameId, onGameEvent);
         stompClient.subscribe('/user/queue/errors', (frame) => {
           boardUi.cancelPendingMove();
@@ -335,6 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (type === 'MOVE_MADE' || type === 'GAME_FINISHED') {
       const positionChanged = data.boardState && data.boardState !== game.boardState;
+      const movingColor = game.currentTurn;
       if (data.path && positionChanged) {
         if (!game.moves) game.moves = [];
         game.moves.push({
@@ -364,6 +366,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         : (typeof data.path === 'string' ? data.path.split(/[,-]/).filter(Boolean) : []);
       if (path.length >= 2 && positionChanged) {
         Checkers.Sound.play(data.capturedSquares ? 'capture' : 'move');
+        if (moveAnnouncement) {
+          const color = Checkers.t('play.color.' + movingColor);
+          moveAnnouncement.textContent = Checkers.t('redesign.move.announcement', color, path.join('–'));
+        }
       }
       if (game.status === 'FINISHED' && !endSoundPlayed) {
         endSoundPlayed = true;
@@ -454,15 +460,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Resign Modal handling
   document.querySelector('[data-resign-btn]')?.addEventListener('click', () => {
-    resignModal?.classList.remove('hidden');
+    Checkers.Overlay.open(resignModal, { initial: document.querySelector('[data-cancel-resign]'), onOpen: () => resignModal.classList.remove('hidden'), onClose: () => resignModal.classList.add('hidden') });
   });
 
   document.querySelector('[data-cancel-resign]')?.addEventListener('click', () => {
-    resignModal?.classList.add('hidden');
+    Checkers.Overlay.close();
   });
 
   document.querySelector('[data-confirm-resign]')?.addEventListener('click', () => {
-    resignModal?.classList.add('hidden');
+    Checkers.Overlay.close();
     if (!stompClient) return;
     stompClient.send('/app/game/' + gameId + '/resign', {}, '{}');
   });
@@ -502,12 +508,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Dismiss Game Over Modal (review board)
   document.querySelector('[data-dismiss-gameover]')?.addEventListener('click', () => {
-    gameoverModal?.classList.add('hidden');
+    Checkers.Overlay.close();
   });
 
   gameoverModal?.addEventListener('click', (e) => {
     if (e.target === gameoverModal) {
-      gameoverModal.classList.add('hidden');
+      Checkers.Overlay.close();
     }
   });
 

@@ -91,6 +91,7 @@ Checkers.BoardUI = (function () {
   function create(root, options) {
     const id = ++boardId;
     const squares = new Map();
+    const rows = new Map();
     const updates = [];
     let processing = false;
     let renderedFlip = null;
@@ -164,6 +165,8 @@ Checkers.BoardUI = (function () {
       const dragFrom = state.drag && state.drag.started ? state.drag.from : null;
       root.classList.add('board');
       root.setAttribute('role', 'grid');
+      root.setAttribute('aria-rowcount', '8');
+      root.setAttribute('aria-colcount', '8');
       root.setAttribute('aria-label', Checkers.t('play.board'));
       root.classList.toggle('is-dragging', !!dragFrom);
       const orderRanks = state.flip
@@ -177,8 +180,12 @@ Checkers.BoardUI = (function () {
       const mandatorySources = mandatoryCaptureSources();
       updateCoordLabels(state.flip);
 
-      orderRanks.forEach((rank) => {
-        orderFiles.forEach((file) => {
+      const focusedElement = root.contains(document.activeElement) ? document.activeElement : null;
+      orderRanks.forEach((rank, rowIndex) => {
+        let row = rows.get(rank);
+        if (!row) { row = document.createElement('div'); row.className = 'board-row'; row.setAttribute('role', 'row'); rows.set(rank, row); }
+        row.setAttribute('aria-rowindex', String(rowIndex + 1));
+        orderFiles.forEach((file, columnIndex) => {
           const alg = algebraic(file, rank);
           let sq = squares.get(alg);
           if (!sq) {
@@ -191,10 +198,17 @@ Checkers.BoardUI = (function () {
           sq.className = 'sq ' + (dark ? 'dark' : 'light');
           sq.dataset.square = alg;
           sq.setAttribute('role', 'gridcell');
+          sq.setAttribute('aria-colindex', String(columnIndex + 1));
           sq.tabIndex = alg === (state.focused || 'a1') ? 0 : -1;
           sq.setAttribute('aria-selected', String(state.selected === alg || state.partial.includes(alg)));
           const labelCode = state.board.squares[alg];
-          sq.setAttribute('aria-label', alg + (labelCode ? ': ' + Checkers.t('play.color.' + (labelCode[0] === 'W' ? 'WHITE' : 'BLACK')) + (labelCode[1] === 'K' ? ' ' + Checkers.t('play.king') : '') : ''));
+          const accessibleStates = [];
+          if (mandatorySources.has(alg)) accessibleStates.push(Checkers.t('redesign.board.mandatory'));
+          else if (isMovableSquare(alg)) accessibleStates.push(Checkers.t('redesign.board.movable'));
+          if (highlights.cap.has(alg)) accessibleStates.push(Checkers.t('redesign.board.capture'));
+          else if (highlights.dest.has(alg)) accessibleStates.push(Checkers.t('redesign.board.destination'));
+          if (state.premove?.includes(alg)) accessibleStates.push(Checkers.t('redesign.board.premove'));
+          sq.setAttribute('aria-label', [alg + (labelCode ? ': ' + Checkers.t('play.color.' + (labelCode[0] === 'W' ? 'WHITE' : 'BLACK')) + (labelCode[1] === 'K' ? ' ' + Checkers.t('play.king') : '') : ''), ...accessibleStates].join(', '));
           if (state.selected === alg || state.partial.includes(alg)) {
             sq.classList.add('selected');
           }
@@ -231,9 +245,11 @@ Checkers.BoardUI = (function () {
             piece.classList.toggle('is-motion-source', !!pendingMove && pendingMove.path[0] === alg);
             if (isMovableSquare(alg)) sq.classList.add('can-move');
           }
-          if (renderedFlip !== state.flip) root.appendChild(sq);
+          if (renderedFlip !== state.flip) row.appendChild(sq);
         });
+        if (renderedFlip !== state.flip) root.appendChild(row);
       });
+      if (focusedElement?.isConnected && document.activeElement !== focusedElement) focusedElement.focus({ preventScroll: true });
       renderedFlip = state.flip;
       renderAnnotations();
     }
@@ -578,20 +594,9 @@ Checkers.BoardUI = (function () {
       const dest = new Set();
       const cap = new Set();
 
-      // Premoves: any dark square is a valid destination (no legality checks).
-      if (state.premoveMode) {
-        if (!state.selected) return { dest, cap };
-        for (let f = 0; f < 8; f++) {
-          for (let r = 0; r < 8; r++) {
-            if ((f + r) % 2 !== 0) continue;
-            const alg = algebraic(f, r);
-            if (alg === state.selected) continue;
-            dest.add(alg);
-            if (state.board.squares && state.board.squares[alg]) cap.add(alg);
-          }
-        }
-        return { dest, cap };
-      }
+      // A premove is speculative: highlight only its selected source/queued path,
+      // without painting every piece and dark square as a possible capture.
+      if (state.premoveMode) return { dest, cap };
 
       const prefix = state.partial.length ? state.partial : (state.selected ? [state.selected] : []);
       if (!prefix.length) return { dest, cap };

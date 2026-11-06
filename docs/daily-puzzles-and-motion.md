@@ -32,3 +32,11 @@ npm run test:browser
 Browser tests default to `http://localhost:8080`. `BASE_URL` selects another test server, and `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` can select an existing Chromium binary. The gameplay smoke test creates a disposable registered test account and plays actual local test games.
 
 The suite covers all 22 puzzle proofs, complete service-based solutions, illegal and incorrect moves, UTC rollover, public API validation, real game statistics, all translated templates, animation ordering and DOM continuity, capture loops, promotion, reduced motion, drag release, saved puzzle progress, responsive EN/RU/HY layouts, bot replies, guest invitations, premoves and a negotiated draw.
+
+## Premove appearance and wooden audio
+
+Premove selection no longer draws speculative destination/capture overlays across the board. Selection and the queued path remain visible; pieces retain their colors. Capture rings explicitly use a transparent background, so an overlay cannot fill a piece with black.
+
+Board events now play local, softened wooden samples instead of synthesized tones. Three subtle move variations, a double-contact capture, and quiet start/end tap sequences share the same sound palette. Sound buffers load once per page, unlock on interaction, and late/hidden-tab sounds are skipped. CC0 provenance and the sample license are in `src/main/resources/static/sounds/board/`; rebuild with `python3 scripts/build-board-sounds.py` (ffmpeg required).
+
+Verified with the real-game/premove regression, animation/drag/keyboard regression, and audio decoding/level/duration checks: 3 browser tests passed. Preview: `docs/redesign/chesscom-refinement/board-sounds-preview.wav` (move, capture, start, end).

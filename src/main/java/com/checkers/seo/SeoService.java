@@ -19,7 +19,7 @@ public class SeoService {
     public static final List<String> LANGUAGES = List.of("en", "ru", "hy");
     public static final List<String> INDEXABLE_PATHS = List.of("/", "/faq");
     public static final Map<String, String> PAGES = Map.of(
-            "/", "home", "/faq", "faq", "/play", "play", "/tasks", "tasks",
+            "/", "home", "/home", "home", "/faq", "faq", "/play", "play", "/tasks", "tasks",
             "/rating", "progress", "/history", "history", "/login", "login", "/register", "register");
     private final SiteProperties site;
     private final MessageSource messages;
@@ -44,11 +44,12 @@ public class SeoService {
         String page = PAGES.getOrDefault(path, "error");
         String title = text("seo." + page + ".title", supportedLocale);
         String description = text("seo." + page + ".description", supportedLocale);
-        String canonical = localizedUrl(PAGES.containsKey(path) ? path : "/", language);
+        String canonicalPath = path.equals("/home") ? "/" : (PAGES.containsKey(path) ? path : "/");
+        String canonical = localizedUrl(canonicalPath, language);
         Map<String, String> alternates = new LinkedHashMap<>();
-        if (INDEXABLE_PATHS.contains(path)) {
-            LANGUAGES.forEach(lang -> alternates.put(lang, localizedUrl(path, lang)));
-            alternates.put("x-default", localizedUrl(path, "en"));
+        if (INDEXABLE_PATHS.contains(canonicalPath)) {
+            LANGUAGES.forEach(lang -> alternates.put(lang, localizedUrl(canonicalPath, lang)));
+            alternates.put("x-default", localizedUrl(canonicalPath, "en"));
         }
         String robots = isIndexable(path) ? "index,follow,max-image-preview:large" : "noindex,follow";
         String image = baseUrl() + "/images/checkers-social.jpg";

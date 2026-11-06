@@ -9,207 +9,31 @@
   <script th:src="@{/js/lobby.js}" defer></script>
 </head>
 <body>
-<div class="app-shell dashboard-shell">
+<div class="app-shell">
   <div th:replace="~{fragments/sidebar :: sidebar('home')}"></div>
   <div th:replace="~{fragments/sidebar :: mobile('home')}"></div>
-
-  <main class="content dashboard-content">
-    <div class="dashboard-grid">
-      <section class="dashboard-main" aria-labelledby="lobby-title">
-        <div class="dashboard-hero">
-          <div class="hero-copy">
-            <div class="hero-eyebrow" th:text="#{lobby.hero.eyebrow}">STRATEGY · LOGIC · REAL PEOPLE</div>
-            <h1 id="lobby-title">
-              <span th:text="#{lobby.hero.welcomeLine}">Welcome to</span>
-              <strong th:text="#{app.title}">Checkers Online</strong>
-            </h1>
-            <p th:text="#{lobby.hero.subtitle}">Play, train, improve your skills and win.</p>
-            <div class="site-stats" th:title="#{lobby.stats.source}">
-              <div class="site-stat"><i data-lucide="users-round"></i><div><strong data-site-online>—</strong><span th:text="#{lobby.stats.online}">online now</span></div></div>
-              <div class="site-stat"><i data-lucide="chart-no-axes-column-increasing"></i><div><strong data-site-games>—</strong><span th:text="#{lobby.stats.games}">games completed</span></div></div>
+  <main class="content home-content" id="main-content" tabindex="-1">
+    <div class="inline-load-error hidden" data-account-refresh-error role="status"><span th:text="#{common.accountCheckFailed}">Your saved session could not be checked. Retry.</span><button type="button" class="text-button" data-account-refresh-retry th:text="#{tasks.retry}">Retry</button></div>
+    <div class="home-grid">
+        <section class="active-games-panel home-active-games hidden" data-active-games-box aria-labelledby="active-games-title" aria-busy="false"><h2 id="active-games-title" th:text="#{redesign.active.title}">Continue a game</h2><p class="lobby-loading hidden" data-active-games-loading role="status" th:text="#{common.loading}">Loading…</p><div data-active-games-list></div><div class="inline-load-error hidden" data-active-games-error role="status"><span th:text="#{common.loadFailed}">Could not load</span><button type="button" class="text-button" data-active-games-retry th:text="#{tasks.retry}">Retry</button></div></section>
+        <section class="home-start" aria-labelledby="home-start-title">
+          <div class="home-hero-board"><div th:replace="~{fragments/position :: preview}"></div></div>
+          <div class="home-hero-copy">
+            <header class="home-heading"><h1 id="home-start-title" th:text="#{home.title}">Play Checkers Online</h1><p th:text="#{home.subtitle}">Russian checkers on an 8×8 board. Play with friends or challenge a bot.</p></header>
+            <div class="site-stats" th:title="#{lobby.stats.source}"><span class="site-stat"><strong data-site-games>—</strong><span th:text="#{lobby.stats.played}">Games played</span></span><span class="site-stat"><span class="online-dot" aria-hidden="true"></span><strong data-site-online>—</strong><span th:text="#{lobby.stats.online}">online now</span></span></div>
+            <div class="home-start-actions"><button type="button" class="btn btn-primary home-action" data-find-random><img th:src="@{/images/modes/online.svg}" width="48" height="48" alt=""/><span><strong th:text="#{lobby.mode.random.title}">Play Online</strong><small th:text="#{home.start.text}">Find an opponent and start playing</small></span></button>
+              <div class="mm-search-box hidden" data-mm-search-state><span class="spinner" aria-hidden="true"></span><span data-mm-status role="status" tabindex="-1" th:text="#{lobby.matchmaking.queued}">Searching…</span><button type="button" class="btn btn-ghost btn-sm" data-cancel-random th:text="#{lobby.mode.random.cancel}">Cancel</button></div>
             </div>
-          </div>
-
-
-        </div>
-
-        <div class="mode-strip" th:aria-label="#{lobby.modes.title}">
-          <article class="mode-tile mode-tile-primary" id="mode-random" data-mode-card data-mode-action="[data-find-random]">
-            <div class="mode-tile-icon"><i data-lucide="zap"></i></div>
-            <div class="mode-tile-copy">
-              <h2 th:text="#{lobby.mode.random.title}">Play online</h2>
-              <p th:text="#{lobby.mode.random.desc}">Random opponent</p>
-            </div>
-            <button type="button" class="mode-tile-action" data-find-random th:aria-label="#{lobby.mode.random.cta}">
-              <span th:text="#{lobby.mode.random.cta}">Play</span>
-              <i data-lucide="chevron-right"></i>
-            </button>
-            <div class="mm-search-box hidden" data-mm-search-state>
-              <div class="spinner"></div>
-              <div data-mm-status th:text="#{lobby.matchmaking.queued}">Searching...</div>
-              <button type="button" class="btn btn-ghost btn-sm" data-cancel-random th:text="#{lobby.mode.random.cancel}">Cancel</button>
-            </div>
-          </article>
-
-          <article class="mode-tile" id="mode-bot" data-mode-card data-mode-action="[data-start-bot]">
-            <div class="mode-tile-icon"><i data-lucide="bot"></i></div>
-            <div class="mode-tile-copy">
-              <h2 th:text="#{lobby.mode.bot.title}">Play bot</h2>
-              <p th:text="#{lobby.mode.bot.desc}">Choose a level</p>
-            </div>
-            <button type="button" class="mode-tile-action" data-start-bot th:aria-label="#{lobby.mode.bot.cta}">
-              <span th:text="#{lobby.mode.bot.cta}">Play</span>
-              <i data-lucide="chevron-right"></i>
-            </button>
-            <div class="difficulty-tabs hidden">
-              <button type="button" class="diff-tab" data-diff-tab="EASY" th:text="#{lobby.difficulty.EASY}">Easy</button>
-              <button type="button" class="diff-tab is-active" data-diff-tab="MEDIUM" th:text="#{lobby.difficulty.MEDIUM}">Medium</button>
-              <button type="button" class="diff-tab" data-diff-tab="HARD" th:text="#{lobby.difficulty.HARD}">Hard</button>
-            </div>
-            <select data-bot-diff class="difficulty-select" th:aria-label="#{lobby.difficulty}">
-              <option value="EASY" th:text="#{lobby.difficulty.EASY}">Easy</option>
-              <option value="MEDIUM" selected th:text="#{lobby.difficulty.MEDIUM}">Medium</option>
-              <option value="HARD" th:text="#{lobby.difficulty.HARD}">Hard</option>
-            </select>
-          </article>
-
-          <article class="mode-tile" id="mode-friend" data-mode-card data-mode-action="[data-create-friend]">
-            <div class="mode-tile-icon"><i data-lucide="users"></i></div>
-            <div class="mode-tile-copy">
-              <h2 th:text="#{lobby.mode.friend.title}">Play a friend</h2>
-              <p th:text="#{lobby.mode.friend.desc}">Invite a friend</p>
-            </div>
-            <button type="button" class="mode-tile-action" data-create-friend th:aria-label="#{lobby.mode.friend.cta}">
-              <span th:text="#{lobby.mode.friend.cta}">Play</span>
-              <i data-lucide="chevron-right"></i>
-            </button>
-          </article>
-
-          <a class="mode-tile" th:href="@{/faq(lang=${currentLocale})}">
-            <div class="mode-tile-icon"><i data-lucide="book-open"></i></div>
-            <div class="mode-tile-copy">
-              <h2 th:text="#{lobby.mode.learn.title}">Rules & FAQ</h2>
-              <p th:text="#{lobby.mode.learn.desc}">Rules, piece moves, and strategy</p>
-            </div>
-            <span class="mode-tile-action"><span th:text="#{common.open}">Open</span><i data-lucide="arrow-right"></i></span>
-          </a>
-        </div>
-
-        <div class="invite-box dashboard-invite hidden" data-invite-box>
-          <strong th:text="#{lobby.invite.link}">Invite Link</strong>
-          <code data-invite-link></code>
-          <div class="actions-row">
-            <button type="button" class="btn btn-ghost" data-copy-invite>
-              <i data-lucide="copy"></i>
-              <span th:text="#{common.copy}">Copy</span>
-            </button>
-            <button type="button" class="btn btn-primary" data-open-invite-game th:text="#{nav.play}">Play</button>
-          </div>
-        </div>
-
-        <div class="join-code-row">
-          <div class="join-code-copy"><i data-lucide="link"></i><div><strong th:text="#{lobby.invite.code}">Invite code</strong><span th:text="#{lobby.invite.hint}">Have an invite? Join your friend.</span></div></div>
-          <input type="text" data-join-code maxlength="16" autocomplete="off"
-                 th:placeholder="#{lobby.mode.friend.codePlaceholder}" th:aria-label="#{lobby.mode.friend.codePlaceholder}"/>
-          <button type="button" class="btn btn-ghost" data-join-friend>
-            <i data-lucide="log-in"></i>
-            <span th:text="#{lobby.mode.friend.join}">Join</span>
-          </button>
-        </div>
-
-        <section class="recent-panel" aria-labelledby="recent-title">
-          <div class="panel-title-row">
-            <h2 id="recent-title"><i data-lucide="history"></i><span th:text="#{lobby.recent.title}">Recent games</span></h2>
-            <a th:href="@{/history(lang=${currentLocale})}">
-              <span th:text="#{lobby.recent.all}">All games</span>
-              <i data-lucide="arrow-right"></i>
-            </a>
-          </div>
-
-          <div class="recent-list" data-recent-games-box>
-            <div data-recent-games-list></div>
-            <div class="recent-empty" data-recent-empty><span class="empty-pieces" aria-hidden="true"></span><div><strong th:text="#{lobby.recent.empty}">No games yet.</strong><p th:text="#{lobby.recent.emptyHint}">Your games will appear here.</p></div></div>
-          </div>
-
-          <div class="active-games-panel hidden" data-active-games-box>
-            <h3 th:text="#{lobby.active.title}">Active games</h3>
-            <div data-active-games-list></div>
+            <nav class="home-secondary-actions" th:aria-label="#{home.otherWays}"><a class="btn btn-ghost home-action" th:href="@{/play(lang=${currentLocale})} + '#mode-bot'"><img th:src="@{/images/modes/bot.svg}" width="48" height="48" alt=""/><span><strong th:text="#{lobby.mode.bot.title}">Play Bots</strong><small th:text="#{lobby.mode.bot.desc}">Challenge a bot from Easy to Hard</small></span></a><a class="home-friend-link" th:href="@{/play(lang=${currentLocale})} + '#mode-friend'"><img th:src="@{/images/modes/friend.svg}" width="24" height="24" alt=""/><span th:text="#{lobby.mode.friend.title}">Play a Friend</span><i data-lucide="chevron-right" aria-hidden="true"></i></a></nav>
           </div>
         </section>
-      </section>
-
-      <aside class="dashboard-aside" th:aria-label="#{lobby.playerPanel}">
-        <section class="side-widget profile-widget">
-          <div class="profile-avatar" data-account-avatar aria-hidden="true">?</div>
-          <div>
-            <strong data-auth="user" data-user-name class="hidden">User</strong>
-            <strong data-auth="guest" th:text="#{common.guest}">Guest</strong>
-            <p data-auth="guest" th:text="#{lobby.profile.guestHint}">Start playing to earn rating</p>
-            <p data-auth="user" class="profile-online hidden"><span class="online-dot"></span><span th:text="#{common.online}">Online</span></p>
-          </div>
-          <div class="profile-metrics hidden" data-personal-metrics>
-            <div><i data-lucide="flag"></i><strong data-personal-games>—</strong><span th:text="#{lobby.stats.played}">Played</span></div>
-            <div><i data-lucide="chart-no-axes-column-increasing"></i><strong data-personal-wins>—</strong><span th:text="#{lobby.stats.wins}">Wins</span></div>
-            <div><i data-lucide="crosshair"></i><strong data-personal-rate>—</strong><span th:text="#{lobby.stats.winRate}">Win rate</span></div>
-          </div>
-          <a class="btn btn-primary btn-block" data-auth="guest" th:href="@{/login(lang=${currentLocale})}">
-            <i data-lucide="log-in"></i>
-            <span th:text="#{nav.login}">Log in</span>
-          </a>
-          <a class="btn btn-primary btn-block hidden" data-auth="user" th:href="@{/play(lang=${currentLocale})}">
-            <i data-lucide="play"></i>
-            <span th:text="#{nav.play}">Play</span>
-          </a>
-        </section>
-
-        <section class="side-widget rating-widget">
-          <div class="widget-title">
-            <i data-lucide="bar-chart-3"></i>
-            <h2 th:text="#{lobby.rating.title}">Your rating</h2>
-          </div>
-          <strong data-stats-guest>—</strong>
-          <div class="progress-summary hidden" data-progress-summary><strong data-progress-rate>—</strong><span th:text="#{lobby.stats.winRate}">Win rate</span></div>
-          <div class="progress-track hidden" data-progress-track><span></span></div>
-          <p class="rating-hint" data-rating-hint th:text="#{lobby.rating.guestHint}">Sign in to track wins and history.</p>
-          <div class="stats-grid hidden" data-stats-grid>
-            <div class="stat-box">
-              <strong data-stat="wins">0</strong>
-              <span th:text="#{lobby.stats.wins}">Wins</span>
-            </div>
-            <div class="stat-box">
-              <strong data-stat="losses">0</strong>
-              <span th:text="#{lobby.stats.losses}">Losses</span>
-            </div>
-            <div class="stat-box">
-              <strong data-stat="draws">0</strong>
-              <span th:text="#{lobby.stats.draws}">Draws</span>
-            </div>
-          </div>
-          <a th:href="@{/rating(lang=${currentLocale})}">
-            <span th:text="#{lobby.rating.more}">Details</span>
-            <i data-lucide="arrow-right"></i>
-          </a>
-        </section>
-
-        <section class="side-widget task-widget" data-daily-task>
-          <div class="panel-title-row">
-            <h2><i data-lucide="trophy"></i><span th:text="#{lobby.task.title}">Daily task</span></h2>
-            <time data-today></time>
-          </div>
-          <a class="task-preview-link" th:href="@{/tasks(lang=${currentLocale})}" th:aria-label="#{lobby.task.cta}"><div class="mini-board" data-task-preview aria-hidden="true"></div></a>
-          <p th:text="#{lobby.task.desc}">Find the best move</p>
-          <a class="btn btn-primary btn-block" th:href="@{/tasks(lang=${currentLocale})}" th:text="#{lobby.task.cta}">Solve</a>
-        </section>
-
-        <section class="side-widget tip-widget">
-          <div class="tip-star"><i data-lucide="star"></i></div>
-          <p th:text="#{lobby.tip.text}">Train, improve, reach new heights.</p>
-        </section>
-      </aside>
+        <section class="task-widget home-task" data-daily-task aria-labelledby="home-task-title"><div class="panel-title-row"><h2 id="home-task-title" th:text="#{lobby.task.title}">Daily task</h2><time data-today></time></div><a class="task-preview-link" th:href="@{/tasks(lang=${currentLocale})}" th:aria-label="#{lobby.task.cta}"><span class="mini-board-loading" data-task-preview-loading role="status" th:text="#{common.loading}">Loading…</span><div class="mini-board hidden" data-task-preview aria-hidden="true"></div></a><p class="inline-load-error task-preview-error hidden" data-task-preview-error role="status"><span th:text="#{common.loadFailed}">Could not load</span></p><p th:text="#{lobby.task.desc}">Find the best move</p><a class="btn btn-ghost btn-block" th:href="@{/tasks(lang=${currentLocale})}" th:text="#{lobby.task.cta}">Solve</a><button type="button" class="text-button hidden" data-daily-retry th:text="#{tasks.retry}">Retry</button></section>
+        <section class="home-progress hidden" data-personal-metrics aria-labelledby="home-progress-title"><div class="panel-title-row"><h2 id="home-progress-title" th:text="#{lobby.stats.title}">Your stats</h2><a th:href="@{/rating(lang=${currentLocale})}" th:text="#{lobby.rating.more}">Details</a></div><dl><div><dt th:text="#{rating.totalGames}">Completed games</dt><dd data-personal-games>0</dd></div><div><dt th:text="#{lobby.stats.wins}">Wins</dt><dd data-personal-wins>0</dd></div><div><dt th:text="#{lobby.stats.losses}">Losses</dt><dd data-personal-losses>0</dd></div><div><dt th:text="#{lobby.stats.draws}">Draws</dt><dd data-personal-draws>0</dd></div><div data-personal-rate-row class="hidden"><dt th:text="#{lobby.stats.winRate}">Win rate</dt><dd data-personal-rate></dd></div></dl><p class="home-progress-empty hidden" data-personal-empty><span th:text="#{rating.empty}">Finish your first game to see your win rate.</span> <a th:href="@{/play(lang=${currentLocale})}" th:text="#{nav.play}">Play</a></p></section>
+        <section class="recent-panel home-recent hidden" aria-labelledby="recent-title" data-recent-games-box aria-busy="false"><div class="panel-title-row"><h2 id="recent-title" th:text="#{lobby.recent.title}">Recent games</h2><a th:href="@{/history(lang=${currentLocale})}"><span th:text="#{lobby.recent.all}">All games</span><i aria-hidden="true" data-lucide="arrow-right"></i></a></div><p class="lobby-loading hidden" data-recent-games-loading role="status" th:text="#{common.loading}">Loading…</p><div data-recent-games-list></div><div class="recent-empty hidden" data-recent-empty><strong th:text="#{lobby.recent.empty}">No games yet.</strong><p th:text="#{lobby.recent.emptyHint}">Your completed games will appear here.</p><a class="text-link" data-auth="guest" th:href="@{/login(lang=${currentLocale})}" th:text="#{redesign.history.future}">Log in to save your next games.</a></div><div class="inline-load-error hidden" data-recent-games-error role="status"><span th:text="#{common.loadFailed}">Could not load</span><button type="button" class="text-button" data-recent-games-retry th:text="#{tasks.retry}">Retry</button></div></section>
     </div>
   </main>
 </div>
-
+<div class="modal-backdrop hidden" data-end-modal><div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="end-title" aria-describedby="end-description"><h2 id="end-title" data-end-title></h2><p id="end-description" data-end-description></p><p class="form-status" data-end-error role="status"></p><div class="actions-row"><button type="button" class="btn btn-ghost" data-cancel-end th:text="#{common.cancel}">Cancel</button><button type="button" class="btn btn-danger" data-confirm-end></button></div></div></div>
 <div id="toast-root" aria-live="polite"></div>
 <div th:replace="~{fragments/assistant :: widget}"></div>
 </body>

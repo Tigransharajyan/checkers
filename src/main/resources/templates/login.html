@@ -5,41 +5,40 @@
   <script th:src="@{/js/auth.js}" defer></script>
 </head>
 <body class="auth-page">
-  <div class="auth-board-backdrop" aria-hidden="true"></div>
-
-  <div class="auth-top-lang" role="group" th:aria-label="#{lang.label}">
-    <div class="lang-switch" th:aria-label="#{lang.label}">
+  <header class="auth-header">
+    <a class="auth-brand" th:href="@{/home(lang=${currentLocale})}"><span class="logo-mark" aria-hidden="true"><i></i><i></i></span><span th:text="#{app.title}">Checkers Online</span></a>
+    <div class="lang-switch" role="group" th:aria-label="#{lang.label}">
       <a data-lang="en" hreflang="en" lang="en" th:href="${languageLinks.en}" th:text="#{lang.en}">EN</a>
       <a data-lang="ru" hreflang="ru" lang="ru" th:href="${languageLinks.ru}" th:text="#{lang.ru}">RU</a>
       <a data-lang="hy" hreflang="hy" lang="hy" th:href="${languageLinks.hy}" th:text="#{lang.hy}">HY</a>
     </div>
-  </div>
+  </header>
 
-  <div class="auth-card">
-    <div class="auth-mark" aria-hidden="true"><i></i><i></i></div>
+  <main class="auth-card" id="main-content" tabindex="-1">
     <h1 th:text="#{auth.login.title}">Log in</h1>
-    <p class="lead" th:text="#{app.tagline}">Play online</p>
+    <p class="lead" th:text="#{redesign.auth.loginHint}">Save your next games.</p>
     <form data-auth-form="login" novalidate>
+      <p class="form-status" data-form-status role="status"></p>
       <div class="field">
         <label for="usernameOrEmail" th:text="#{auth.usernameOrEmail}">User</label>
-        <div class="auth-input-control"><i data-lucide="user-round"></i><input id="usernameOrEmail" name="usernameOrEmail" required autocomplete="username" th:placeholder="#{auth.usernameOrEmail}"/></div>
-        <span class="field-error" data-field-error="usernameOrEmail"></span>
+        <div class="auth-input-control"><i aria-hidden="true" data-lucide="user-round"></i><input id="usernameOrEmail" aria-describedby="usernameOrEmail-error" name="usernameOrEmail" required autocomplete="username" th:placeholder="#{auth.usernameOrEmail}"/></div>
+        <span class="field-error" id="usernameOrEmail-error" data-field-error="usernameOrEmail" aria-live="polite"></span>
       </div>
       <div class="field">
         <label for="password" th:text="#{auth.password}">Password</label>
-        <div class="auth-input-control"><i data-lucide="lock-keyhole"></i><input id="password" name="password" type="password" required autocomplete="current-password" th:placeholder="#{auth.password}"/></div>
-        <span class="field-error" data-field-error="password"></span>
+        <div class="auth-input-control"><i aria-hidden="true" data-lucide="lock-keyhole"></i><input id="password" aria-describedby="password-error" name="password" type="password" required autocomplete="current-password" th:placeholder="#{auth.password}"/></div>
+        <span class="field-error" id="password-error" data-field-error="password" aria-live="polite"></span>
       </div>
-      <button type="submit" class="btn btn-primary btn-block"><span th:text="#{auth.submitLogin}">Log in</span><i data-lucide="arrow-right"></i></button>
+      <button type="submit" class="btn btn-primary btn-block"><span th:text="#{auth.submitLogin}">Log in</span><i aria-hidden="true" data-lucide="arrow-right"></i></button>
       <button type="button" class="btn btn-ghost btn-block" data-guest-login th:text="#{auth.guest}">Guest</button>
       <p class="muted" th:text="#{auth.guestHint}">Hint</p>
     </form>
     <p class="auth-links">
       <span th:text="#{auth.noAccount}">No account?</span>
       <a th:href="@{/register(lang=${currentLocale})}" th:text="#{nav.register}">Sign up</a>
-      <a class="auth-home-link" th:href="@{/(lang=${currentLocale})}">&larr; <span th:text="#{nav.home}">Lobby</span></a>
+      <a class="auth-home-link" th:href="@{/home(lang=${currentLocale})}">&larr; <span th:text="#{nav.home}">Lobby</span></a>
     </p>
-  </div>
+  </main>
 
   <div id="toast-root" aria-live="polite"></div>
 </body>

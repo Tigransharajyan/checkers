@@ -1,15 +1,18 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const root = document.querySelector('[data-task-board]');
   const feedback = document.querySelector('[data-task-feedback]');
+  const announcement = document.querySelector('[data-task-announcement]');
   const instructions = document.querySelector('[data-task-instructions]');
   const reset = document.querySelector('[data-reset-task]');
   const retry = document.querySelector('[data-retry-task]');
+  const practice = document.querySelector('[data-task-practice]');
   let initial, current, board;
   let busy = true;
 
   function storageKey() { return 'checkers.dailyTask.v2.' + initial.id; }
   function show(message, ok) {
     feedback.textContent = message;
+    announcement.textContent = message;
     feedback.className = 'task-feedback ' + (ok ? 'ok' : 'bad');
   }
   function setBusy(value) {
@@ -19,10 +22,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function refreshText() {
     const solved = current.status === 'SOLVED';
-    instructions.textContent = solved ? Checkers.t('tasks.completed') : Checkers.t('tasks.goal', initial.maxPlayerMoves);
+    practice?.classList.toggle('btn-primary', solved);
+    practice?.classList.toggle('btn-ghost', !solved);
+    instructions.textContent = Checkers.t('tasks.instructions');
     document.querySelector('[data-task-progress]').textContent = Checkers.t('tasks.progress', current.movesPlayed, initial.maxPlayerMoves);
-    document.querySelector('[data-task-date]').textContent = new Intl.DateTimeFormat(Checkers.locale(), { day: 'numeric', month: 'long', timeZone: 'UTC' })
-      .format(new Date(initial.date + 'T00:00:00Z'));
+    document.querySelector('[data-task-date]').textContent = Checkers.formatTaskDate(initial.date);
     board.setLegal(solved ? [] : current.legalMoves);
     if (solved) show(Checkers.t('tasks.correct'), true);
   }
@@ -43,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         for (let index = 0; index < response.events.length; index++) {
           const event = response.events[index];
-          if (index > 0) instructions.textContent = Checkers.t('tasks.defending');
+          if (index > 0) show(Checkers.t('tasks.defending'), true);
           await board.setBoard(event.boardState, { path: event.path, from: event.path[0], to: event.path.at(-1) });
           Checkers.Sound.play(event.capturedSquares.length ? 'capture' : 'move');
         }
@@ -51,6 +55,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       current = response;
       save();
       refreshText();
+      if (response.status === 'ACTIVE') {
+        const notation = event => event ? event.path.join(event.capturedSquares.length ? ':' : '–') : '—';
+        show(Checkers.t('redesign.tasks.accepted', notation(response.events[0]), notation(response.events[1]), Checkers.t('tasks.progress', response.movesPlayed, initial.maxPlayerMoves)), true);
+      }
     } catch (error) {
       board.cancelPendingMove();
       show(Checkers.apiErrorMessage(error), false);
@@ -80,6 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       setBusy(false);
     } catch (_) {
       instructions.textContent = Checkers.t('common.loadFailed');
+      show(Checkers.t('common.loadFailed'), false);
       retry.classList.remove('hidden');
     }
   }

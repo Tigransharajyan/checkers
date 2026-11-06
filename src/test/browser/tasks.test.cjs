@@ -24,6 +24,11 @@ test(
         "initial",
         await p.locator("[data-task-instructions]").innerText(),
       );
+      assert.equal(
+        await p.locator("[data-task-instructions]").innerText(),
+        await p.evaluate(() => Checkers.t("tasks.instructions")),
+        "loading copy should be replaced with the actual puzzle instruction",
+      );
       const initial = await p.evaluate(() => Checkers.DailyTask.load());
       let current = initial;
       let wrong;

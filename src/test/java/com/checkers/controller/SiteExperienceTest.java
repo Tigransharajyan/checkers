@@ -39,12 +39,12 @@ class SiteExperienceTest {
     @Test
     void rendersEveryScreenInAllThreeLanguages() throws Exception {
         for (String lang : new String[]{"en", "ru", "hy"}) {
-            for (String path : new String[]{"/", "/play", "/play?id=1", "/tasks", "/rating", "/history", "/faq", "/login", "/register"}) {
+            for (String path : new String[]{"/", "/home", "/play", "/play?id=1", "/tasks", "/rating", "/history", "/faq", "/login", "/register"}) {
                 mvc.perform(get(path).param("lang", lang))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("lang=\"" + lang + "\"")))
                         .andExpect(content().string(not(containsString("??"))))
-                        .andExpect(content().string(containsString("/css/theme.css")));
+                        .andExpect(content().string(containsString("/css/app.css")));
             }
         }
     }

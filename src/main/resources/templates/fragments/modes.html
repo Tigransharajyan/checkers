@@ -1,0 +1,42 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="selector(taskLink)">
+  <div class="mode-selector">
+    <div class="mode-strip" role="group" th:aria-label="#{lobby.modes.title}">
+      <section class="mode-tile" id="mode-random" tabindex="-1" aria-labelledby="online-mode-title">
+        <button type="button" class="mode-card" data-find-random>
+          <img class="mode-card-icon" th:src="@{/images/modes/online.svg}" width="48" height="48" alt=""/>
+          <span class="mode-card-copy"><span class="mode-card-title" id="online-mode-title" th:text="#{lobby.mode.random.title}">Play Online</span><span class="mode-card-description" th:text="#{lobby.mode.random.desc}">Find an opponent for a game of checkers</span></span>
+        </button>
+        <div class="mm-search-box hidden" data-mm-search-state>
+          <span class="spinner" aria-hidden="true"></span><span data-mm-status role="status" th:text="#{lobby.matchmaking.queued}">Searching…</span>
+          <button type="button" class="btn btn-ghost btn-sm" data-cancel-random th:text="#{lobby.mode.random.cancel}">Cancel</button>
+        </div>
+      </section>
+      <section class="mode-tile" id="mode-bot" tabindex="-1" aria-labelledby="bot-mode-title">
+        <button type="button" class="mode-card" data-start-bot>
+          <img class="mode-card-icon" th:src="@{/images/modes/bot.svg}" width="48" height="48" alt=""/>
+          <span class="mode-card-copy"><span class="mode-card-title" id="bot-mode-title" th:text="#{lobby.mode.bot.title}">Play Bots</span><span class="mode-card-description" th:text="#{lobby.mode.bot.desc}">Challenge a bot from Easy to Hard</span></span>
+        </button>
+        <div class="bot-level"><label for="bot-difficulty" th:text="#{lobby.difficulty}">Difficulty</label><select id="bot-difficulty" data-bot-diff class="difficulty-select"><option value="EASY" th:text="#{lobby.difficulty.EASY}">Easy</option><option value="MEDIUM" selected th:text="#{lobby.difficulty.MEDIUM}">Medium</option><option value="HARD" th:text="#{lobby.difficulty.HARD}">Hard</option></select></div>
+      </section>
+      <section class="mode-tile" id="mode-friend" tabindex="-1" aria-labelledby="friend-mode-title">
+        <button type="button" class="mode-card" data-create-friend>
+          <img class="mode-card-icon" th:src="@{/images/modes/friend.svg}" width="48" height="48" alt=""/>
+          <span class="mode-card-copy"><span class="mode-card-title" id="friend-mode-title" th:text="#{lobby.mode.friend.title}">Play a Friend</span><span class="mode-card-description" th:text="#{lobby.mode.friend.desc}">Invite a friend to a game of checkers</span></span>
+        </button>
+      </section>
+      <a class="mode-card" th:href="@{/tasks(lang=${currentLocale})}"><img class="mode-card-icon" th:src="@{/images/modes/puzzle.svg}" width="48" height="48" alt=""/><span class="mode-card-copy"><span class="mode-card-title" th:text="#{lobby.task.title}">Daily Puzzle</span><span class="mode-card-description" th:text="#{lobby.task.desc}">Find the best move</span></span></a>
+      <a class="mode-card" th:href="@{/faq(lang=${currentLocale})}"><img class="mode-card-icon" th:src="@{/images/modes/learn.svg}" width="48" height="48" alt=""/><span class="mode-card-copy"><span class="mode-card-title" th:text="#{lobby.mode.learn.title}">Learn Checkers</span><span class="mode-card-description" th:text="#{lobby.mode.learn.desc}">Rules, piece moves, and strategy</span></span></a>
+    </div>
+    <div class="mode-links"><a th:href="@{/history(lang=${currentLocale})}"><img th:src="@{/images/modes/history.svg}" width="20" height="20" alt=""/><span th:text="#{nav.history}">History</span></a><a th:href="@{/rating(lang=${currentLocale})}"><img th:src="@{/images/modes/rating.svg}" width="20" height="20" alt=""/><span th:text="#{nav.rating}">Progress</span></a></div>
+    <div class="invite-box hidden" data-invite-box role="region" aria-labelledby="invite-title" tabindex="-1">
+      <strong id="invite-title" th:text="#{lobby.invite.link}">Invitation link</strong><code data-invite-link></code>
+      <div class="actions-row"><button type="button" class="btn btn-ghost" data-copy-invite><i aria-hidden="true" data-lucide="copy"></i><span th:text="#{common.copy}">Copy</span></button><button type="button" class="btn btn-primary" data-open-invite-game th:text="#{nav.play}">Play</button></div>
+    </div>
+    <form class="join-code-row" data-join-form novalidate>
+      <div class="join-code-copy"><label for="invite-code" th:text="#{lobby.invite.code}">Invitation code</label><p id="invite-hint" th:text="#{lobby.invite.hint}">Have an invitation? Join your friend.</p></div>
+      <input id="invite-code" type="text" data-join-code maxlength="16" autocomplete="off" aria-describedby="invite-hint invite-error" th:placeholder="#{lobby.mode.friend.codePlaceholder}"/>
+      <button type="submit" class="btn btn-ghost" data-join-friend th:text="#{lobby.mode.friend.join}">Join</button>
+      <p id="invite-error" class="field-error" data-join-error role="status"></p>
+    </form>
+  </div>
+</th:block>

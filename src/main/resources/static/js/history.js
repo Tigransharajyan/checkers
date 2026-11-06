@@ -4,6 +4,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const guest = document.querySelector('[data-history-guest]');
   const tbody = document.querySelector('[data-history-body]');
 
+  const status = document.querySelector('[data-history-status]');
+  const retry = document.querySelector('[data-history-retry]');
+  const scrollHint = document.querySelector('#history-scroll-hint');
+  const updateOverflow = () => {
+    const overflow = !tableWrap.classList.contains('hidden') && tableWrap.scrollWidth > tableWrap.clientWidth;
+    scrollHint.classList.toggle('hidden', !overflow);
+    tableWrap.tabIndex = overflow ? 0 : -1;
+  };
+  window.addEventListener('resize', updateOverflow);
+  retry?.addEventListener('click', () => loadHistory());
   let cachedItems = null;
 
   function renderRows(items, user) {
@@ -28,14 +38,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultBadge = `<span class="res-badge res-draw">${Checkers.t('play.result.draw')}</span>`;
       }
 
+      const dateValue = g.finishedAt || g.startedAt || g.createdAt;
+      const date = dateValue ? new Date(dateValue) : null;
+      const validDate = date && !Number.isNaN(date.valueOf());
+      const dateText = validDate
+        ? new Intl.DateTimeFormat(Checkers.locale(), { year: 'numeric', month: 'short', day: 'numeric' }).format(date)
+        : '—';
       tr.innerHTML = `
-        <td><span class="mode-badge">${Checkers.t('mode.' + g.mode)}</span></td>
-        <td style="font-weight:var(--fw-medium)">${Checkers.escapeHtml(vs)}</td>
-        <td><strong>${Checkers.escapeHtml(winner)}</strong></td>
-        <td>${resultBadge || (reason === reasonKey ? g.finishReason : reason)}</td>
-        <td>
+        <td data-label="${Checkers.t('history.date')}"><time${validDate ? ` datetime="${date.toISOString()}"` : ''}>${Checkers.escapeHtml(dateText)}</time></td>
+        <td data-label="${Checkers.t('history.mode')}"><span class="mode-badge">${Checkers.t('mode.' + g.mode)}</span></td>
+        <td data-label="${Checkers.t('history.players')}" class="history-players">${Checkers.escapeHtml(vs)}</td>
+        <td data-label="${Checkers.t('history.winner')}"><strong>${Checkers.escapeHtml(winner)}</strong></td>
+        <td data-label="${Checkers.t('history.result')}">${resultBadge || (reason === reasonKey ? g.finishReason : reason)}</td>
+        <td data-label="${Checkers.t('history.open')}">
           <a class="btn btn-ghost btn-sm" href="/play?id=${g.id}&lang=${Checkers.locale()}">
-            <i data-lucide="eye"></i>
+            <i data-lucide="eye" aria-hidden="true"></i>
             <span>${Checkers.t('history.open')}</span>
           </a>
         </td>
@@ -49,6 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function loadHistory() {
     const user = Checkers.Auth.user();
+    status.textContent = ''; retry.classList.add('hidden');
     if (!user || user.guest) {
       guest?.classList.remove('hidden');
       tableWrap?.classList.add('hidden');
@@ -56,11 +74,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    status.textContent = Checkers.t('common.loading');
     try {
       if (!cachedItems) {
         const page = await Checkers.api('/api/games/history?size=30');
         cachedItems = page.content || [];
       }
+      status.textContent = '';
       if (!cachedItems.length) {
         empty?.classList.remove('hidden');
         tableWrap?.classList.add('hidden');
@@ -69,8 +89,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       empty?.classList.add('hidden');
       tableWrap?.classList.remove('hidden');
       renderRows(cachedItems, user);
+      updateOverflow();
     } catch (e) {
-      Checkers.toast(Checkers.apiErrorMessage(e), 'error');
+      status.textContent = Checkers.apiErrorMessage(e);
+      retry.classList.remove('hidden');
+      tableWrap.classList.add('hidden');
     }
   }
 

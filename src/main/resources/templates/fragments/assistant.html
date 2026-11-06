@@ -1,9 +1,9 @@
 <div class="assistant" xmlns:th="http://www.thymeleaf.org" th:fragment="widget">
-  <div class="assistant-panel" data-assistant-panel>
+  <div class="assistant-panel" id="help-panel" data-assistant-panel role="dialog" aria-labelledby="help-title">
     <div class="assistant-head">
-      <span th:text="#{assistant.title}">AI Assistant</span>
+      <span id="help-title" th:text="#{assistant.title}">AI Assistant</span>
       <button type="button" class="icon-btn" data-assistant-close th:aria-label="#{assistant.close}">
-        <i data-lucide="x"></i>
+        <i aria-hidden="true" data-lucide="x"></i>
       </button>
     </div>
     <div class="assistant-body">
@@ -26,16 +26,17 @@
                 th:data-chip="#{assistant.quick.matchmaking.question}"
                 th:text="#{assistant.quick.matchmaking.label}">Match?</button>
       </div>
-      <div class="assistant-log" data-assistant-log></div>
+      <div class="assistant-log" data-assistant-log role="log" aria-live="polite" th:aria-label="#{assistant.title}"></div>
       <form class="assistant-form" data-assistant-form>
-        <input type="text" data-assistant-input maxlength="500" th:placeholder="#{assistant.placeholder}" autocomplete="off"/>
+        <label for="help-question" th:text="#{redesign.assistant.question}">Your question</label>
+        <input id="help-question" type="text" data-assistant-input maxlength="500" th:placeholder="#{assistant.placeholder}" autocomplete="off"/>
         <button type="submit" class="btn btn-primary btn-sm" data-assistant-send th:aria-label="#{assistant.send}">
-          <i data-lucide="send"></i>
+          <i aria-hidden="true" data-lucide="send"></i>
         </button>
       </form>
     </div>
   </div>
-  <button type="button" class="assistant-toggle" data-assistant-toggle th:aria-label="#{assistant.open}">
-    <i data-lucide="message-circle"></i>
+  <button type="button" class="assistant-toggle" data-assistant-toggle aria-expanded="false" aria-controls="help-panel" th:aria-label="#{assistant.open}">
+    <i aria-hidden="true" data-lucide="help-circle"></i><span th:text="#{redesign.help}">Help with the game</span>
   </button>
 </div>

@@ -12,38 +12,33 @@
 <body class="game-page">
 <div class="app-shell game-shell">
   <div th:replace="~{fragments/sidebar :: sidebar('play')}"></div>
-  <div th:replace="~{fragments/sidebar :: mobile('play')}"></div>
+  <div class="sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
 
-  <main class="content game-content">
+  <header class="game-topbar">
+    <button type="button" class="icon-btn" data-sidebar-toggle aria-controls="main-sidebar" aria-expanded="false" th:aria-label="#{nav.menu}"><i aria-hidden="true" data-lucide="menu"></i></button>
+    <a class="game-topbar-brand" th:href="@{/home(lang=${currentLocale})}"><span class="logo-mark" aria-hidden="true"><i></i><i></i></span><span th:text="#{app.title}">Checkers</span></a>
+    <a class="game-topbar-exit" th:href="@{/home(lang=${currentLocale})}"><i aria-hidden="true" data-lucide="arrow-left"></i><span th:text="#{play.backLobby}">Back to lobby</span></a>
+  </header>
+
+  <main class="content game-content" id="main-content" tabindex="-1">
     <div class="play-layout">
-      <!-- 8x8 Board Column -->
-      <div class="board-column">
-        <div class="board-frame">
-          <div class="rank-labels" data-rank-labels>
-            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
-          </div>
-          <div class="board-wrap">
-            <div class="board" data-board></div>
-          </div>
-          <div class="file-labels" data-file-labels>
-            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Side Control Panel -->
-      <aside class="side-panel">
+      <div class="game-context">
+        <h1 class="sr-only" th:text="#{play.title}">Checkers game</h1>
         <div class="side-panel-header">
           <div class="game-badge-wrap">
-            <span class="game-mode-indicator"><i data-lucide="swords"></i></span>
+            <span class="game-mode-indicator"><i aria-hidden="true" data-lucide="swords"></i></span>
             <span class="game-mode-text" th:text="#{play.title}">Game</span>
           </div>
-          <a class="btn btn-ghost btn-sm" th:href="@{/(lang=${currentLocale})}">
-            <i data-lucide="arrow-left"></i>
-            <span th:text="#{play.backLobby}">Lobby</span>
-          </a>
         </div>
 
+        <!-- Status Banner -->
+        <div class="status-banner" data-game-status role="status" th:text="#{common.loading}">Loading</div>
+        <p class="sr-only" data-move-announcement role="status" aria-live="polite" aria-atomic="true"></p>
+
+      </div>
+
+      <!-- 8x8 Board Column -->
+      <div class="board-column">
         <!-- Opponent Card -->
         <div class="player-card" data-opp-card>
           <div class="avatar" data-opp-avatar aria-hidden="true">?</div>
@@ -53,9 +48,18 @@
           </div>
         </div>
 
-        <!-- Status Banner -->
-        <div class="status-banner" data-game-status th:text="#{common.loading}">Loading</div>
 
+        <div class="board-frame">
+          <div class="rank-labels" data-rank-labels>
+            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+          </div>
+          <div class="board-wrap">
+            <div class="board" data-board aria-describedby="board-instructions"></div>
+          </div>
+          <div class="file-labels" data-file-labels>
+            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+          </div>
+        </div>
         <!-- Your Player Card -->
         <div class="player-card" data-you-card>
           <div class="avatar you" data-you-avatar aria-hidden="true">?</div>
@@ -65,14 +69,19 @@
           </div>
         </div>
 
+        <p class="board-instructions" id="board-instructions" th:text="#{redesign.board.keyboard}">Use the arrow keys and Enter to move.</p>
+      </div>
+
+      <!-- Side Control Panel -->
+      <aside class="side-panel">
         <!-- Action Buttons -->
         <div class="actions-row game-actions-row">
-          <button type="button" class="btn btn-danger" data-resign-btn>
-            <i data-lucide="flag"></i>
+          <button type="button" class="btn btn-danger-quiet" data-resign-btn>
+            <i aria-hidden="true" data-lucide="flag"></i>
             <span th:text="#{play.resign}">Resign</span>
           </button>
           <button type="button" class="btn btn-ghost" data-draw-offer-btn>
-            <i data-lucide="handshake"></i>
+            <i aria-hidden="true" data-lucide="handshake"></i>
             <span th:text="#{play.drawOffer}">Draw</span>
           </button>
         </div>
@@ -89,8 +98,8 @@
 
         <!-- Move Log in 2-column notation -->
         <div class="move-log-panel">
-          <h3><i data-lucide="notebook-tabs"></i><span th:text="#{play.moveLog}">Notation</span></h3>
-          <div class="move-log" data-move-log></div>
+          <h3><span th:text="#{play.moveLog}">Notation</span></h3>
+          <div class="move-log" data-move-log></div><p class="move-log-empty" data-move-log-empty th:text="#{redesign.moves.empty}">Moves will appear here.</p>
         </div>
       </aside>
     </div>
@@ -99,8 +108,8 @@
 
 <!-- Resign Confirmation Modal -->
 <div class="modal-backdrop hidden" data-resign-modal>
-  <div class="modal-dialog">
-    <h2 th:text="#{play.resign}">Resign</h2>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="resign-title">
+    <h2 id="resign-title" th:text="#{play.resign}">Resign</h2>
     <p th:text="#{play.resignConfirm}">Are you sure you want to resign?</p>
     <div class="actions-row">
       <button type="button" class="btn btn-danger" data-confirm-resign th:text="#{play.resign}">Resign</button>
@@ -111,13 +120,13 @@
 
 <!-- Game Over Modal -->
 <div class="modal-backdrop hidden" data-gameover-modal>
-  <div class="modal-dialog">
-    <h2 data-gameover-title th:text="#{play.finished}">Game Over</h2>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
+    <h2 id="gameover-title" data-gameover-title th:text="#{play.finished}">Game Over</h2>
     <p data-gameover-reason></p>
     <div class="actions-row" style="margin-top:var(--s-8)">
       <button type="button" class="btn btn-secondary" data-dismiss-gameover th:text="#{play.reviewBoard}">Review Board</button>
       <button type="button" class="btn btn-primary" data-new-game-btn th:text="#{play.newGame}">New Game</button>
-      <a class="btn btn-ghost" th:href="@{/(lang=${currentLocale})}" th:text="#{play.backLobby}">Lobby</a>
+          <a class="btn btn-ghost" th:href="@{/home(lang=${currentLocale})}" th:text="#{play.backLobby}">Lobby</a>
     </div>
   </div>
 </div>

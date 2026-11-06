@@ -1,0 +1,266 @@
+{
+  "generatedAt": "2026-11-06T19:55:57.633Z",
+  "note": "Full-page captures from Chromium. Exact browser viewport is recorded; the document can exceed that height.",
+  "screenshots": [
+    {
+      "file": "faq-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/faq",
+      "locale": "ru",
+      "state": "FAQ"
+    },
+    {
+      "file": "game-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Active bot game"
+    },
+    {
+      "file": "game-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Active bot game"
+    },
+    {
+      "file": "game-844x390.png",
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Active bot game"
+    },
+    {
+      "file": "history-guest-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/history",
+      "locale": "ru",
+      "state": "Guest history"
+    },
+    {
+      "file": "history-populated-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/history",
+      "locale": "ru",
+      "state": "History after one resigned game"
+    },
+    {
+      "file": "home-active-zero-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/home",
+      "locale": "ru",
+      "state": "Registered Home: active bot game, zero record"
+    },
+    {
+      "file": "home-active-zero-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/home",
+      "locale": "ru",
+      "state": "Registered Home: active bot game, zero record; mobile source order"
+    },
+    {
+      "file": "home-guest-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/home",
+      "locale": "ru",
+      "state": "Guest Home"
+    },
+    {
+      "file": "home-guest-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/home",
+      "locale": "ru",
+      "state": "Guest Home"
+    },
+    {
+      "file": "home-session-error-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/home",
+      "locale": "ru",
+      "state": "Registered Home: transient account check failure"
+    },
+    {
+      "file": "login-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/login",
+      "locale": "ru",
+      "state": "Login form"
+    },
+    {
+      "file": "play-1179x1000.png",
+      "viewport": {
+        "width": 1179,
+        "height": 1000
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Mode selection page"
+    },
+    {
+      "file": "play-1200x1000.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1000
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Mode selection page"
+    },
+    {
+      "file": "play-1280x720.png",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Mode selection page"
+    },
+    {
+      "file": "play-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Mode selection page"
+    },
+    {
+      "file": "play-360x640.png",
+      "viewport": {
+        "width": 360,
+        "height": 640
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Mode selection page"
+    },
+    {
+      "file": "play-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Mode selection page"
+    },
+    {
+      "file": "play-768x1024.png",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "route": "/play",
+      "locale": "ru",
+      "state": "Mode selection page"
+    },
+    {
+      "file": "progress-guest-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/rating",
+      "locale": "ru",
+      "state": "Guest progress"
+    },
+    {
+      "file": "progress-guest-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/rating",
+      "locale": "ru",
+      "state": "Guest progress"
+    },
+    {
+      "file": "progress-populated-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/rating",
+      "locale": "ru",
+      "state": "Progress after one resigned game"
+    },
+    {
+      "file": "register-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/register",
+      "locale": "ru",
+      "state": "Registration form"
+    },
+    {
+      "file": "tasks-initial-1440x1000.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "route": "/tasks",
+      "locale": "ru",
+      "state": "Daily task with loaded board, initial position"
+    },
+    {
+      "file": "tasks-initial-360x640.png",
+      "viewport": {
+        "width": 360,
+        "height": 640
+      },
+      "route": "/tasks",
+      "locale": "ru",
+      "state": "Daily task with loaded board, initial position"
+    },
+    {
+      "file": "tasks-initial-390x844.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "/tasks",
+      "locale": "ru",
+      "state": "Daily task with loaded board, initial position"
+    }
+  ]
+}
