@@ -50,7 +50,10 @@ class AssistantExperienceTest {
         mvc.perform(post("/api/assistant/chat").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"locale\":\"ru\",\"message\":\"я хочу удалить свой аккаунт на сайте\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.matched").value(true))
-                .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.containsString("такой функции нет")))
+                .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.containsString("Сейчас такой функции нет")))
+                .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.containsString("https://t.me/shaatimi")))
+                .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.containsString("shatimi@proton.me")))
+                .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("API"))))
                 .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("Уточните"))));
     }

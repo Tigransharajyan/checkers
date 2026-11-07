@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
  */
 @Component
 public class SiteHelpKnowledge {
+    /** Public support channels supplied by the site owner; never inferred from a model response. */
+    private static final String OWNER_CONTACTS = "Telegram: https://t.me/shaatimi\nEmail: shatimi@proton.me";
     private final FaqKnowledgeBase faq;
     private final Map<String, Map<String, String>> answers = new LinkedHashMap<>();
     private final List<TopicMatch> directMatches = new ArrayList<>();
@@ -56,7 +58,8 @@ public class SiteHelpKnowledge {
                     translations.put(locale, text
                             .replace("{reconnectSeconds}", String.valueOf(game.getReconnectTimeoutSeconds()))
                             .replace("{matchmakingSeconds}", String.valueOf(game.getMatchmakingTimeoutSeconds()))
-                            .replace("{drawMinimumMoves}", String.valueOf(game.getDrawOfferMinimumMoves())));
+                            .replace("{drawMinimumMoves}", String.valueOf(game.getDrawOfferMinimumMoves()))
+                            .replace("{ownerContacts}", OWNER_CONTACTS));
                 }
             }
             String rules = new ClassPathResource("assistant/system-prompt.txt")
@@ -119,11 +122,11 @@ public class SiteHelpKnowledge {
     public AssistantReply unavailable(String locale) {
         String language = locale(locale);
         String text = switch (language) {
-            case "ru" -> "Сейчас ИИ-помощник временно недоступен, а в локальной справке не нашёлся точный ответ. Попробуйте ещё раз немного позже. Это не означает, что ваш вопрос не относится к сайту.";
-            case "hy" -> "Այժմ ԱԻ օգնականը ժամանակավորապես հասանելի չէ, իսկ տեղային տեղեկատուում ճշգրիտ պատասխան չի գտնվել։ Մի փոքր ուշ կրկին փորձեք։ Սա չի նշանակում, որ ձեր հարցը կայքին չի վերաբերում։";
-            default -> "The AI assistant is temporarily unavailable and local help has no exact answer. Please try again shortly. This does not mean your question is unrelated to the site.";
+            case "ru" -> "Сейчас не удалось загрузить ответ. Попробуйте ещё раз через минуту или свяжитесь с владельцем сайта.";
+            case "hy" -> "Այժմ պատասխանը չհաջողվեց բեռնել։ Մեկ րոպեից կրկին փորձեք կամ կապվեք կայքի սեփականատիրոջ հետ։";
+            default -> "The answer could not be loaded just now. Try again in a minute or contact the site owner.";
         };
-        return new AssistantReply(text, false, "/faq?lang=" + language);
+        return new AssistantReply(text + "\n\n" + OWNER_CONTACTS, false, "/faq?lang=" + language);
     }
 
     /**
@@ -134,8 +137,12 @@ public class SiteHelpKnowledge {
         String language = locale(locale);
         if (topics == null || topics.isEmpty() || topics.size() > 3
                 || topics.stream().anyMatch(id -> !answers.containsKey(id))) return clarify(language);
-        String text = String.join("\n\n", topics.stream().distinct()
-                .map(id -> answers.get(id).get(language)).toList());
+        List<String> sections = topics.stream().distinct().map(id -> answers.get(id).get(language)).toList();
+        boolean contacts = sections.stream().anyMatch(section -> section.contains(OWNER_CONTACTS));
+        // Several related topics may share an escalation path; show the public contacts only once.
+        String text = String.join("\n\n", sections.stream()
+                .map(section -> section.replace("\n\n" + OWNER_CONTACTS, "")).toList());
+        if (contacts) text += "\n\n" + OWNER_CONTACTS;
         return new AssistantReply(text, true, "/faq?lang=" + language);
     }
 

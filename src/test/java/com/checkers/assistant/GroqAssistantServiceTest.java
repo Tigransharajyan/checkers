@@ -69,11 +69,11 @@ class GroqAssistantServiceTest {
                 "ջնջել իմ հաշիվը")) {
             AssistantReply reply = service.reply("ru", message);
             assertEquals(knowledge.answer("ru", List.of("account_delete")), reply, message);
-            assertTrue(reply.answer().contains("такой функции нет"));
+            assertTrue(reply.answer().contains("Сейчас такой функции нет"));
             assertFalse(reply.answer().contains("Уточните"));
         }
         assertTrue(service.reply("en", "delete my account").answer().contains("not currently available"));
-        assertTrue(service.reply("hy", "ջնջել իմ հաշիվը").answer().contains("ջնջել հնարավոր չէ"));
+        assertTrue(service.reply("hy", "ջնջել իմ հաշիվը").answer().contains("նման գործառույթ չկա"));
         verifyNoInteractions(client);
     }
 
@@ -144,5 +144,38 @@ class GroqAssistantServiceTest {
     void blankQuestionDoesNotContactProvider() {
         assertEquals(knowledge.clarify("en"), service.reply("en", " "));
         verifyNoInteractions(client);
+    }
+
+    /** Owner-provided support channels replace speculative disclaimers in all supported languages. */
+    @Test
+    void givesOwnerContactsWithDirectHelpfulWording() {
+        for (String locale : List.of("en", "ru", "hy")) {
+            for (String topic : List.of("account_delete", "password_reset", "profile_edit", "history_clear",
+                    "report_player", "feature_availability", "support_limits", "owner_contact")) {
+                String answer = knowledge.answer(locale, List.of(topic)).answer();
+                assertTrue(answer.contains("https://t.me/shaatimi"), topic);
+                assertTrue(answer.contains("shatimi@proton.me"), topic);
+                assertFalse(answer.contains("{ownerContacts}"), topic);
+                assertFalse(answer.contains("не могу"), topic);
+                assertFalse(answer.contains("cannot"), topic);
+                assertFalse(answer.contains("knowledge base"), topic);
+            }
+        }
+        String deletion = service.reply("ru", "Хочу удалить аккаунт").answer();
+        assertEquals("Сейчас такой функции нет. Если вы хотите удалить свой аккаунт, свяжитесь с владельцем сайта.\n\n"
+                + "Telegram: https://t.me/shaatimi\nEmail: shatimi@proton.me", deletion);
+        assertEquals(knowledge.answer("ru", List.of("owner_contact")),
+                service.reply("ru", "Как связаться с владельцем сайта?"));
+        verifyNoInteractions(client);
+    }
+
+    /** A multi-topic answer provides one clear contact block instead of repeating it after each topic. */
+    @Test
+    void combinesSupportTopicsWithoutDuplicatingContacts() {
+        String answer = knowledge.answer("ru", List.of("account_delete", "profile_edit", "owner_contact")).answer();
+        assertEquals(1, answer.split("https://t.me/shaatimi", -1).length - 1);
+        assertEquals(1, answer.split("shatimi@proton.me", -1).length - 1);
+        assertTrue(knowledge.systemPrompt().contains("SITE ASSISTANT VOICE"));
+        assertTrue(knowledge.systemPrompt().contains("They are approved site information"));
     }
 }

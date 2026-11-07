@@ -41,6 +41,26 @@ Checkers.initAssistant = function () {
     } catch (_) {}
   }
 
+  /** Links only the owner's two approved public contacts; all other content stays plain text. */
+  function renderAnswerText(body, text, role) {
+    if (role === 'user') { body.textContent = text; return; }
+    const contacts = /https:\/\/t\.me\/shaatimi\b(?![\w/?#.-])|\bshatimi@proton\.me\b(?![\w.-])/g;
+    let cursor = 0;
+    for (const match of text.matchAll(contacts)) {
+      body.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+      const link = document.createElement('a');
+      link.textContent = match[0];
+      link.href = match[0].startsWith('https:') ? 'https://t.me/shaatimi' : 'mailto:shatimi@proton.me';
+      if (match[0].startsWith('https:')) {
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      }
+      body.appendChild(link);
+      cursor = match.index + match[0].length;
+    }
+    body.appendChild(document.createTextNode(text.slice(cursor)));
+  }
+
   function renderMessage(role, text) {
     const row = document.createElement('div');
     row.className = 'assistant-msg ' + role;
@@ -57,7 +77,7 @@ Checkers.initAssistant = function () {
     const who = document.createElement('strong');
     who.textContent = role === 'user' ? Checkers.t('assistant.you') : Checkers.t('assistant.bot');
     const body = document.createElement('p');
-    body.textContent = text;
+    renderAnswerText(body, text, role);
     content.append(who, body);
     row.appendChild(content);
     log.appendChild(row);

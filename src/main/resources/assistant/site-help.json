@@ -1,26 +1,26 @@
 {
   "history_clear": {
-    "en": "The site currently has no control to delete completed games, clear personal history or reset statistics. Ending an active game is different: it resigns a started game or cancels a waiting invitation, and does not erase recorded results. The assistant cannot remove records.",
-    "ru": "Сейчас на сайте нет функции удаления завершённых партий, очистки истории или сброса статистики. Завершение активной игры — другое действие: начатая партия считается сдачей, ожидающее приглашение отменяется. Записанные результаты при этом не стираются. Помощник не может удалить записи.",
-    "hy": "Կայքում այժմ չկա ավարտված խաղերը ջնջելու, անձնական պատմությունը մաքրելու կամ վիճակագրությունը զրոյացնելու գործառույթ։ Ընթացիկ խաղի ավարտը այլ գործողություն է․ սկսված խաղը հանձնվում է, սպասող հրավերը՝ չեղարկվում։ Արդյունքները չեն ջնջվում։ Օգնականը չի կարող հեռացնել գրառումները։",
+    "en": "Clearing game history or resetting statistics is not available on the site yet. For a request about your saved data, contact the site owner. Ending an active game does not erase its result.\n\n{ownerContacts}",
+    "ru": "Очистка истории и сброс статистики на сайте пока недоступны. Если нужно разобраться с сохранёнными данными, напишите владельцу сайта. Завершение активной партии не удаляет её результат.\n\n{ownerContacts}",
+    "hy": "Խաղերի պատմությունը մաքրելը և վիճակագրությունը զրոյացնելը դեռ հասանելի չեն։ Պահպանված տվյալների հարցով գրեք կայքի սեփականատիրոջը։ Ընթացիկ խաղն ավարտելը չի ջնջում դրա արդյունքը։\n\n{ownerContacts}",
     "directMatch": "(?s)(?=.*(?:удал|очист|сброс|обнул|стер|delete|clear|reset|erase|ջնջ|մաքր|զրոյ))(?=.*(?:истори|статист|результат|заверш[её]нн|сыгранн|history|statistic|completed game|results|պատմությ|վիճակագր|արդյունք)).*"
   },
   "account_delete": {
-    "en": "Account deletion is not currently available in the website interface or account API. There is no Delete account button, and I cannot delete an account through chat. Logging out only ends your session; it does not delete the account, games or statistics. I cannot promise deletion through a support address that the site does not publish.",
-    "ru": "Сейчас удалить аккаунт через сайт нельзя: такой функции нет ни в интерфейсе, ни в API аккаунта. Кнопки «Удалить аккаунт» нет, и я не могу выполнить удаление через чат. Выход из аккаунта только завершает сессию — аккаунт, партии и статистика остаются. Подтверждённого контакта для запроса удаления в справке сайта также нет.",
-    "hy": "Այժմ կայքի միջոցով հաշիվը ջնջել հնարավոր չէ․ այդ գործառույթը չկա ո՛չ միջերեսում, ո՛չ հաշվի API-ում։ «Ջնջել հաշիվը» կոճակ չկա, և ես չեմ կարող դա անել չաթով։ Հաշվից դուրս գալը միայն ավարտում է սեսիան․ հաշիվը, խաղերն ու վիճակագրությունը մնում են։ Կայքի տեղեկատուում ջնջման հարցման հաստատված կոնտակտ նույնպես նշված չէ։",
+    "en": "Account deletion is not currently available on the site. To request deletion of your account, contact the site owner.\n\n{ownerContacts}",
+    "ru": "Сейчас такой функции нет. Если вы хотите удалить свой аккаунт, свяжитесь с владельцем сайта.\n\n{ownerContacts}",
+    "hy": "Այժմ կայքում նման գործառույթ չկա։ Եթե ցանկանում եք ջնջել ձեր հաշիվը, կապվեք կայքի սեփականատիրոջ հետ։\n\n{ownerContacts}",
     "directMatch": "(?s)(?!.*(?:удал\\S*\\s+истори|delete\\s+(?:my\\s+)?history|clear\\s+(?:my\\s+)?history))(?=.*(?:удал|стереть|закрыть|убрать|снести|delete|remov|erase|close|deactivat|ջնջ|հեռաց|փակ))(?=.*(?:аккаунт|акк\\b|уч[её]т(?:н|к)|профил|account|profile|հաշիվ|հաշվ|պրոֆիլ)).*"
   },
   "password_reset": {
-    "en": "The site currently has no password-change, forgotten-password or email-recovery feature. There is no reset link I can send, and the assistant cannot recover or replace your password. If you know the password, sign in at /login with your username or email. Do not send your password or tokens in chat.",
-    "ru": "На сайте сейчас нет функции смены пароля, «Забыли пароль» или восстановления через email. Ссылку для сброса отправить нельзя, и помощник не может восстановить или заменить пароль. Если пароль известен, войдите на /login по имени пользователя или email. Не отправляйте пароль и токены в чат.",
-    "hy": "Կայքում այժմ չկա գաղտնաբառը փոխելու, «Մոռացել եմ գաղտնաբառը» կամ email-ով վերականգնելու գործառույթ։ Վերականգնման հղում ուղարկել հնարավոր չէ, և օգնականը չի կարող վերականգնել կամ փոխարինել գաղտնաբառը։ Եթե այն գիտեք, մուտք գործեք /login էջում՝ օգտանունով կամ email-ով։ Գաղտնաբառեր և թոքեններ մի ուղարկեք չաթում։",
+    "en": "Password changes and automatic recovery are not available on the site yet. If you forgot your password or need to change it, contact the site owner. Do not include your password in the message.\n\n{ownerContacts}",
+    "ru": "Смена пароля и автоматическое восстановление пока недоступны. Если вы забыли пароль или хотите его изменить, свяжитесь с владельцем сайта. Сам пароль в сообщении не указывайте.\n\n{ownerContacts}",
+    "hy": "Գաղտնաբառի փոփոխությունն ու ավտոմատ վերականգնումը դեռ հասանելի չեն։ Եթե մոռացել եք գաղտնաբառը կամ ցանկանում եք փոխել այն, կապվեք կայքի սեփականատիրոջ հետ։ Հաղորդագրության մեջ գաղտնաբառը մի նշեք։\n\n{ownerContacts}",
     "directMatch": "(?s)(?=.*(?:смен|помен|измен|забы|не\\s+помн|восстанов|сброс|узнать|forgot|reset|recover|change|lost|remember|մոռաց|վերականգ|փոխ))(?=.*(?:парол|password|գաղտնաբառ)).*"
   },
   "profile_edit": {
-    "en": "After registration the website does not currently offer changing your username or email, uploading an avatar, or editing a public profile. The supported profile preference is the interface language (EN/RU/HY). The assistant cannot change account data or open a nonexistent profile-settings screen.",
-    "ru": "После регистрации сайт пока не позволяет менять имя пользователя и email, загружать аватар или редактировать публичный профиль. Из настроек профиля поддерживается язык интерфейса — EN/RU/HY. Помощник не может изменить данные аккаунта или открыть несуществующий раздел настроек профиля.",
-    "hy": "Գրանցումից հետո կայքը դեռ չի թույլ տալիս փոխել օգտանունը կամ email-ը, վերբեռնել ավատար կամ խմբագրել հանրային պրոֆիլը։ Հաշվի աջակցվող նախընտրությունը միջերեսի լեզուն է՝ EN/RU/HY։ Օգնականը չի կարող փոխել հաշվի տվյալները կամ բացել գոյություն չունեցող պրոֆիլի կարգավորումների էջ։",
+    "en": "Changing your username, email or avatar is not available on the site yet. For an account-data request, contact the site owner. You can change the interface language using EN / RU / HY.\n\n{ownerContacts}",
+    "ru": "Изменить имя пользователя, email или аватар на сайте пока нельзя. По вопросам изменения данных аккаунта свяжитесь с владельцем сайта. Язык интерфейса можно переключить кнопками EN / RU / HY.\n\n{ownerContacts}",
+    "hy": "Կայքում դեռ հնարավոր չէ փոխել օգտանունը, email-ը կամ ավատարը։ Հաշվի տվյալների փոփոխության հարցով կապվեք կայքի սեփականատիրոջ հետ։ Միջերեսի լեզուն կարող եք փոխել EN / RU / HY կոճակներով։\n\n{ownerContacts}",
     "directMatch": "(?s)(?:.*(?:аватар|avatar|ավատար).*|(?s)(?=.*(?:смен|помен|измен|редакт|настройк|edit|change|setting|փոխ|խմբագր|կարգավոր))(?=.*(?:ник|логин|имя|почт|email|e-mail|профил|username|profile|nickname|օգտանուն|պրոֆիլ|էլեկտրոնային)).*)"
   },
   "undo_move": {
@@ -42,15 +42,15 @@
     "directMatch": "(?s)(?=.*(?:чат|написать|сообщени|список|chat|message|friend list|չաթ|հաղորդագր|ցանկ))(?=.*(?:соперник|игрок|друз|другу|opponent|player|friend|մրցակից|խաղացող|ընկեր)).*"
   },
   "report_player": {
-    "en": "There is currently no in-site report, block-player or moderation-request function. I cannot sanction a player or forward a complaint. You can resign or end the active game and start another; resigning a started game counts as a loss. No verified support contact is published in the assistant knowledge base.",
-    "ru": "На сайте сейчас нет функций жалобы, блокировки игрока или обращения к модератору. Я не могу наказать игрока или отправить жалобу. Можно завершить активную партию и начать другую; сдача начатой игры считается поражением. Подтверждённый контакт поддержки в базе помощника не указан.",
-    "hy": "Կայքում այժմ չկան բողոքարկման, խաղացողին արգելափակելու կամ մոդերատորին դիմելու գործառույթներ։ Ես չեմ կարող պատժել խաղացողին կամ փոխանցել բողոքը։ Կարող եք ավարտել ընթացիկ խաղը և սկսել ուրիշը․ սկսված խաղը հանձնելը պարտություն է։ Օգնականի բազայում աջակցության հաստատված կոնտակտ նշված չէ։",
+    "en": "To report a player, contact the site owner. Include the player name, game link and a short description of what happened.\n\n{ownerContacts}",
+    "ru": "Чтобы пожаловаться на игрока, напишите владельцу сайта. Укажите имя игрока, ссылку на партию и коротко опишите, что произошло.\n\n{ownerContacts}",
+    "hy": "Խաղացողի մասին բողոք ներկայացնելու համար գրեք կայքի սեփականատիրոջը։ Նշեք խաղացողի անունը, խաղի հղումը և կարճ նկարագրեք տեղի ունեցածը։\n\n{ownerContacts}",
     "directMatch": "пожалова|жалоб|модератор|заблокир.{0,15}(?:игрок|соперник)|report.{0,15}(?:player|opponent)|block.{0,15}(?:player|opponent)|բողոք|մոդերատոր"
   },
   "feature_availability": {
-    "en": "That is a valid question about this website. The available sections are Play, daily Tasks, History, personal Progress and Rules. My current site information does not confirm that the requested additional feature exists, so I cannot give you a working button or procedure for it. I also cannot enable it through chat.",
-    "ru": "Это вопрос по теме сайта. Здесь доступны игра, задачи дня, история, личный прогресс и правила. В текущей справке нет подтверждения, что запрошенная дополнительная функция реализована, поэтому я не могу указать работающую кнопку или порядок действий для неё. Включить такую функцию через чат я тоже не могу.",
-    "hy": "Սա կայքի մասին տեղին հարց է։ Հասանելի են խաղը, օրվա խնդիրները, պատմությունը, անձնական առաջընթացն ու կանոնները։ Իմ ընթացիկ տեղեկատուում հաստատված չէ, որ նշված լրացուցիչ գործառույթը իրականացված է, ուստի չեմ կարող տալ դրա աշխատող կոճակը կամ քայլերի հերթականությունը։ Չաթով այն միացնել նույնպես չեմ կարող։"
+    "en": "For this feature or a suggestion for the site, contact the owner. Describe what you would like to do so your request is clear.\n\n{ownerContacts}",
+    "ru": "По этой возможности или предложению для сайта свяжитесь с владельцем. Коротко опишите, что вы хотите сделать.\n\n{ownerContacts}",
+    "hy": "Այս հնարավորության կամ կայքի վերաբերյալ առաջարկի համար կապվեք սեփականատիրոջ հետ։ Կարճ նկարագրեք՝ ինչ եք ցանկանում անել։\n\n{ownerContacts}"
   },
   "welcome": {
     "en": "Hello! I help only with Checkers Online: starting games, invitations, accounts, Russian draughts rules, draws, premoves and daily puzzles. Ask a concrete question about this site.",
@@ -69,15 +69,15 @@
     "fallbackMatch": "регистр|созда.{0,20}(?:аккаунт|учетн)|зарег|sign.?up|register|create.{0,15}account|գրանց"
   },
   "login": {
-    "en": "Open /login and enter your username or email plus password. Email matching ignores letter case. If the saved session cannot be checked because of a temporary connection problem, use Retry. An expired or rejected session may require signing in again. The website currently has no password-reset or email-recovery screen.",
-    "ru": "Откройте /login и введите имя пользователя или email и пароль. Регистр букв email не важен. При временной ошибке проверки сохранённой сессии нажмите «Повторить». Если сессия истекла или отклонена, войдите заново. На сайте сейчас нет экрана сброса пароля или восстановления через email.",
-    "hy": "Բացեք /login և մուտքագրեք օգտանունը կամ email-ը և գաղտնաբառը։ Email-ի տառերի մեծությունն ու փոքրությունը չեն ազդում։ Պահպանված մուտքի ժամանակավոր ստուգման սխալի դեպքում սեղմեք «Կրկին»։ Ժամկետանց կամ մերժված սեսիայի դեպքում կրկին մուտք գործեք։ Կայքում այժմ չկա գաղտնաբառի վերականգնման կամ email-ով վերականգնման էջ։",
+    "en": "Open /login and enter your username or email and password. Email is case-insensitive. If you see a temporary connection error, press Retry. If you forgot the password, contact the site owner.\n\n{ownerContacts}",
+    "ru": "Откройте /login и введите имя пользователя или email и пароль. Регистр букв email не важен. При временной ошибке соединения нажмите «Повторить». Если забыли пароль, свяжитесь с владельцем сайта.\n\n{ownerContacts}",
+    "hy": "Բացեք /login և մուտքագրեք օգտանունը կամ email-ը և գաղտնաբառը։ Email-ի տառերի մեծությունն ու փոքրությունը նշանակություն չունի։ Կապի ժամանակավոր սխալի դեպքում սեղմեք «Կրկին»։ Եթե մոռացել եք գաղտնաբառը, կապվեք կայքի սեփականատիրոջ հետ։\n\n{ownerContacts}",
     "fallbackMatch": "войти|вход|не пускает|log.?in|sign.?in|մուտք"
   },
   "logout": {
-    "en": "Use Log out in the account navigation. The browser clears its saved tokens and the server revokes the supplied refresh token. Logging out does not delete the account or recorded results. A guest session does not provide password-based access for later recovery.",
-    "ru": "Нажмите «Выйти» в навигации аккаунта. Браузер удалит сохранённые токены, а сервер отзовёт refresh-токен. Выход не удаляет аккаунт и записанные результаты. У гостевой сессии нет пароля для последующего восстановления входа.",
-    "hy": "Հաշվի ընտրացանկում սեղմեք «Դուրս գալ»։ Բրաուզերը հեռացնում է պահպանված թոքենները, իսկ սերվերը չեղարկում է refresh թոքենը։ Ելքը չի ջնջում հաշիվը կամ գրանցված արդյունքները։ Հյուրի սեսիան հետագայում մուտքը վերականգնելու գաղտնաբառ չունի։",
+    "en": "Select Log out in the account menu. This ends your session; your account, games and results stay saved. Sign in again at /login to return to your account.",
+    "ru": "Нажмите «Выйти» в меню аккаунта. Сессия завершится, а аккаунт, партии и результаты сохранятся. Чтобы вернуться, войдите снова на /login.",
+    "hy": "Հաշվի ընտրացանկում սեղմեք «Դուրս գալ»։ Սեսիան կավարտվի, իսկ հաշիվը, խաղերն ու արդյունքները կպահպանվեն։ Վերադառնալու համար կրկին մուտք գործեք /login էջում։",
     "fallbackMatch": "выйти|выход|log.?out|sign.?out|դուրս գալ"
   },
   "invitations": {
@@ -92,9 +92,9 @@
     "hy": "Մրցակցի որոնման համար անհրաժեշտ է մեկ այլ իրական սպասող խաղացող․ բոտ ինքնաբերաբար չի փոխարինում նրան։ Կարող եք չեղարկել որոնումը կամ ընտրել բոտի ռեժիմը։ Կարգավորված սպասման ժամկետը {matchmakingSeconds} վայրկյան է։ Ռեժիմը փոխելիս նախ չեղարկվում է ընթացիկ որոնումը․ ձախողման դեպքում կրկին փորձեք։"
   },
   "bot_levels": {
-    "en": "Choose Easy, Medium or Hard before starting a bot game. The human plays White and moves first. The bot uses the same legal-move engine, including mandatory captures and draws. Its minimax search depths are 2, 4 and 6 plies; a complete multi-jump chain is one ply. Higher difficulty searches further but does not guarantee perfect play.",
-    "ru": "Перед началом партии с ботом выберите Easy, Medium или Hard. Человек играет белыми и ходит первым. Бот использует тот же движок правил, включая обязательные взятия и ничьи. Глубины поиска minimax — 2, 4 и 6 полуходов; вся серия взятий считается одним полуходом. Высокая сложность смотрит дальше, но не гарантирует идеальную игру.",
-    "hy": "Բոտի խաղից առաջ ընտրեք Easy, Medium կամ Hard։ Մարդը խաղում է սպիտակներով և սկսում է։ Բոտն օգտագործում է նույն կանոնների շարժիչը՝ պարտադիր հարվածներով և ոչ-ոքիով։ Minimax որոնման խորություններն են 2, 4 և 6 կիսաքայլ․ հարվածների ամբողջ շղթան մեկ կիսաքայլ է։ Բարձր բարդությունն ավելի հեռու է որոնում, բայց կատարյալ խաղ չի երաշխավորում։",
+    "en": "Choose Easy, Medium or Hard and start the game. You play White and move first. Easy is suited to getting started, Medium offers more resistance, and Hard searches further ahead. The rules are the same at every level.",
+    "ru": "Выберите Easy, Medium или Hard и начните партию. Вы играете белыми и ходите первым. Easy подойдёт для знакомства с игрой, Medium даст больше сопротивления, Hard просчитывает ходы глубже. Правила на всех уровнях одинаковые.",
+    "hy": "Ընտրեք Easy, Medium կամ Hard և սկսեք խաղը։ Դուք խաղում եք սպիտակներով և սկսում եք։ Easy-ը հարմար է խաղին ծանոթանալու համար, Medium-ը ավելի մեծ դիմադրություն է ցուցաբերում, Hard-ը քայլերն ավելի խորն է հաշվարկում։ Կանոնները բոլոր մակարդակներում նույնն են։",
     "fallbackMatch": "сложност|уровень.{0,12}бот|bot.{0,12}(?:level|difficult)|բարդությ"
   },
   "controls": {
@@ -125,15 +125,15 @@
     "fallbackMatch": "предлож.{0,12}нич|прин.{0,12}нич|offer.{0,12}draw|accept.{0,12}draw|առաջարկ.{0,12}ոչ"
   },
   "daily_puzzle": {
-    "en": "Tasks (/tasks) presents one shared puzzle per UTC day. Play White and find the winning plan within its move limit. The server checks every move and chooses Black's defense; a legal but incorrect plan is not accepted as a solution. Accepted progress is stored in this browser and revalidated after reload. Reset starts the puzzle again. Puzzle attempts do not count as ordinary completed games. The assistant cannot reveal a stored solution or inspect the current puzzle board.",
-    "ru": "В «Задачах» (/tasks) одна общая задача на день по UTC. Играйте белыми и найдите выигрышный план в заданный лимит. Сервер проверяет ходы и выбирает защиту чёрных; допустимый, но неверный план не считается решением. Принятый прогресс сохраняется в этом браузере и проверяется после обновления страницы. Сброс начинает задачу заново. Попытки не учитываются как обычные завершённые партии. Помощник не видит текущую доску и не раскрывает сохранённое решение.",
-    "hy": "«Խնդիրներ» էջում (/tasks) ամեն UTC օրվա համար կա մեկ ընդհանուր խնդիր։ Խաղացեք սպիտակներով և գտեք հաղթական պլանը տրված սահմանում։ Սերվերը ստուգում է քայլերը և ընտրում սևերի պաշտպանությունը․ օրինական, բայց սխալ պլանը լուծում չի համարվում։ Ընդունված առաջընթացը պահպանվում է այս բրաուզերում և վերաբացվելիս ստուգվում։ Սկզբնականացման կոճակը խնդիրը սկսում է նորից։ Փորձերը սովորական ավարտված խաղ չեն հաշվվում։ Օգնականը չի տեսնում ընթացիկ տախտակը և չի բացահայտում պատրաստի լուծումը։",
+    "en": "Open Tasks (/tasks) and find a winning plan for White within the move limit. After your move, Black responds automatically. Correct progress is saved in this browser and restored after a reload. Reset starts the solution again. Everyone gets the same puzzle for the UTC day; puzzle attempts do not affect normal game statistics.",
+    "ru": "Откройте «Задачи» (/tasks) и найдите выигрышный план за белых в заданное число ходов. После вашего хода чёрные отвечают автоматически. Верный прогресс сохраняется в этом браузере и восстанавливается после обновления страницы. «Сброс» начинает решение заново. Задача общая для всех на день по UTC; попытки не влияют на статистику обычных партий.",
+    "hy": "Բացեք «Խնդիրներ» բաժինը (/tasks) և գտեք սպիտակների հաղթական պլանը՝ տրված քայլերի սահմանում։ Ձեր քայլից հետո սևերն ավտոմատ պատասխանում են։ Ճիշտ առաջընթացը պահպանվում է այս բրաուզերում և վերականգնվում էջը թարմացնելուց հետո։ Սկզբնականացումը լուծումը սկսում է նորից։ UTC օրվա խնդիրը բոլորի համար նույնն է․ փորձերը չեն ազդում սովորական խաղերի վիճակագրության վրա։",
     "fallbackMatch": "задач|puzzle|խնդիր"
   },
   "history": {
-    "en": "History (/history) lists completed games for the signed-in registered account. Home also shows active games to continue and recent results. Games include mode, participants, outcome and dates. Guest personal history is unavailable. Signing into a different account or losing a temporary development database can explain an empty list; the assistant cannot read your private records.",
-    "ru": "История (/history) показывает завершённые партии текущего зарегистрированного аккаунта. На главной также есть активные партии для продолжения и последние результаты. Видны режим, участники, итог и даты. Личная история гостю недоступна. Пустой список возможен при другом аккаунте или сбросе временной базы разработки; помощник не читает ваши личные записи.",
-    "hy": "Պատմությունը (/history) ցույց է տալիս մուտք գործած գրանցված հաշվի ավարտված խաղերը։ Գլխավոր էջում կան նաև շարունակվող խաղերը և վերջին արդյունքները։ Տեսանելի են ռեժիմը, մասնակիցները, արդյունքն ու ամսաթվերը։ Հյուրի անձնական պատմությունը հասանելի չէ։ Դատարկ ցուցակի պատճառ կարող են լինել այլ հաշիվը կամ մշակման ժամանակավոր բազայի վերագործարկումը․ օգնականը չի կարդում անձնական գրառումները։",
+    "en": "Open History (/history) while signed in to your registered account to see completed games, opponents, results and dates. Active games are on Home under Continue a game. If the list is empty, check that you signed in to the account used to play. Guests do not have a personal history.",
+    "ru": "Откройте «Историю» (/history) под своим зарегистрированным аккаунтом: там видны завершённые партии, соперники, результаты и даты. Текущие игры находятся на главной в блоке продолжения партии. Если список пуст, проверьте, что вошли в тот аккаунт, с которого играли. Личная история доступна зарегистрированным игрокам.",
+    "hy": "Գրանցված հաշվով մուտք գործելուց հետո բացեք «Պատմություն» բաժինը (/history)․ այնտեղ կան ավարտված խաղերը, մրցակիցները, արդյունքներն ու ամսաթվերը։ Ընթացիկ խաղերը գլխավոր էջի շարունակման բաժնում են։ Եթե ցուցակը դատարկ է, ստուգեք՝ մուտք եք գործել այն հաշվով, որով խաղացել եք։ Անձնական պատմությունը հասանելի է գրանցված խաղացողներին։",
     "fallbackMatch": "истори|history|պատմությ"
   },
   "statistics": {
@@ -143,9 +143,9 @@
     "fallbackMatch": "статист|процент.{0,12}побед|рейтинг|elo|leaderboard|win rate|statistics|վիճակագր|վարկանիշ"
   },
   "reconnect": {
-    "en": "An online human opponent has {reconnectSeconds} seconds to reconnect before technical defeat is considered. Return to the same game using its participant account. Temporary disconnection is not an immediate loss. The server rechecks game state before finishing it. For connection problems, check the network and reopen the game; the assistant cannot reconnect or change the result for you.",
-    "ru": "При отключении онлайн-сопернику даётся {reconnectSeconds} секунд на возврат перед возможным техническим поражением. Вернитесь в ту же партию под аккаунтом участника. Временное отключение не означает немедленное поражение. Перед завершением сервер проверяет состояние партии. Проверьте сеть и откройте игру заново; помощник не может переподключить вас или изменить результат.",
-    "hy": "Առցանց մրցակիցն ունի {reconnectSeconds} վայրկյան վերամիանալու համար մինչև հնարավոր տեխնիկական պարտությունը։ Վերադարձեք նույն խաղին մասնակցի հաշվով։ Ժամանակավոր անջատումը անմիջական պարտություն չէ։ Ավարտից առաջ սերվերը կրկին ստուգում է խաղի վիճակը։ Ստուգեք կապը և վերաբացեք խաղը․ օգնականը չի կարող ձեր փոխարեն միանալ կամ փոխել արդյունքը։",
+    "en": "If the connection drops, check your network and reopen the same game using your participant account. Online games allow {reconnectSeconds} seconds to reconnect before technical defeat. If the result seems wrong, send the game link and a description to the site owner.\n\n{ownerContacts}",
+    "ru": "Если связь прервалась, проверьте интернет и откройте ту же партию под своим аккаунтом. На возвращение в онлайн-игру даётся {reconnectSeconds} секунд до технического поражения. Если результат кажется ошибочным, отправьте владельцу ссылку на партию и описание ситуации.\n\n{ownerContacts}",
+    "hy": "Եթե կապն ընդհատվել է, ստուգեք ինտերնետը և ձեր հաշվով վերաբացեք նույն խաղը։ Առցանց խաղին վերադառնալու համար տրվում է {reconnectSeconds} վայրկյան՝ մինչև տեխնիկական պարտությունը։ Եթե արդյունքը սխալ է թվում, սեփականատիրոջն ուղարկեք խաղի հղումը և իրավիճակի նկարագրությունը։\n\n{ownerContacts}",
     "fallbackMatch": "отключ|переподключ|пропал.{0,12}соперник|disconnect|reconnect|վերամի|անջատ"
   },
   "sounds": {
@@ -160,13 +160,19 @@
     "hy": "Կայքն օգտագործում է Java 17, Spring Boot, Thymeleaf և JavaScript։ REST-ը բեռնում է վիճակներն ու հաշվի տվյալները, STOMP-ը WebSocket/SockJS-ով փոխանցում է խաղի իրադարձությունները։ Ընդհանուր Java շարժիչը ստուգում է մարդկանց, բոտի և խնդիրների քայլերը։ JPA-ն պահում է օգտատերերին, խաղերը, քայլերը, հրավերներն ու refresh թոքենները։ Մշակման ընթացքում օգտագործվում է ժամանակավոր H2, աշխատող տարբերակում՝ PostgreSQL։ Որոնումն ու ներկայությունը նախատեսված են հավելվածի մեկ օրինակի համար։ Սրանք այս կայքի մասին փաստեր են, ոչ կամայական ծրագրավորման ծառայություն։"
   },
   "security": {
-    "en": "Passwords are stored as BCrypt hashes. The server checks signed access JWTs, refresh-token expiry/revocation, game participation and turn ownership. Tokens and provider keys must not be pasted into the chat. The assistant cannot reveal secrets, inspect another player's data, reset a password or alter a game. Use the account's login screen for authentication.",
-    "ru": "Пароли хранятся как BCrypt-хеши. Сервер проверяет подпись access JWT, срок и отзыв refresh-токенов, участие в партии и очередь хода. Не вставляйте токены и API-ключи в чат. Помощник не раскрывает секреты, не читает данные другого игрока, не сбрасывает пароль и не меняет партию. Для входа используйте страницу авторизации.",
-    "hy": "Գաղտնաբառերը պահվում են որպես BCrypt հեշեր։ Սերվերը ստուգում է access JWT-ի ստորագրությունը, refresh թոքենների ժամկետն ու չեղարկումը, խաղին մասնակցությունն ու քայլի հերթը։ Թոքեններ և API բանալիներ մի տեղադրեք չաթում։ Օգնականը չի բացահայտում գաղտնիքներ, չի կարդում ուրիշ խաղացողի տվյալները, չի վերականգնում գաղտնաբառը և չի փոխում խաղը։ Մուտքի համար օգտագործեք մուտքի էջը։"
+    "en": "Use /login to sign in. Passwords are protected with BCrypt hashes, and game actions are checked against the participant and turn. Keep your password and login tokens private. For account-access questions, contact the site owner without sending your password.\n\n{ownerContacts}",
+    "ru": "Для входа используйте /login. Пароли защищены BCrypt-хешированием, а действия в партии проверяются по участнику и очереди хода. Храните пароль и токены входа в секрете. С вопросами о доступе к аккаунту обращайтесь к владельцу сайта, не отправляя сам пароль.\n\n{ownerContacts}",
+    "hy": "Մուտքի համար օգտագործեք /login էջը։ Գաղտնաբառերը պաշտպանված են BCrypt հեշավորմամբ, իսկ խաղի գործողությունները ստուգվում են ըստ մասնակցի և հերթի։ Գաղտնի պահեք գաղտնաբառն ու մուտքի թոքենները։ Հաշվի հասանելիության հարցերով դիմեք կայքի սեփականատիրոջը՝ առանց գաղտնաբառը ուղարկելու։\n\n{ownerContacts}"
   },
   "support_limits": {
-    "en": "I can explain documented Checkers Online features, but cannot inspect your account or current board, reveal a puzzle solution, calculate a guaranteed best move, act on a game, recover passwords or confirm undocumented features, contacts or ownership details. Describe the page and visible problem without sharing passwords or tokens. I will ask for clarification when the available site information is insufficient.",
-    "ru": "Я могу объяснить известные функции Checkers Online, но не вижу аккаунт и текущую доску, не раскрываю решение задачи, не вычисляю гарантированно лучший ход, не управляю партией, не восстанавливаю пароли и не подтверждаю неизвестные функции, контакты или сведения о владельце. Опишите страницу и видимую проблему без паролей и токенов. Если сведений недостаточно, я попрошу уточнение.",
-    "hy": "Կարող եմ բացատրել Checkers Online-ի հայտնի գործառույթները, բայց չեմ տեսնում հաշիվը կամ ընթացիկ տախտակը, չեմ բացահայտում խնդրի լուծումը, չեմ հաշվարկում երաշխավորված լավագույն քայլը, չեմ կառավարում խաղը, չեմ վերականգնում գաղտնաբառերը և չեմ հաստատում անհայտ գործառույթներ, կոնտակտներ կամ սեփականատիրոջ տվյալներ։ Նկարագրեք էջն ու տեսանելի խնդիրը՝ առանց գաղտնաբառերի և թոքենների։ Անբավարար տեղեկության դեպքում հստակեցում կխնդրեմ։"
+    "en": "Your results are in Progress and your completed games are in History. For a question about your account, a disputed result or a problem that needs attention, contact the site owner. Include the relevant page or game link.\n\n{ownerContacts}",
+    "ru": "Ваши результаты доступны в разделе «Прогресс», завершённые партии — в «Истории». С вопросами об аккаунте, спорном результате или проблеме, требующей разбирательства, обратитесь к владельцу сайта. Приложите ссылку на нужную страницу или партию.\n\n{ownerContacts}",
+    "hy": "Ձեր արդյունքները հասանելի են «Առաջընթաց» բաժնում, ավարտված խաղերը՝ «Պատմություն» բաժնում։ Հաշվի, վիճելի արդյունքի կամ քննարկում պահանջող խնդրի դեպքում դիմեք կայքի սեփականատիրոջը։ Կցեք համապատասխան էջի կամ խաղի հղումը։\n\n{ownerContacts}"
+  },
+  "owner_contact": {
+    "en": "You can contact the site owner here:\n\n{ownerContacts}",
+    "ru": "Связаться с владельцем сайта можно здесь:\n\n{ownerContacts}",
+    "hy": "Կայքի սեփականատիրոջ հետ կարող եք կապվել այստեղ․\n\n{ownerContacts}",
+    "directMatch": "(?s)(?:.*(?:telegram|телеграм|տելեգրամ|shaatimi|shatimi@).*|(?=.*(?:связ|контакт|напис|обрат|поддержк|contact|support|reach|կապ|գրել|աջակց))(?=.*(?:владел|владель|админ|создател|разработчик|поддержк|owner|admin|developer|support|սեփականատ|աջակց|ստեղծող)).*)"
   }
 }

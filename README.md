@@ -173,6 +173,9 @@ the localized reply from the existing FAQ and `src/main/resources/assistant/site
 Instructions live in `src/main/resources/assistant/system-prompt.txt`. Unrelated requests are
 refused. Clear requests for known unavailable features receive a specific explanation,
 including account deletion, password recovery, profile editing and history cleanup.
+Answers use a direct site-assistant voice and provide the owner's public Telegram
+(https://t.me/shaatimi) and email (shatimi@proton.me) when personal support is needed.
+Only these approved contact addresses become clickable links; arbitrary answer text stays escaped.
 Curated multilingual intent rules keep these answers available without Groq; expanded
 local help also recovers clear questions when remote routing fails or asks an unnecessary
 clarification. Genuine ambiguity asks for clarification, while a provider outage is

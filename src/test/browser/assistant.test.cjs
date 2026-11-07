@@ -155,3 +155,37 @@ test('assistant shows animated typing until success or failure without saving th
     assert(await page.locator('[data-assistant-toggle]').evaluate(el => el === document.activeElement));
   } finally { await browser.close(); }
 });
+
+/** Public owner contacts are clickable without allowing arbitrary HTML or untrusted URL schemes. */
+test('assistant renders only approved contact links and preserves them after reload', { timeout: 30000 }, async () => {
+  const browser = await chromium.launch({
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
+    headless: true, args: ['--no-sandbox'],
+  });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const answer = 'Сейчас такой функции нет. Свяжитесь с владельцем сайта.\n\n'
+      + 'Telegram: https://t.me/shaatimi\nEmail: shatimi@proton.me\n'
+      + '<img src=x onerror="alert(1)"> javascript:alert(1) https://t.me/shaatimi.evil.example';
+    await page.route('**/api/assistant/chat', route => route.fulfill({ json: { answer, matched: true, faqPath: '/faq?lang=ru' } }));
+    await page.goto(base + '/faq?lang=ru');
+    await page.locator('[data-assistant-toggle]').click();
+    await page.locator('[data-assistant-input]').fill('Удалить аккаунт');
+    await page.locator('[data-assistant-input]').press('Enter');
+    await page.waitForFunction(() => !document.querySelector('[data-assistant-send]').disabled);
+    for (let check = 0; check < 2; check++) {
+      const body = page.locator('.assistant-msg.bot p').last();
+      assert.equal(await body.textContent(), answer);
+      assert.equal(await body.locator('a').count(), 2);
+      const telegram = body.locator('a[href="https://t.me/shaatimi"]');
+      assert.equal(await telegram.getAttribute('target'), '_blank');
+      assert.equal(await telegram.getAttribute('rel'), 'noopener noreferrer');
+      assert.equal(await body.locator('a[href="mailto:shatimi@proton.me"]').count(), 1);
+      assert.equal(await body.locator('img, script, a[href^="javascript:"]').count(), 0);
+      if (check === 0) {
+        await page.reload();
+        await page.locator('[data-assistant-toggle]').click();
+      }
+    }
+  } finally { await browser.close(); }
+});
