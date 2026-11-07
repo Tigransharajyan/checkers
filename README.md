@@ -2,7 +2,7 @@
 
 Online multiplayer checkers (Russian draughts) web application built with Spring Boot, Thymeleaf, WebSocket/STOMP.
 
-Backend classes and methods have detailed English comments. For a Russian-language walkthrough of the architecture and algorithms, see the [diploma guide](docs/diploma-guide.md) and [architecture overview](ARCHITECTURE.md).
+Backend classes and methods have detailed English comments. See the [architecture overview](ARCHITECTURE.md) for the project structure.
 
 ## Tech Stack
 
@@ -50,8 +50,6 @@ npm ci
 npx playwright install chromium
 npm run test:browser
 ```
-
-See [daily puzzles and move animation](docs/daily-puzzles-and-motion.md) for the shared engine, puzzle proofs, API contract and browser test setup.
 
 SEO configuration, public-origin checks and deployment instructions are described below. Asset licenses and source credits remain beside the runtime files.
 
