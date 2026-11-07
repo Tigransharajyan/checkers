@@ -61,4 +61,11 @@ class IntentAssistantServiceTest {
         assertFalse(reply.matched());
         assertTrue(reply.faqPath().contains("/faq"));
     }
+
+    /** Generic question words alone cannot select an unrelated FAQ answer during an outage. */
+    @Test
+    void doesNotMatchOnlyBecauseAQuestionContainsHowOrWhere() {
+        assertFalse(service.reply("ru", "как сделать квантовый телепорт на сайте").matched());
+        assertFalse(service.reply("en", "How do I calculate unrelated quantum bananas on this site?").matched());
+    }
 }

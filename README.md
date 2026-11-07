@@ -171,7 +171,12 @@ Strict topic restriction is enforced by rendering approved server content, not a
 model text. Groq selects up to three topic identifiers; the server validates them and builds
 the localized reply from the existing FAQ and `src/main/resources/assistant/site-help.json`.
 Instructions live in `src/main/resources/assistant/system-prompt.txt`. Unrelated requests are
-refused; unknown site questions ask for clarification. Earlier user questions provide bounded
+refused. Clear requests for known unavailable features receive a specific explanation,
+including account deletion, password recovery, profile editing and history cleanup.
+Curated multilingual intent rules keep these answers available without Groq; expanded
+local help also recovers clear questions when remote routing fails or asks an unnecessary
+clarification. Genuine ambiguity asks for clarification, while a provider outage is
+reported as unavailability rather than a problem with the user's question. Earlier user questions provide bounded
 context, but cannot submit system messages or change the topic policy. The assistant cannot
 inspect accounts, current games or puzzle solutions, and cannot perform game actions.
 

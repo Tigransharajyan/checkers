@@ -43,4 +43,15 @@ class AssistantExperienceTest {
                         .content("{\"locale\":\"en\",\"message\":\"" + "x".repeat(501) + "\"}"))
                 .andExpect(status().isBadRequest());
     }
+
+    /** The exact reported deletion question must work through the public API without model keys. */
+    @Test
+    void accountDeletionQuestionReceivesAnExplicitFeatureAnswer() throws Exception {
+        mvc.perform(post("/api/assistant/chat").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"locale\":\"ru\",\"message\":\"я хочу удалить свой аккаунт на сайте\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.matched").value(true))
+                .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.containsString("такой функции нет")))
+                .andExpect(jsonPath("$.answer", org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Уточните"))));
+    }
 }

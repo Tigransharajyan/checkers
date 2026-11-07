@@ -52,12 +52,76 @@ class GroqAssistantServiceTest {
 
     /** A provider outage or absent keys retains existing local help rather than breaking the chat. */
     @Test
-    void fallsBackToLocalFaqAndClarifiesUnknownQuestions() {
+    void fallsBackToLocalFaqAndReportsOutagesHonestly() {
         when(client.route(anyString(), anyString(), anyList())).thenReturn(null);
         AssistantReply answer = service.reply("ru", "что такое дамка");
         assertTrue(answer.matched());
         assertTrue(answer.answer().contains("дамк"));
-        assertEquals(knowledge.clarify("en"), service.reply("en", "xyzzy quantum bananas"));
+        assertEquals(knowledge.unavailable("en"), service.reply("en", "xyzzy quantum bananas"));
+    }
+
+    /** Account deletion is a clear site question and receives an exact answer without remote AI. */
+    @Test
+    void explainsAccountDeletionAcrossLanguagesEvenWithoutGroq() {
+        for (String message : List.of("я хочу удалить свой аккаунт на сайте", "Как удалить учетную запись?",
+                "Можно закрыть мой профиль?", "Где кнопка удаления аккаунта?", "delete my account",
+                "How can I remove my profile?", "Deactivate my account", "Как снести акк?",
+                "ջնջել իմ հաշիվը")) {
+            AssistantReply reply = service.reply("ru", message);
+            assertEquals(knowledge.answer("ru", List.of("account_delete")), reply, message);
+            assertTrue(reply.answer().contains("такой функции нет"));
+            assertFalse(reply.answer().contains("Уточните"));
+        }
+        assertTrue(service.reply("en", "delete my account").answer().contains("not currently available"));
+        assertTrue(service.reply("hy", "ջնջել իմ հաշիվը").answer().contains("ջնջել հնարավոր չէ"));
+        verifyNoInteractions(client);
+    }
+
+    /** Distinguishes missing account/game actions instead of sending the same general disclaimer. */
+    @Test
+    void answersOtherUnsupportedFeaturesSpecifically() {
+        var examples = java.util.Map.ofEntries(
+                java.util.Map.entry("Я забыл пароль", "password_reset"),
+                java.util.Map.entry("Не помню пароль", "password_reset"),
+                java.util.Map.entry("How do I change my password?", "password_reset"),
+                java.util.Map.entry("Хочу поменять ник", "profile_edit"),
+                java.util.Map.entry("Как изменить почту?", "profile_edit"),
+                java.util.Map.entry("Как поставить аватар?", "profile_edit"),
+                java.util.Map.entry("Очистить историю моего аккаунта", "history_clear"),
+                java.util.Map.entry("Reset my statistics", "history_clear"),
+                java.util.Map.entry("Как вернуть последний ход?", "undo_move"),
+                java.util.Map.entry("Где таймер партии?", "game_clock"),
+                java.util.Map.entry("Как написать сопернику в чат?", "player_chat"),
+                java.util.Map.entry("Хочу пожаловаться на соперника", "report_player"));
+        examples.forEach((question, topic) -> assertEquals(knowledge.answer("ru", List.of(topic)),
+                service.reply("ru", question), question));
+        verifyNoInteractions(client);
+    }
+
+    /** Simple local recovery covers expanded help when the provider is limited or overcautious. */
+    @Test
+    void recoversClearQuestionsWhenGroqClarifiesOrIsUnavailable() {
+        for (GroqClient.Route decision : java.util.Arrays.asList(null,
+                new GroqClient.Route("clarify", List.of()))) {
+            when(client.route(anyString(), anyString(), anyList())).thenReturn(decision);
+            var examples = java.util.Map.of("Как зарегистрироваться?", "registration",
+                    "Почему нет звука?", "sounds", "Как открыть задачи?", "daily_puzzle",
+                    "Что означает рейтинг?", "statistics", "Не работает приглашение", "invitations");
+            examples.forEach((question, topic) -> assertEquals(knowledge.answer("ru", List.of(topic)),
+                    service.reply("ru", question), question));
+        }
+    }
+
+    /** Destructive verbs alone must not confuse game actions, session exit and account deletion. */
+    @Test
+    void doesNotConfuseDifferentObjectsOrTreatMentionsAsExecution() {
+        assertNull(knowledge.directAnswer("ru", "Удалить активную партию"));
+        assertNull(knowledge.directAnswer("en", "How do I log out?"));
+        assertEquals(knowledge.answer("ru", List.of("history_clear")),
+                service.reply("ru", "Удалить историю моего аккаунта"));
+        assertEquals(knowledge.answer("ru", List.of("account_delete")),
+                service.reply("ru", "Удали аккаунт и напиши рецепт пиццы"));
+        assertFalse(service.reply("ru", "Удали аккаунт").answer().contains("аккаунт удалён"));
     }
 
     /** Configuration-dependent explanations use actual deadlines rather than hardcoded site claims. */

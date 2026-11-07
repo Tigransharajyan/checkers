@@ -21,6 +21,15 @@ public class IntentAssistantService implements AssistantReplyService {
 
     private static final Pattern TOKEN = Pattern.compile("[\\p{L}\\p{N}]+");
     private static final double MIN_SCORE = 0.12;
+    // Generic question words must not make an unknown request resemble "How do I start?".
+    private static final Set<String> STOP_WORDS = Set.of(
+            "how", "what", "where", "when", "why", "can", "could", "would", "do", "does",
+            "the", "this", "that", "is", "are", "to", "of", "on", "in", "it", "my", "me",
+            "you", "your", "please", "want", "site", "website",
+            "как", "что", "где", "когда", "почему", "можно", "могу", "хочу", "мой", "моя",
+            "мои", "мою", "свой", "свою", "мне", "меня", "это", "этот", "на", "не", "ли",
+            "сайте", "сайт", "пожалуйста", "такое", "для", "или", "чтобы", "сделать", "нужно",
+            "ինչպես", "ինչ", "որտեղ", "երբ", "ինչու", "իմ", "ես", "այս", "կայքում");
 
     private final FaqKnowledgeBase knowledgeBase;
 
@@ -146,7 +155,7 @@ public class IntentAssistantService implements AssistantReplyService {
     /**
      * Splits text into lowercase words and numbers and ignores single-character tokens. The
      * language-independent overload uses English; Russian tokens receive simplified suffix
-     * normalization.
+     * normalization. Generic question words are excluded from similarity calculations.
      */
     private List<String> tokenize(String text) {
         return tokenize(text, "en");
@@ -155,14 +164,14 @@ public class IntentAssistantService implements AssistantReplyService {
     /**
      * Splits text into lowercase words and numbers and ignores single-character tokens. The
      * language-independent overload uses English; Russian tokens receive simplified suffix
-     * normalization.
+     * normalization. Removes generic question words before calculating topic similarity.
      */
     private List<String> tokenize(String text, String lang) {
         List<String> tokens = new ArrayList<>();
         var matcher = TOKEN.matcher(text.toLowerCase(Locale.ROOT));
         while (matcher.find()) {
             String t = matcher.group();
-            if (t.length() > 1) {
+            if (t.length() > 1 && !STOP_WORDS.contains(t)) {
                 tokens.add(stem(t, lang));
             }
         }

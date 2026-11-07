@@ -37,15 +37,29 @@ public class GroqAssistantService implements AssistantReplyService {
     public AssistantReply reply(String locale, String message, List<String> recentQuestions) {
         String language = knowledge.locale(locale);
         if (message == null || message.isBlank()) return knowledge.clarify(language);
+        // A known missing feature still has a precise answer, even with no remote AI available.
+        AssistantReply direct = knowledge.directAnswer(language, message);
+        if (direct != null) return direct;
         GroqClient.Route route = groq.route(language, message, recentQuestions);
         if (route == null) {
-            AssistantReply fallback = local.reply(language, message);
-            return fallback.matched() ? fallback : knowledge.clarify(language);
+            AssistantReply fallback = fallback(language, message);
+            return fallback != null ? fallback : knowledge.unavailable(language);
         }
         return switch (route.decision()) {
             case "answer" -> knowledge.answer(language, route.topics());
             case "refuse" -> knowledge.refuse(language);
-            default -> knowledge.clarify(language);
+            default -> {
+                AssistantReply fallback = fallback(language, message);
+                yield fallback != null ? fallback : knowledge.clarify(language);
+            }
         };
+    }
+
+    /** Tries expanded local help before the original FAQ when AI routing cannot provide an answer. */
+    private AssistantReply fallback(String locale, String message) {
+        AssistantReply expanded = knowledge.fallbackAnswer(locale, message);
+        if (expanded != null) return expanded;
+        AssistantReply faq = local.reply(locale, message);
+        return faq.matched() ? faq : null;
     }
 }
