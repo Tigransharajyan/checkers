@@ -150,7 +150,33 @@ SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
    - Verify canonical URLs, `/robots.txt` and `/sitemap.xml` on the deployed domain
    - For staging, set `SITE_INDEXING_ENABLED=false`
 
-The help assistant uses the local FAQ and requires no external API key.
+### Site assistant with Groq
+
+The assistant uses Groq when `GROQ_API_KEYS` is set; otherwise the local FAQ remains available.
+Add the comma-separated keys in **Render → shatimi-checkers → Environment → GROQ_API_KEYS**,
+then deploy the service. Never put actual keys in Git or browser JavaScript. For local runs,
+copy `.env.example` to `.env` and set `GROQ_API_KEYS`; Spring loads this ignored file automatically.
+`GROQ_API_KEY` also works for one key.
+
+The default model is `openai/gpt-oss-20b`, using Groq's strict structured-output API.
+Override with `GROQ_MODEL` only when the model supports that API. The server allows up to
+`GROQ_REQUESTS_PER_MINUTE` model operations per minute (default 12) and two concurrent calls.
+A failed key switches to the next available one. Invalid keys are skipped until restart;
+permission failures, rate limits and temporary outages receive cooldowns. A successful key
+remains preferred. Groq quotas may be shared by keys in the same organization: adding keys
+does not increase that organization's allowance. Exhausted or unavailable providers fall back
+to local help without exposing credentials or error bodies.
+
+Strict topic restriction is enforced by rendering approved server content, not arbitrary
+model text. Groq selects up to three topic identifiers; the server validates them and builds
+the localized reply from the existing FAQ and `src/main/resources/assistant/site-help.json`.
+Instructions live in `src/main/resources/assistant/system-prompt.txt`. Unrelated requests are
+refused; unknown site questions ask for clarification. Earlier user questions provide bounded
+context, but cannot submit system messages or change the topic policy. The assistant cannot
+inspect accounts, current games or puzzle solutions, and cannot perform game actions.
+
+API details: [Groq structured outputs](https://console.groq.com/docs/structured-outputs),
+[rate limits](https://console.groq.com/docs/rate-limits).
 
 ### Subsequent Deploys
 

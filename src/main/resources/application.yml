@@ -1,5 +1,8 @@
 # Shared settings. The --- separators below introduce dev and prod profile overrides.
 spring:
+  config:
+    # Local secrets are optional, ignored by Git and never packaged in the application JAR.
+    import: "optional:file:.env[.properties]"
   application:
     name: checkers-online
   profiles:
@@ -29,6 +32,12 @@ server:
   port: ${PORT:8080}
 
 app:
+  assistant:
+    groq:
+      # Comma-separated server keys, tried in order; no key keeps local FAQ help available.
+      api-keys: ${GROQ_API_KEYS:${GROQ_API_KEY:}}
+      model: ${GROQ_MODEL:openai/gpt-oss-20b}
+      requests-per-minute: ${GROQ_REQUESTS_PER_MINUTE:12}
   jwt:
     # The fallback is for development; production supplies its secret through the environment.
     secret: ${JWT_SECRET:dev-only-change-me-to-a-long-enough-secret-key-for-hs256-checkers-online}

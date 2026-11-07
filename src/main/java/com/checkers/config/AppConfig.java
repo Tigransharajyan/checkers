@@ -1,5 +1,6 @@
 package com.checkers.config;
 
+import com.checkers.assistant.GroqProperties;
 import com.checkers.security.jwt.JwtProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -8,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import com.checkers.engine.CheckersRulesEngine;
 
 /**
- * Registers the rules engine and binds JWT settings to application configuration.
+ * Registers the rules engine and binds JWT and server-side assistant settings.
  */
 @Configuration
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, GroqProperties.class})
 public class AppConfig {
 
     /**

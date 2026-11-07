@@ -25,6 +25,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
+      # Set comma-separated Groq keys in the Render environment, never in this repository.
+      - key: GROQ_API_KEYS
+        sync: false
+
       # Canonicals use Render's real RENDER_EXTERNAL_URL automatically.
       # For a custom domain, add SITE_BASE_URL with its HTTPS origin in Dashboard.
       # Staging: set SITE_INDEXING_ENABLED=false.

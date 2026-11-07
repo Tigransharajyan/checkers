@@ -29,7 +29,8 @@ public class AssistantController {
      */
     @PostMapping("/chat")
     public ResponseEntity<AssistantChatResponse> chat(@Valid @RequestBody AssistantChatRequest request) {
-        AssistantReply reply = assistantReplyService.reply(request.getLocale(), request.getMessage());
+        AssistantReply reply = assistantReplyService.reply(
+                request.getLocale(), request.getMessage(), request.getRecentQuestions());
         return ResponseEntity.ok(AssistantChatResponse.builder()
                 .answer(reply.answer())
                 .matched(reply.matched())

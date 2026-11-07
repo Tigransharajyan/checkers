@@ -16,6 +16,7 @@ Checkers.initAssistant = function () {
 
   const STORAGE_PREFIX = 'checkers.assistant.session.';
   let history = loadHistory();
+  let sending = false;
 
   function storageKey() {
     return STORAGE_PREFIX + Checkers.locale();
@@ -23,7 +24,9 @@ Checkers.initAssistant = function () {
 
   function loadHistory() {
     try {
-      return JSON.parse(sessionStorage.getItem(storageKey()) || '[]');
+      const saved = JSON.parse(sessionStorage.getItem(storageKey()) || '[]');
+      return Array.isArray(saved) ? saved.filter((item) => item &&
+        (item.role === 'user' || item.role === 'bot') && typeof item.text === 'string').slice(-30) : [];
     } catch {
       return [];
     }
@@ -107,24 +110,32 @@ Checkers.initAssistant = function () {
     });
   });
 
+  /** Sends one question with bounded user-only context; credentials stay on the server. */
   async function send() {
     const message = (input?.value || '').trim();
-    if (!message) return;
+    if (!message || sending) return;
+    sending = true;
+    const language = Checkers.locale();
+    const recentQuestions = history.filter((item) => item.role === 'user')
+      .slice(-4).map((item) => item.text.slice(0, 500));
     input.value = '';
     append('user', message);
     if (sendBtn) sendBtn.disabled = true;
     try {
       const res = await Checkers.api('/api/assistant/chat', {
         method: 'POST',
+        signal: AbortSignal.timeout(15000),
         body: JSON.stringify({
           message,
-          locale: Checkers.locale()
+          locale: language,
+          recentQuestions
         })
       });
-      append('bot', res.answer);
+      if (Checkers.locale() === language) append('bot', res.answer);
     } catch (e) {
-      append('bot', Checkers.apiErrorMessage(e));
+      if (Checkers.locale() === language) append('bot', Checkers.apiErrorMessage(e));
     } finally {
+      sending = false;
       if (sendBtn) sendBtn.disabled = false;
       input?.focus();
     }
