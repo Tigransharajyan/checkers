@@ -13,12 +13,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Authoritative assistant content shared by AI routing and server-side answer rendering. Groq
- * may select topic identifiers, but only these curated local texts can reach the user.
+ * Authoritative site facts for grounded AI generation and localized help during provider outages.
+ * Catalogue wording is reference material, not a mandatory set of canned AI replies.
  */
 @Component
 public class SiteHelpKnowledge {
@@ -65,16 +66,14 @@ public class SiteHelpKnowledge {
             String rules = new ClassPathResource("assistant/system-prompt.txt")
                     .getContentAsString(StandardCharsets.UTF_8);
             List<Map<String, String>> catalogue = new ArrayList<>();
-            answers.forEach((id, translations) -> catalogue.add(Map.of("id", id, "facts", translations.get("en"))));
-            prompt = rules + "\n\nTRUSTED SITE TOPICS (JSON):\n" + mapper.writeValueAsString(catalogue);
+            answers.forEach((id, translations) -> {
+                String facts = translations.getOrDefault("facts", translations.get("en"));
+                catalogue.add(Map.of("id", id, "facts", facts.replace("\n\n" + OWNER_CONTACTS, "")));
+            });
+            prompt = "TRUSTED SITE TOPICS (JSON):\n" + mapper.writeValueAsString(catalogue) + "\n\n" + rules;
         } catch (IOException error) {
             throw new IllegalStateException("Cannot load site assistant knowledge", error);
         }
-    }
-
-    /** Returns the immutable list of identifiers allowed by the provider's output schema. */
-    public List<String> topicIds() {
-        return List.copyOf(answers.keySet());
     }
 
     /** Returns trusted instructions and catalogue; credentials and account data are never included. */
@@ -103,10 +102,23 @@ public class SiteHelpKnowledge {
         return match(locale, message, directMatches);
     }
 
-    /** Returns a specific local answer when Groq is unavailable or unnecessarily asks to clarify. */
+    /** Returns a specific local answer when Groq is unavailable. */
     public AssistantReply fallbackAnswer(String locale, String message) {
         AssistantReply direct = directAnswer(locale, message);
-        return direct != null ? direct : match(locale, message, fallbackMatches);
+        if (direct != null) return direct;
+        AssistantReply expanded = match(locale, message, fallbackMatches);
+        if (expanded != null) return expanded;
+        // During an outage, an exact FAQ question is safe; a merely similar topic is not.
+        String normalized = normalizeQuestion(message);
+        return faq.entries(locale).stream()
+                .filter(entry -> normalizeQuestion(entry.question()).equals(normalized))
+                .findFirst().map(entry -> answer(locale, List.of(entry.id()))).orElse(null);
+    }
+
+    /** Ignores case and punctuation only; this is equality matching, not a fuzzy topic guess. */
+    private String normalizeQuestion(String text) {
+        return text == null ? "" : Normalizer.normalize(text, Normalizer.Form.NFKC)
+                .toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}\\p{N}]+", " ").trim();
     }
 
     /** Normalizes user spelling and returns only curated topics selected by trusted patterns. */
@@ -131,7 +143,7 @@ public class SiteHelpKnowledge {
 
     /**
      * Renders up to three known topics in the interface language. Rejects unknown identifiers as
-     * a whole rather than exposing any model-produced text or partial untrusted response.
+     * a whole so offline matching cannot accidentally return unrelated or partial content.
      */
     public AssistantReply answer(String locale, List<String> topics) {
         String language = locale(locale);

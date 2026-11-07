@@ -3,88 +3,103 @@
     "en": "Clearing game history or resetting statistics is not available on the site yet. For a request about your saved data, contact the site owner. Ending an active game does not erase its result.\n\n{ownerContacts}",
     "ru": "Очистка истории и сброс статистики на сайте пока недоступны. Если нужно разобраться с сохранёнными данными, напишите владельцу сайта. Завершение активной партии не удаляет её результат.\n\n{ownerContacts}",
     "hy": "Խաղերի պատմությունը մաքրելը և վիճակագրությունը զրոյացնելը դեռ հասանելի չեն։ Պահպանված տվյալների հարցով գրեք կայքի սեփականատիրոջը։ Ընթացիկ խաղն ավարտելը չի ջնջում դրա արդյունքը։\n\n{ownerContacts}",
-    "directMatch": "(?s)(?=.*(?:удал|очист|сброс|обнул|стер|delete|clear|reset|erase|ջնջ|մաքր|զրոյ))(?=.*(?:истори|статист|результат|заверш[её]нн|сыгранн|history|statistic|completed game|results|պատմությ|վիճակագր|արդյունք)).*"
+    "directMatch": "(?s)(?=.*(?:удал|очист|сброс|обнул|стер|delete|clear|reset|erase|ջնջ|մաքր|զրոյ))(?=.*(?:истори|статист|результат|заверш[её]нн|сыгранн|history|statistic|completed game|results|պատմությ|վիճակագր|արդյունք)).*",
+    "facts": "No history deletion or statistics reset option. Data requests go to the owner. Ending a game preserves its result."
   },
   "account_delete": {
     "en": "Account deletion is not currently available on the site. To request deletion of your account, contact the site owner.\n\n{ownerContacts}",
     "ru": "Сейчас такой функции нет. Если вы хотите удалить свой аккаунт, свяжитесь с владельцем сайта.\n\n{ownerContacts}",
     "hy": "Այժմ կայքում նման գործառույթ չկա։ Եթե ցանկանում եք ջնջել ձեր հաշիվը, կապվեք կայքի սեփականատիրոջ հետ։\n\n{ownerContacts}",
-    "directMatch": "(?s)(?!.*(?:удал\\S*\\s+истори|delete\\s+(?:my\\s+)?history|clear\\s+(?:my\\s+)?history))(?=.*(?:удал|стереть|закрыть|убрать|снести|delete|remov|erase|close|deactivat|ջնջ|հեռաց|փակ))(?=.*(?:аккаунт|акк\\b|уч[её]т(?:н|к)|профил|account|profile|հաշիվ|հաշվ|պրոֆիլ)).*"
+    "directMatch": "(?s)(?!.*(?:удал\\S*\\s+истори|delete\\s+(?:my\\s+)?history|clear\\s+(?:my\\s+)?history))(?=.*(?:удал|стереть|закрыть|убрать|снести|delete|remov|erase|close|deactivat|ջնջ|հեռաց|փակ))(?=.*(?:аккаунт|акк\\b|уч[её]т(?:н|к)|профил|account|profile|հաշիվ|հաշվ|պրոֆիլ)).*",
+    "facts": "No account deletion feature. Users may request account deletion from the owner through the supplied contacts."
   },
   "password_reset": {
     "en": "Password changes and automatic recovery are not available on the site yet. If you forgot your password or need to change it, contact the site owner. Do not include your password in the message.\n\n{ownerContacts}",
     "ru": "Смена пароля и автоматическое восстановление пока недоступны. Если вы забыли пароль или хотите его изменить, свяжитесь с владельцем сайта. Сам пароль в сообщении не указывайте.\n\n{ownerContacts}",
     "hy": "Գաղտնաբառի փոփոխությունն ու ավտոմատ վերականգնումը դեռ հասանելի չեն։ Եթե մոռացել եք գաղտնաբառը կամ ցանկանում եք փոխել այն, կապվեք կայքի սեփականատիրոջ հետ։ Հաղորդագրության մեջ գաղտնաբառը մի նշեք։\n\n{ownerContacts}",
-    "directMatch": "(?s)(?=.*(?:смен|помен|измен|забы|не\\s+помн|восстанов|сброс|узнать|forgot|reset|recover|change|lost|remember|մոռաց|վերականգ|փոխ))(?=.*(?:парол|password|գաղտնաբառ)).*"
+    "directMatch": "(?s)(?=.*(?:смен|помен|измен|забы|не\\s+помн|восстанов|сброс|узнать|forgot|reset|recover|change|lost|remember|մոռաց|վերականգ|փոխ))(?=.*(?:парол|password|գաղտնաբառ)).*",
+    "facts": "No password change or automated recovery feature. Account-access requests go to the owner. Never request the password."
   },
   "profile_edit": {
     "en": "Changing your username, email or avatar is not available on the site yet. For an account-data request, contact the site owner. You can change the interface language using EN / RU / HY.\n\n{ownerContacts}",
     "ru": "Изменить имя пользователя, email или аватар на сайте пока нельзя. По вопросам изменения данных аккаунта свяжитесь с владельцем сайта. Язык интерфейса можно переключить кнопками EN / RU / HY.\n\n{ownerContacts}",
     "hy": "Կայքում դեռ հնարավոր չէ փոխել օգտանունը, email-ը կամ ավատարը։ Հաշվի տվյալների փոփոխության հարցով կապվեք կայքի սեփականատիրոջ հետ։ Միջերեսի լեզուն կարող եք փոխել EN / RU / HY կոճակներով։\n\n{ownerContacts}",
-    "directMatch": "(?s)(?:.*(?:аватар|avatar|ավատար).*|(?s)(?=.*(?:смен|помен|измен|редакт|настройк|edit|change|setting|փոխ|խմբագր|կարգավոր))(?=.*(?:ник|логин|имя|почт|email|e-mail|профил|username|profile|nickname|օգտանուն|պրոֆիլ|էլեկտրոնային)).*)"
+    "directMatch": "(?s)(?:.*(?:аватар|avatar|ավատար).*|(?s)(?=.*(?:смен|помен|измен|редакт|настройк|edit|change|setting|փոխ|խմբագր|կարգավոր))(?=.*(?:ник|логин|имя|почт|email|e-mail|профил|username|profile|nickname|օգտանուն|պրոֆիլ|էլեկտրոնային)).*)",
+    "facts": "No username, email or avatar editing. Account-data requests go to the owner. Interface language can be changed."
   },
   "undo_move": {
     "en": "Taking back or undoing a confirmed move is not supported in ordinary games, including games against the bot. Planned premoves can be cancelled with right-click or Escape before execution. In the daily puzzle, Reset starts the solution again. These actions do not undo a confirmed move in a normal game.",
     "ru": "Возврат или отмена уже подтверждённого хода в обычной партии не поддерживается, в том числе с ботом. Запланированные премувы можно отменить правой кнопкой или Escape до исполнения. В задаче дня «Сброс» начинает решение заново. Это не отменяет подтверждённый ход в обычной игре.",
     "hy": "Սովորական խաղում արդեն հաստատված քայլը հետ վերցնելը չի աջակցվում, նաև բոտի դեմ։ Նախապես հերթագրված քայլերը կարելի է չեղարկել աջ կոճակով կամ Escape-ով՝ մինչև կատարումը։ Օրվա խնդրում սկզբնականացումը սկսում է լուծումը նորից։ Սրանք սովորական խաղի հաստատված քայլը չեն հետ շրջում։",
-    "directMatch": "(?s)(?=.*(?:верну|назад|отмен|переход|undo|take.?back|retract|հետ|չեղարկ))(?=.*(?:сделан|подтвержд|последн|ход|move|քայլ)).*"
+    "directMatch": "(?s)(?=.*(?:верну|назад|отмен|переход|undo|take.?back|retract|հետ|չեղարկ))(?=.*(?:сделан|подтвержд|последн|ход|move|քայլ)).*",
+    "facts": "Confirmed moves cannot be undone, including against bots. Right-click/Escape cancels queued premoves. Puzzle Reset affects only that puzzle."
   },
   "game_clock": {
     "en": "Games currently do not have a chess clock, selectable time control, increment or blitz mode. The number beside each player is their remaining piece count, not minutes. Online games do have a reconnect deadline after a player disconnects; this is separate from a move clock.",
     "ru": "Сейчас в партиях нет шахматных часов, выбора контроля времени, добавления секунд или режима блиц. Число рядом с игроком показывает оставшиеся шашки, а не минуты. В онлайн-игре есть срок на переподключение после отключения — это отдельный механизм, не таймер хода.",
     "hy": "Խաղերում այժմ չկան շախմատային ժամացույց, ժամանակի ընտրություն, հավելյալ վայրկյաններ կամ բլից ռեժիմ։ Խաղացողի կողքի թիվը մնացած խաղաքարերն է, ոչ րոպեները։ Առցանց խաղում անջատումից հետո կա վերամիացման ժամկետ․ դա առանձին մեխանիզմ է, ոչ քայլի ժամացույց։",
-    "directMatch": "час(?:ы|ов|ами)|таймер|контрол.{0,12}врем|блиц|clock|time control|blitz|increment|ժամացույց|բլից|ժամանակի վերահսկ|играть на время|врем.{0,8}на ход|врем.{0,8}партии"
+    "directMatch": "час(?:ы|ов|ами)|таймер|контрол.{0,12}врем|блиц|clock|time control|blitz|increment|ժամացույց|բլից|ժամանակի վերահսկ|играть на время|врем.{0,8}на ход|врем.{0,8}партии",
+    "facts": "No move clock, time control, increment or blitz. Player numbers are remaining piece counts. Online reconnect deadline is separate."
   },
   "player_chat": {
     "en": "The site currently has no messaging chat with an opponent, friend list or direct-message inbox. This help assistant is separate from opponent communication. To play with a friend, create an invitation and send its link using a messaging app you already use.",
     "ru": "На сайте пока нет чата с соперником, списка друзей и личных сообщений. Этот помощник отвечает на вопросы о сайте и не передаёт сообщения другим игрокам. Для игры с другом создайте приглашение и отправьте ссылку через привычный вам мессенджер.",
     "hy": "Կայքում դեռ չկա մրցակցի հետ հաղորդագրությունների չաթ, ընկերների ցանկ կամ անձնական հաղորդագրությունների բաժին։ Այս օգնականը պատասխանում է կայքի հարցերին և հաղորդագրություններ չի փոխանցում ուրիշներին։ Ընկերոջ հետ խաղալու համար ստեղծեք հրավեր և հղումն ուղարկեք ձեր սովորական մեսենջերով։",
-    "directMatch": "(?s)(?=.*(?:чат|написать|сообщени|список|chat|message|friend list|չաթ|հաղորդագր|ցանկ))(?=.*(?:соперник|игрок|друз|другу|opponent|player|friend|մրցակից|խաղացող|ընկեր)).*"
+    "directMatch": "(?s)(?=.*(?:чат|написать|сообщени|список|chat|message|friend list|չաթ|հաղորդագր|ցանկ))(?=.*(?:соперник|игрок|друз|другу|opponent|player|friend|մրցակից|խաղացող|ընկեր)).*",
+    "facts": "No opponent chat, friends list or private messages. Friend invitations are shared through external messaging apps."
   },
   "report_player": {
     "en": "To report a player, contact the site owner. Include the player name, game link and a short description of what happened.\n\n{ownerContacts}",
     "ru": "Чтобы пожаловаться на игрока, напишите владельцу сайта. Укажите имя игрока, ссылку на партию и коротко опишите, что произошло.\n\n{ownerContacts}",
     "hy": "Խաղացողի մասին բողոք ներկայացնելու համար գրեք կայքի սեփականատիրոջը։ Նշեք խաղացողի անունը, խաղի հղումը և կարճ նկարագրեք տեղի ունեցածը։\n\n{ownerContacts}",
-    "directMatch": "пожалова|жалоб|модератор|заблокир.{0,15}(?:игрок|соперник)|report.{0,15}(?:player|opponent)|block.{0,15}(?:player|opponent)|բողոք|մոդերատոր"
+    "directMatch": "пожалова|жалоб|модератор|заблокир.{0,15}(?:игрок|соперник)|report.{0,15}(?:player|opponent)|block.{0,15}(?:player|opponent)|բողոք|մոդերատոր",
+    "facts": "Reports go to the owner with player name, game link and description. No automatic moderation action is available to this assistant."
   },
   "feature_availability": {
     "en": "For this feature or a suggestion for the site, contact the owner. Describe what you would like to do so your request is clear.\n\n{ownerContacts}",
     "ru": "По этой возможности или предложению для сайта свяжитесь с владельцем. Коротко опишите, что вы хотите сделать.\n\n{ownerContacts}",
-    "hy": "Այս հնարավորության կամ կայքի վերաբերյալ առաջարկի համար կապվեք սեփականատիրոջ հետ։ Կարճ նկարագրեք՝ ինչ եք ցանկանում անել։\n\n{ownerContacts}"
+    "hy": "Այս հնարավորության կամ կայքի վերաբերյալ առաջարկի համար կապվեք սեփականատիրոջ հետ։ Կարճ նկարագրեք՝ ինչ եք ցանկանում անել։\n\n{ownerContacts}",
+    "facts": "Feature requests and suggestions go to the owner. No undocumented feature or planned release is confirmed."
   },
   "welcome": {
     "en": "Hello! I help only with Checkers Online: starting games, invitations, accounts, Russian draughts rules, draws, premoves and daily puzzles. Ask a concrete question about this site.",
     "ru": "Здравствуйте! Я помогаю только с Checkers Online: началом игры, приглашениями, аккаунтом, правилами русских шашек, ничьими, премувами и задачами дня. Задайте конкретный вопрос о сайте.",
-    "hy": "Բարև։ Ես օգնում եմ միայն Checkers Online-ի՝ խաղ սկսելու, հրավերների, հաշվի, ռուսական շաշկու կանոնների, ոչ-ոքիի, նախնական քայլերի և օրվա խնդիրների հարցերով։ Տվեք կայքի մասին կոնկրետ հարց։"
+    "hy": "Բարև։ Ես օգնում եմ միայն Checkers Online-ի՝ խաղ սկսելու, հրավերների, հաշվի, ռուսական շաշկու կանոնների, ոչ-ոքիի, նախնական քայլերի և օրվա խնդիրների հարցերով։ Տվեք կայքի մասին կոնկրետ հարց։",
+    "facts": "This assistant helps with this website, accounts, games, draughts rules, puzzles and support."
   },
   "navigation": {
     "en": "Home (/) offers starting or continuing a game and the daily puzzle. Play (/play) selects an opponent mode. Tasks (/tasks) opens the daily puzzle, Progress (/rating) shows personal results, History (/history) lists completed games, and Rules (/faq) explains the rules. The side menu opens with the menu button on narrow screens.",
     "ru": "Главная (/) позволяет начать или продолжить партию и открыть задачу дня. Игра (/play) — выбор соперника. Задачи (/tasks) — задача дня, Прогресс (/rating) — личные результаты, История (/history) — завершённые партии, Правила (/faq) — справка. На узком экране боковое меню открывается кнопкой меню.",
-    "hy": "Գլխավոր էջը (/) առաջարկում է սկսել կամ շարունակել խաղը և բացել օրվա խնդիրը։ Խաղը (/play) ընտրում է մրցակցի ռեժիմը։ Խնդիրները (/tasks) բացում են օրվա խնդիրը, Առաջընթացը (/rating)՝ անձնական արդյունքները, Պատմությունը (/history)՝ ավարտված խաղերը, Կանոնները (/faq)՝ տեղեկատուն։ Նեղ էկրանին կողային ընտրացանկը բացվում է ընտրացանկի կոճակով։"
+    "hy": "Գլխավոր էջը (/) առաջարկում է սկսել կամ շարունակել խաղը և բացել օրվա խնդիրը։ Խաղը (/play) ընտրում է մրցակցի ռեժիմը։ Խնդիրները (/tasks) բացում են օրվա խնդիրը, Առաջընթացը (/rating)՝ անձնական արդյունքները, Պատմությունը (/history)՝ ավարտված խաղերը, Կանոնները (/faq)՝ տեղեկատուն։ Նեղ էկրանին կողային ընտրացանկը բացվում է ընտրացանկի կոճակով։",
+    "facts": "Routes: / home and continuing games; /play opponent selection; /tasks daily puzzle; /rating personal progress; /history completed games; /faq rules. Narrow screens have a side-menu button."
   },
   "registration": {
     "en": "Open /register, enter a username, valid email and password, then submit the form. A username must contain 3–50 characters and the password at least 8. The server checks whether the name or email is already taken. Registration signs you in; use the registered account for personal history and statistics.",
     "ru": "Откройте /register, введите имя пользователя, корректный email и пароль и отправьте форму. Имя должно содержать 3–50 символов, пароль — не менее 8. Сервер проверяет, не заняты ли имя и email. После регистрации выполняется вход; зарегистрированный аккаунт нужен для личной истории и статистики.",
     "hy": "Բացեք /register, լրացրեք օգտանունը, ճիշտ email-ը և գաղտնաբառը, ապա ուղարկեք ձևը։ Օգտանունը պետք է ունենա 3–50 նիշ, գաղտնաբառը՝ առնվազն 8։ Սերվերը ստուգում է անունի և email-ի զբաղվածությունը։ Գրանցումից հետո մուտքը կատարվում է ավտոմատ․ անձնական պատմության և վիճակագրության համար օգտագործեք գրանցված հաշիվ։",
-    "fallbackMatch": "регистр|созда.{0,20}(?:аккаунт|учетн)|зарег|sign.?up|register|create.{0,15}account|գրանց"
+    "fallbackMatch": "регистр|созда.{0,20}(?:аккаунт|учетн)|зарег|sign.?up|register|create.{0,15}account|գրանց",
+    "facts": "/register requires unique username (3-50 characters), valid unique email and password (8+ characters). Registration signs the user in."
   },
   "login": {
     "en": "Open /login and enter your username or email and password. Email is case-insensitive. If you see a temporary connection error, press Retry. If you forgot the password, contact the site owner.\n\n{ownerContacts}",
     "ru": "Откройте /login и введите имя пользователя или email и пароль. Регистр букв email не важен. При временной ошибке соединения нажмите «Повторить». Если забыли пароль, свяжитесь с владельцем сайта.\n\n{ownerContacts}",
     "hy": "Բացեք /login և մուտքագրեք օգտանունը կամ email-ը և գաղտնաբառը։ Email-ի տառերի մեծությունն ու փոքրությունը նշանակություն չունի։ Կապի ժամանակավոր սխալի դեպքում սեղմեք «Կրկին»։ Եթե մոռացել եք գաղտնաբառը, կապվեք կայքի սեփականատիրոջ հետ։\n\n{ownerContacts}",
-    "fallbackMatch": "войти|вход|не пускает|log.?in|sign.?in|մուտք"
+    "fallbackMatch": "войти|вход|не пускает|log.?in|sign.?in|մուտք",
+    "facts": "/login accepts username or email and password. Email is case-insensitive. Temporary connection errors have Retry. Forgotten passwords require contacting the owner."
   },
   "logout": {
     "en": "Select Log out in the account menu. This ends your session; your account, games and results stay saved. Sign in again at /login to return to your account.",
     "ru": "Нажмите «Выйти» в меню аккаунта. Сессия завершится, а аккаунт, партии и результаты сохранятся. Чтобы вернуться, войдите снова на /login.",
     "hy": "Հաշվի ընտրացանկում սեղմեք «Դուրս գալ»։ Սեսիան կավարտվի, իսկ հաշիվը, խաղերն ու արդյունքները կպահպանվեն։ Վերադառնալու համար կրկին մուտք գործեք /login էջում։",
-    "fallbackMatch": "выйти|выход|log.?out|sign.?out|դուրս գալ"
+    "fallbackMatch": "выйти|выход|log.?out|sign.?out|դուրս գալ",
+    "facts": "Account-menu Log out ends the session, preserving account, games and statistics. Sign in again at /login."
   },
   "invitations": {
     "en": "A friend invitation has a link and code and expires after 24 hours. The creator plays White and the joining player Black. Reopening the link as an existing participant returns to the same game. A third player cannot occupy an accepted invitation. Copy the full link or enter the code in Play; check expiry and whether someone already joined if it is rejected.",
     "ru": "Приглашение другу содержит ссылку и код и действует 24 часа. Создатель играет белыми, присоединившийся — чёрными. Повторное открытие участником возвращает в ту же партию. Третий игрок не может занять использованное приглашение. Скопируйте ссылку полностью или введите код в разделе «Игра»; при отказе проверьте срок и не присоединился ли уже другой игрок.",
     "hy": "Ընկերոջ հրավերն ունի հղում և կոդ և գործում է 24 ժամ։ Ստեղծողը խաղում է սպիտակներով, միացողը՝ սևերով։ Մասնակցի կրկնակի բացումը վերադարձնում է նույն խաղին։ Երրորդ խաղացողը չի կարող զբաղեցնել ընդունված հրավերը։ Պատճենեք ամբողջ հղումը կամ մուտքագրեք կոդը «Խաղ» բաժնում․ մերժման դեպքում ստուգեք ժամկետը և արդյոք ուրիշն արդեն միացել է։",
-    "fallbackMatch": "приглаш|код.{0,12}друг|invite|invitation|հրավեր"
+    "fallbackMatch": "приглаш|код.{0,12}друг|invite|invitation|հրավեր",
+    "facts": "Friend invitations provide a link and code, expire in 24h. Creator is White, joiner Black. Existing participants reopen the same game; a third player cannot join an accepted invitation."
   },
   "search_wait": {
     "en": "Matchmaking needs another real waiting player; a bot is not silently substituted. You can cancel the search or choose bot mode yourself. The configured matchmaking timeout is {matchmakingSeconds} seconds. Switching modes first cancels an active search; retry if that cancellation fails.",
@@ -95,23 +110,27 @@
     "en": "Choose Easy, Medium or Hard and start the game. You play White and move first. Easy is suited to getting started, Medium offers more resistance, and Hard searches further ahead. The rules are the same at every level.",
     "ru": "Выберите Easy, Medium или Hard и начните партию. Вы играете белыми и ходите первым. Easy подойдёт для знакомства с игрой, Medium даст больше сопротивления, Hard просчитывает ходы глубже. Правила на всех уровнях одинаковые.",
     "hy": "Ընտրեք Easy, Medium կամ Hard և սկսեք խաղը։ Դուք խաղում եք սպիտակներով և սկսում եք։ Easy-ը հարմար է խաղին ծանոթանալու համար, Medium-ը ավելի մեծ դիմադրություն է ցուցաբերում, Hard-ը քայլերն ավելի խորն է հաշվարկում։ Կանոնները բոլոր մակարդակներում նույնն են։",
-    "fallbackMatch": "сложност|уровень.{0,12}бот|bot.{0,12}(?:level|difficult)|բարդությ"
+    "fallbackMatch": "сложност|уровень.{0,12}бот|bot.{0,12}(?:level|difficult)|բարդությ",
+    "facts": "Easy/Medium/Hard change search difficulty, not rules. Human plays White and moves first."
   },
   "controls": {
     "en": "Click a movable piece and then its destination, or drag it. For an ambiguous capture chain, select intermediate landings in order. Arrow keys move board focus; Enter or Space selects a piece or destination. Right-drag draws an annotation and right-click can mark a square; when premoves exist, right-click cancels their queue. Flip changes your view, not ownership or turn.",
     "ru": "Нажмите доступную шашку и поле назначения или перетащите её. Если серия взятий неоднозначна, выбирайте промежуточные приземления по порядку. Стрелки перемещают фокус, Enter или пробел выбирает шашку или поле. Правая кнопка позволяет рисовать отметки; при существующей очереди премувов она отменяет очередь. Переворот меняет только вид доски, а не цвет игрока или очередь хода.",
     "hy": "Սեղմեք հասանելի խաղաքարը և նպատակային վանդակը կամ քաշեք այն։ Անորոշ հարվածաշղթայի դեպքում հերթով ընտրեք միջանկյալ վանդակները։ Սլաքները տեղափոխում են ֆոկուսը, Enter-ը կամ բացատը ընտրում է խաղաքարը կամ վանդակը։ Աջ կոճակը թույլ է տալիս նշումներ անել․ նախնական քայլերի հերթի առկայության դեպքում այն չեղարկում է հերթը։ Տախտակի շրջումը փոխում է միայն տեսքը, ոչ խաղացողի գույնը կամ քայլի հերթը։",
-    "fallbackMatch": "перевер|перетаск|клавиат|flip|drag|keyboard|շրջել"
+    "fallbackMatch": "перевер|перетаск|клавиат|flip|drag|keyboard|շրջել",
+    "facts": "Click piece then destination or drag. Ambiguous captures require intermediate landings in order. Arrows focus squares; Enter/Space selects. Right-drag draws annotations. Right-click/Escape clears premoves. Flip changes view only."
   },
   "illegal_move": {
     "en": "Check whose turn it is, whether the piece is yours and whether a capture is available anywhere. Captures are mandatory. Men make quiet moves forward only; captures may go backward. Destinations must be empty dark squares and a capture chain must be completed. The server validates the whole path. Wait for pending animation or synchronization if input is temporarily blocked.",
     "ru": "Проверьте очередь хода, принадлежность шашки и наличие взятия любой своей фигурой. Взятие обязательно. Простая шашка ходит без взятия только вперёд, но бьёт и назад. Приземление должно быть на свободном тёмном поле, серию взятий нужно закончить. Сервер проверяет весь путь. Если ввод временно заблокирован, дождитесь анимации или синхронизации.",
-    "hy": "Ստուգեք քայլի հերթը, խաղաքարի պատկանելությունը և որևէ սեփական խաղաքարով հարվածի առկայությունը։ Հարվածը պարտադիր է։ Պարզ խաղաքարը սովորական քայլ անում է միայն առաջ, բայց հարվածում է նաև հետ։ Վերջնակետը պետք է լինի ազատ մուգ վանդակ, իսկ հարվածաշղթան պետք է ավարտել։ Սերվերը ստուգում է ամբողջ ուղին։ Մուտքի ժամանակավոր արգելափակման դեպքում սպասեք անիմացիայի կամ համաժամացման ավարտին։"
+    "hy": "Ստուգեք քայլի հերթը, խաղաքարի պատկանելությունը և որևէ սեփական խաղաքարով հարվածի առկայությունը։ Հարվածը պարտադիր է։ Պարզ խաղաքարը սովորական քայլ անում է միայն առաջ, բայց հարվածում է նաև հետ։ Վերջնակետը պետք է լինի ազատ մուգ վանդակ, իսկ հարվածաշղթան պետք է ավարտել։ Սերվերը ստուգում է ամբողջ ուղին։ Մուտքի ժամանակավոր արգելափակման դեպքում սպասեք անիմացիայի կամ համաժամացման ավարտին։",
+    "facts": "Moves require own piece, own turn, empty dark destination and a complete capture chain. Any available capture is mandatory. Men make quiet moves forward, captures both ways. Server validates full paths."
   },
   "results": {
     "en": "A side loses if it has no pieces or no legal moves, including a blocked position. Resign ends a started game as a loss. Ending a waiting invitation cancels it. The result window offers reviewing the final board, starting a new game or returning to the lobby. Closing the result window does not undo the outcome.",
     "ru": "Сторона проигрывает, если у неё не осталось фигур или допустимых ходов, в том числе при блокировке. Сдача начатой партии засчитывает поражение. Завершение ожидающего приглашения отменяет его. В итоговом окне можно посмотреть последнюю позицию, начать новую игру или вернуться в лобби. Закрытие окна не отменяет результат.",
-    "hy": "Կողմը պարտվում է, եթե չունի խաղաքարեր կամ օրինական քայլեր, այդ թվում՝ արգելափակված դիրքում։ Սկսված խաղում հանձնվելը պարտություն է։ Սպասող հրավերի ավարտը չեղարկում է այն։ Արդյունքի պատուհանից կարելի է դիտել վերջնական դիրքը, սկսել նոր խաղ կամ վերադառնալ լոբբի։ Պատուհանը փակելը չի չեղարկում արդյունքը։"
+    "hy": "Կողմը պարտվում է, եթե չունի խաղաքարեր կամ օրինական քայլեր, այդ թվում՝ արգելափակված դիրքում։ Սկսված խաղում հանձնվելը պարտություն է։ Սպասող հրավերի ավարտը չեղարկում է այն։ Արդյունքի պատուհանից կարելի է դիտել վերջնական դիրքը, սկսել նոր խաղ կամ վերադառնալ լոբբի։ Պատուհանը փակելը չի չեղարկում արդյունքը։",
+    "facts": "No pieces or legal moves means a loss. Resign loses an active game; ending a waiting invitation cancels it. Result window supports review, new game and lobby. Closing it preserves the outcome."
   },
   "draw_limits": {
     "en": "Automatic draws check the third occurrence of the same pieces and side to move; 15 moves per side with 4–5 pieces or 25 with 6–7 when only kings move without captures; and unchanged material for 5/30/60 moves per side with 2–3/4–5/6–7 pieces when both sides have kings. Three or more kings against one have a 15-attacking-move limit. Three pieces off the a1–h8 long diagonal against a lone king on it have a 5-attacking-move rule, subject to the implemented placement and capture-continuation exceptions. Victory takes precedence. Captures, promotion and man moves reset the applicable counters, not necessarily every counter.",
@@ -128,19 +147,22 @@
     "en": "Open Tasks (/tasks) and find a winning plan for White within the move limit. After your move, Black responds automatically. Correct progress is saved in this browser and restored after a reload. Reset starts the solution again. Everyone gets the same puzzle for the UTC day; puzzle attempts do not affect normal game statistics.",
     "ru": "Откройте «Задачи» (/tasks) и найдите выигрышный план за белых в заданное число ходов. После вашего хода чёрные отвечают автоматически. Верный прогресс сохраняется в этом браузере и восстанавливается после обновления страницы. «Сброс» начинает решение заново. Задача общая для всех на день по UTC; попытки не влияют на статистику обычных партий.",
     "hy": "Բացեք «Խնդիրներ» բաժինը (/tasks) և գտեք սպիտակների հաղթական պլանը՝ տրված քայլերի սահմանում։ Ձեր քայլից հետո սևերն ավտոմատ պատասխանում են։ Ճիշտ առաջընթացը պահպանվում է այս բրաուզերում և վերականգնվում էջը թարմացնելուց հետո։ Սկզբնականացումը լուծումը սկսում է նորից։ UTC օրվա խնդիրը բոլորի համար նույնն է․ փորձերը չեն ազդում սովորական խաղերի վիճակագրության վրա։",
-    "fallbackMatch": "задач|puzzle|խնդիր"
+    "fallbackMatch": "задач|puzzle|խնդիր",
+    "facts": "/tasks: White finds a win within a move limit; Black replies automatically. Browser saves progress. Reset restarts. Same puzzle for everyone each UTC day. Puzzles do not affect normal statistics."
   },
   "history": {
     "en": "Open History (/history) while signed in to your registered account to see completed games, opponents, results and dates. Active games are on Home under Continue a game. If the list is empty, check that you signed in to the account used to play. Guests do not have a personal history.",
     "ru": "Откройте «Историю» (/history) под своим зарегистрированным аккаунтом: там видны завершённые партии, соперники, результаты и даты. Текущие игры находятся на главной в блоке продолжения партии. Если список пуст, проверьте, что вошли в тот аккаунт, с которого играли. Личная история доступна зарегистрированным игрокам.",
     "hy": "Գրանցված հաշվով մուտք գործելուց հետո բացեք «Պատմություն» բաժինը (/history)․ այնտեղ կան ավարտված խաղերը, մրցակիցները, արդյունքներն ու ամսաթվերը։ Ընթացիկ խաղերը գլխավոր էջի շարունակման բաժնում են։ Եթե ցուցակը դատարկ է, ստուգեք՝ մուտք եք գործել այն հաշվով, որով խաղացել եք։ Անձնական պատմությունը հասանելի է գրանցված խաղացողներին։",
-    "fallbackMatch": "истори|history|պատմությ"
+    "fallbackMatch": "истори|history|պատմությ",
+    "facts": "Registered users see completed games, opponents, outcomes and dates at /history. Active games are on home. Guests lack personal history."
   },
   "statistics": {
     "en": "Progress (/rating) shows the registered user's wins, losses, draws and win rate, not an Elo leaderboard. Win rate is wins divided by all completed personal games. Site activity counts recent distinct visitors and completed games from real data. Tasks are excluded from ordinary game totals. Guests do not accumulate personal result counters. A failed data request shows an unknown value rather than an invented zero.",
     "ru": "Прогресс (/rating) показывает победы, поражения, ничьи и процент побед зарегистрированного пользователя, а не таблицу Elo. Процент — победы, делённые на все завершённые личные партии. Общая активность считает реальных недавних посетителей и завершённые игры. Задачи не входят в обычные партии. Гостю личные счётчики не накапливаются. Ошибка запроса означает неизвестное значение, а не выдуманный ноль.",
     "hy": "Առաջընթացը (/rating) ցույց է տալիս գրանցված օգտատիրոջ հաղթանակները, պարտությունները, ոչ-ոքիներն ու հաղթանակների տոկոսը, ոչ թե Elo վարկանիշային աղյուսակ։ Տոկոսը հաղթանակների հարաբերությունն է բոլոր ավարտված անձնական խաղերին։ Կայքի ակտիվությունը հաշվում է իրական վերջին այցելուներին և ավարտված խաղերը։ Խնդիրները սովորական խաղերի թվի մեջ չեն մտնում։ Հյուրի անձնական հաշվիչները չեն կուտակվում։ Հարցման սխալի դեպքում ցուցադրվում է անհայտ արժեք, ոչ հորինված զրո։",
-    "fallbackMatch": "статист|процент.{0,12}побед|рейтинг|elo|leaderboard|win rate|statistics|վիճակագր|վարկանիշ"
+    "fallbackMatch": "статист|процент.{0,12}побед|рейтинг|elo|leaderboard|win rate|statistics|վիճակագր|վարկանիշ",
+    "facts": "/rating shows personal wins/losses/draws and win rate, not Elo or a leaderboard. Win rate = wins / all completed personal games. Guests and puzzles do not add personal counters. Failed requests show unknown, not zero."
   },
   "reconnect": {
     "en": "If the connection drops, check your network and reopen the same game using your participant account. Online games allow {reconnectSeconds} seconds to reconnect before technical defeat. If the result seems wrong, send the game link and a description to the site owner.\n\n{ownerContacts}",
@@ -152,27 +174,32 @@
     "en": "A normal move plays a recorded soft wooden contact. Each capture landing plays a denser recorded contact, so several jumps produce several sounds. A long quiet king move is still a normal move. Browsers may require a click before enabling audio; also check tab muting and device volume. Hidden tabs and cancelled moves suppress remaining contacts; reduced-motion settings retain separate contacts without piece animation.",
     "ru": "Обычный ход сопровождается записью мягкого деревянного стука. Каждое приземление при взятии даёт более плотный контакт, поэтому несколько прыжков звучат отдельно. Дальний ход дамки без взятия остаётся обычным ходом. Для включения аудио браузеру может потребоваться нажатие; проверьте звук вкладки и устройства. Скрытая вкладка и отмена подавляют оставшиеся контакты; уменьшенная анимация сохраняет отдельные стуки без движения фигуры.",
     "hy": "Սովորական քայլի ժամանակ հնչում է փայտե մեղմ հպման ձայնագրություն։ Հարվածի յուրաքանչյուր վայրէջք ունի ավելի խիտ առանձին ձայն, հետևաբար մի քանի ցատկը հնչում է առանձին։ Դամի հեռու քայլն առանց հարվածի մնում է սովորական քայլ։ Բրաուզերը ձայնը միացնելու համար կարող է սեղմում պահանջել․ ստուգեք ներդիրի և սարքի ձայնը։ Թաքնված ներդիրն ու չեղարկումը դադարեցնում են մնացած ձայները․ կրճատված շարժման դեպքում առանձին հպումները պահպանվում են առանց անիմացիայի։",
-    "fallbackMatch": "звук|стук|sound|audio|ձայն"
+    "fallbackMatch": "звук|стук|sound|audio|ձայն",
+    "facts": "Recorded wooden contacts: soft for a quiet move, denser per capture landing. Multiple captures play multiple contacts. Browsers may require a click to enable audio. Check muted tab/device volume. Hidden tabs/cancelled moves suppress remaining sounds."
   },
   "technical": {
     "en": "This website uses Java 17, Spring Boot, Thymeleaf and JavaScript. REST loads snapshots and account data; STOMP over WebSocket/SockJS delivers game events. A pure Java rules engine validates moves for humans, bots and puzzles. JPA stores users, games, moves, invitations and refresh tokens. Development uses temporary H2; production uses PostgreSQL. Matchmaking and presence currently assume one application instance. These facts describe this website, not a general coding service.",
     "ru": "Сайт использует Java 17, Spring Boot, Thymeleaf и JavaScript. REST загружает снимки и данные аккаунта, STOMP поверх WebSocket/SockJS передаёт игровые события. Общий Java-движок проверяет ходы людей, бота и задач. JPA хранит пользователей, партии, ходы, приглашения и refresh-токены. В разработке используется временная H2, в рабочей версии — PostgreSQL. Подбор и присутствие рассчитаны на один экземпляр приложения. Это сведения об этом сайте, а не сервис написания произвольных программ.",
-    "hy": "Կայքն օգտագործում է Java 17, Spring Boot, Thymeleaf և JavaScript։ REST-ը բեռնում է վիճակներն ու հաշվի տվյալները, STOMP-ը WebSocket/SockJS-ով փոխանցում է խաղի իրադարձությունները։ Ընդհանուր Java շարժիչը ստուգում է մարդկանց, բոտի և խնդիրների քայլերը։ JPA-ն պահում է օգտատերերին, խաղերը, քայլերը, հրավերներն ու refresh թոքենները։ Մշակման ընթացքում օգտագործվում է ժամանակավոր H2, աշխատող տարբերակում՝ PostgreSQL։ Որոնումն ու ներկայությունը նախատեսված են հավելվածի մեկ օրինակի համար։ Սրանք այս կայքի մասին փաստեր են, ոչ կամայական ծրագրավորման ծառայություն։"
+    "hy": "Կայքն օգտագործում է Java 17, Spring Boot, Thymeleaf և JavaScript։ REST-ը բեռնում է վիճակներն ու հաշվի տվյալները, STOMP-ը WebSocket/SockJS-ով փոխանցում է խաղի իրադարձությունները։ Ընդհանուր Java շարժիչը ստուգում է մարդկանց, բոտի և խնդիրների քայլերը։ JPA-ն պահում է օգտատերերին, խաղերը, քայլերը, հրավերներն ու refresh թոքենները։ Մշակման ընթացքում օգտագործվում է ժամանակավոր H2, աշխատող տարբերակում՝ PostgreSQL։ Որոնումն ու ներկայությունը նախատեսված են հավելվածի մեկ օրինակի համար։ Սրանք այս կայքի մասին փաստեր են, ոչ կամայական ծրագրավորման ծառայություն։",
+    "facts": "Java17/Spring Boot/Thymeleaf/JavaScript. REST snapshots/account data; STOMP over WebSocket/SockJS game events. Shared pure-Java rules engine for humans/bots/puzzles. JPA users/games/moves/invitations/refresh tokens. Dev H2; production PostgreSQL. Single-instance matchmaking/presence."
   },
   "security": {
     "en": "Use /login to sign in. Passwords are protected with BCrypt hashes, and game actions are checked against the participant and turn. Keep your password and login tokens private. For account-access questions, contact the site owner without sending your password.\n\n{ownerContacts}",
     "ru": "Для входа используйте /login. Пароли защищены BCrypt-хешированием, а действия в партии проверяются по участнику и очереди хода. Храните пароль и токены входа в секрете. С вопросами о доступе к аккаунту обращайтесь к владельцу сайта, не отправляя сам пароль.\n\n{ownerContacts}",
-    "hy": "Մուտքի համար օգտագործեք /login էջը։ Գաղտնաբառերը պաշտպանված են BCrypt հեշավորմամբ, իսկ խաղի գործողությունները ստուգվում են ըստ մասնակցի և հերթի։ Գաղտնի պահեք գաղտնաբառն ու մուտքի թոքենները։ Հաշվի հասանելիության հարցերով դիմեք կայքի սեփականատիրոջը՝ առանց գաղտնաբառը ուղարկելու։\n\n{ownerContacts}"
+    "hy": "Մուտքի համար օգտագործեք /login էջը։ Գաղտնաբառերը պաշտպանված են BCrypt հեշավորմամբ, իսկ խաղի գործողությունները ստուգվում են ըստ մասնակցի և հերթի։ Գաղտնի պահեք գաղտնաբառն ու մուտքի թոքենները։ Հաշվի հասանելիության հարցերով դիմեք կայքի սեփականատիրոջը՝ առանց գաղտնաբառը ուղարկելու։\n\n{ownerContacts}",
+    "facts": "Passwords use BCrypt; game actions validate participant and turn. Passwords and login tokens must stay private. Account-access requests go to the owner."
   },
   "support_limits": {
     "en": "Your results are in Progress and your completed games are in History. For a question about your account, a disputed result or a problem that needs attention, contact the site owner. Include the relevant page or game link.\n\n{ownerContacts}",
     "ru": "Ваши результаты доступны в разделе «Прогресс», завершённые партии — в «Истории». С вопросами об аккаунте, спорном результате или проблеме, требующей разбирательства, обратитесь к владельцу сайта. Приложите ссылку на нужную страницу или партию.\n\n{ownerContacts}",
-    "hy": "Ձեր արդյունքները հասանելի են «Առաջընթաց» բաժնում, ավարտված խաղերը՝ «Պատմություն» բաժնում։ Հաշվի, վիճելի արդյունքի կամ քննարկում պահանջող խնդրի դեպքում դիմեք կայքի սեփականատիրոջը։ Կցեք համապատասխան էջի կամ խաղի հղումը։\n\n{ownerContacts}"
+    "hy": "Ձեր արդյունքները հասանելի են «Առաջընթաց» բաժնում, ավարտված խաղերը՝ «Պատմություն» բաժնում։ Հաշվի, վիճելի արդյունքի կամ քննարկում պահանջող խնդրի դեպքում դիմեք կայքի սեփականատիրոջը։ Կցեք համապատասխան էջի կամ խաղի հղումը։\n\n{ownerContacts}",
+    "facts": "Personal results: /rating. Completed games: /history. Account problems, disputed results and issues needing attention go to the owner with relevant page/game link."
   },
   "owner_contact": {
     "en": "You can contact the site owner here:\n\n{ownerContacts}",
     "ru": "Связаться с владельцем сайта можно здесь:\n\n{ownerContacts}",
     "hy": "Կայքի սեփականատիրոջ հետ կարող եք կապվել այստեղ․\n\n{ownerContacts}",
-    "directMatch": "(?s)(?:.*(?:telegram|телеграм|տելեգրամ|shaatimi|shatimi@).*|(?=.*(?:связ|контакт|напис|обрат|поддержк|contact|support|reach|կապ|գրել|աջակց))(?=.*(?:владел|владель|админ|создател|разработчик|поддержк|owner|admin|developer|support|սեփականատ|աջակց|ստեղծող)).*)"
+    "directMatch": "(?s)(?:.*(?:telegram|телеграм|տելեգրամ|shaatimi|shatimi@).*|(?=.*(?:связ|контакт|напис|обрат|поддержк|contact|support|reach|կապ|գրել|աջակց))(?=.*(?:владел|владель|админ|создател|разработчик|поддержк|owner|admin|developer|support|սեփականատ|աջակց|ստեղծող)).*)",
+    "facts": "Public owner contacts are the Telegram and Email supplied in the assistant instructions."
   }
 }

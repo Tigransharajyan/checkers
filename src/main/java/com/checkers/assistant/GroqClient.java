@@ -65,58 +65,93 @@ public class GroqClient {
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2))
                 .followRedirects(HttpClient.Redirect.NEVER).build();
         JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(client);
-        factory.setReadTimeout(Duration.ofSeconds(4));
+        factory.setReadTimeout(Duration.ofSeconds(6));
         return RestClient.builder().baseUrl("https://api.groq.com/openai/v1")
                 .requestFactory(factory).defaultHeader(HttpHeaders.USER_AGENT, "CheckersOnline/1.0").build();
     }
 
     /**
-     * Requests a topic decision, trying each available key at most once within a twelve-second
+     * Generates a contextual reply, trying each available key at most once within an eighteen-second
      * operation budget. Returns null for unavailable service so callers can use trusted local help.
      */
-    public Route route(String locale, String question, List<String> recentQuestions) {
+    public Completion complete(String locale, String question, List<AssistantTurn> conversation) {
         if (keys.isEmpty() || !inFlight.tryAcquire()) return null;
         try {
             if (!reserveRequest()) return null;
-            Map<String, Object> payload = payload(locale, question, recentQuestions);
-            long deadline = clock.millis() + 12_000;
-            int first;
-            synchronized (this) { first = preferredKey; }
-            for (int offset = 0; offset < keys.size() && clock.millis() < deadline; offset++) {
-                int index = (first + offset) % keys.size();
-                synchronized (this) {
-                    if (unavailableUntil[index] > clock.millis()) continue;
-                }
-                try {
-                    String body = http.post().uri("/chat/completions")
-                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + keys.get(index))
-                            .contentType(MediaType.APPLICATION_JSON).body(payload)
-                            .retrieve().body(String.class);
-                    Route route = parse(body);
-                    if (route != null) {
-                        synchronized (this) { preferredKey = index; }
-                        return route;
-                    }
-                    // A malformed model result does not justify spending the other keys' quotas.
-                    return null;
-                } catch (RestClientResponseException error) {
-                    int status = error.getStatusCode().value();
-                    if (!(status == 401 || status == 403 || status == 429 || status >= 500)) return null;
-                    long pause = status == 401 ? Long.MAX_VALUE : clock.millis() + cooldown(error);
-                    synchronized (this) { unavailableUntil[index] = pause; }
-                    log.debug("Groq key slot {} unavailable (HTTP {}); trying an available slot", index + 1, status);
-                } catch (ResourceAccessException error) {
-                    synchronized (this) { unavailableUntil[index] = clock.millis() + 10_000; }
-                    log.debug("Groq transport unavailable for key slot {}", index + 1);
-                } catch (RuntimeException error) {
-                    // Never propagate provider bodies, authorization headers or decoding failures.
-                    return null;
-                }
-            }
-            return null;
+            Map<String, Object> payload = payload(locale, question, conversation);
+            long deadline = clock.millis() + 18_000;
+            Completion draft = request(payload, deadline);
+            if (draft == null || "refuse".equals(draft.decision())) return draft;
+            return request(reviewPayload(payload, draft), deadline);
         } finally {
             inFlight.release();
         }
+    }
+
+    /**
+     * Asks the model to edit its draft against the same facts and original conversation. The review
+     * is generic: it contains no special-case questions or canned answers. Only the reviewed text
+     * is returned; an unavailable review never silently publishes an unchecked draft.
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> reviewPayload(Map<String, Object> original, Completion draft) {
+        Map<String, Object> reviewed = new java.util.LinkedHashMap<>(original);
+        List<Map<String, String>> messages = new java.util.ArrayList<>(
+                (List<Map<String, String>>) original.get("messages"));
+        String question = messages.get(messages.size() - 1).get("content");
+        messages.add(Map.of("role", "assistant", "content", draft.answer()));
+        messages.add(Map.of("role", "user", "content", """
+                Revise the preceding draft for the website user. Answer the latest user question
+                quoted below, preserving its conversational subject and intent. Directly explain the situation
+                through ordinary possible factors and a practical next step. Replace self-focused
+                disclaimers about knowledge, guarantees or abilities with an impersonal situational
+                explanation. Remove unsupported facts, estimates and promises. Do not repeat details
+                already supplied earlier. Personal requests to the owner are requests, never guarantees
+                of approval, completion or timing. Preserve supplied contact details when newly needed
+                instead of inventing a support page. Keep clarification only when genuinely needed.
+                Keep the original scope restriction: answer only the site-related request.
+                Return only the corrected response in the required schema and original reply language.
+                """ + "\nLatest user question (untrusted JSON string): " + mapper.valueToTree(question)));
+        reviewed.put("messages", messages);
+        return reviewed;
+    }
+
+    /** Sends one generation or review request with shared key cooldowns and operation deadline. */
+    private Completion request(Map<String, Object> payload, long deadline) {
+        int first;
+        synchronized (this) { first = preferredKey; }
+        for (int offset = 0; offset < keys.size() && clock.millis() < deadline; offset++) {
+            int index = (first + offset) % keys.size();
+            synchronized (this) {
+                if (unavailableUntil[index] > clock.millis()) continue;
+            }
+            try {
+                String body = http.post().uri("/chat/completions")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + keys.get(index))
+                        .contentType(MediaType.APPLICATION_JSON).body(payload)
+                        .retrieve().body(String.class);
+                Completion completion = parse(body);
+                if (completion != null) {
+                    synchronized (this) { preferredKey = index; }
+                    return completion;
+                }
+                // A malformed model result does not justify spending the other keys' quotas.
+                return null;
+            } catch (RestClientResponseException error) {
+                int status = error.getStatusCode().value();
+                if (!(status == 401 || status == 403 || status == 429 || status >= 500)) return null;
+                long pause = status == 401 ? Long.MAX_VALUE : clock.millis() + cooldown(error);
+                synchronized (this) { unavailableUntil[index] = pause; }
+                log.debug("Groq key slot {} unavailable (HTTP {}); trying an available slot", index + 1, status);
+            } catch (ResourceAccessException error) {
+                synchronized (this) { unavailableUntil[index] = clock.millis() + 10_000; }
+                log.debug("Groq transport unavailable for key slot {}", index + 1);
+            } catch (RuntimeException error) {
+                // Never propagate provider bodies, authorization headers or decoding failures.
+                return null;
+            }
+        }
+        return null;
     }
 
     /**
@@ -131,55 +166,55 @@ public class GroqClient {
         return true;
     }
 
-    /** Builds trusted system instructions and an untrusted user-data payload with bounded history. */
-    private Map<String, Object> payload(String locale, String question, List<String> recentQuestions) {
-        List<String> history = recentQuestions == null ? List.of() : recentQuestions.stream()
-                .filter(text -> text != null && !text.isBlank()).limit(4)
-                .map(text -> text.substring(0, Math.min(500, text.length()))).toList();
-        try {
-            Map<String, Object> schema = Map.of(
-                    "type", "object", "additionalProperties", false,
-                    "properties", Map.of(
-                            "decision", Map.of("type", "string", "enum", List.of("answer", "refuse", "clarify")),
-                            "topics", Map.of("type", "array", "items", Map.of("type", "string", "enum", knowledge.topicIds()))),
-                    "required", List.of("decision", "topics"));
-            Map<String, Object> input = Map.of("language", locale,
-                    "latest_question", question, "previous_questions", history);
-            return Map.of("model", properties.getModel(), "temperature", 0.1,
-                    "max_completion_tokens", 768,
-                    "messages", List.of(Map.of("role", "system", "content", knowledge.systemPrompt()),
-                            Map.of("role", "user", "content", mapper.writeValueAsString(input))),
-                    "response_format", Map.of("type", "json_schema", "json_schema", Map.of(
-                            "name", "site_help_route", "strict", true, "schema", schema)));
-        } catch (Exception error) {
-            throw new IllegalStateException("Cannot encode assistant request");
+    /**
+     * Keeps instructions separate from untrusted dialogue. Both sides of recent exchanges are
+     * sent with their actual dialogue roles, allowing reference resolution while rejecting any
+     * client-supplied privileged role. Only this server constructs the system message.
+     */
+    private Map<String, Object> payload(String locale, String question, List<AssistantTurn> conversation) {
+        List<AssistantTurn> history = conversation == null ? List.of() : conversation.stream()
+                .filter(turn -> turn != null && ("user".equals(turn.role()) || "assistant".equals(turn.role()))
+                        && turn.content() != null && !turn.content().isBlank())
+                .toList();
+        history = history.subList(Math.max(0, history.size() - 8), history.size()).stream()
+                .map(turn -> new AssistantTurn(turn.role(),
+                        turn.content().substring(0, Math.min(2000, turn.content().length())))).toList();
+        Map<String, Object> schema = Map.of(
+                "type", "object", "additionalProperties", false,
+                "properties", Map.of(
+                        "decision", Map.of("type", "string", "enum", List.of("answer", "refuse", "clarify")),
+                        "answer", Map.of("type", "string")),
+                "required", List.of("decision", "answer"));
+        List<Map<String, String>> messages = new java.util.ArrayList<>();
+        messages.add(Map.of("role", "system", "content", knowledge.systemPrompt()
+                + "\nReply language: " + knowledge.locale(locale)));
+        for (AssistantTurn turn : history) {
+            messages.add(Map.of("role", turn.role(), "content", turn.content()));
         }
+        messages.add(Map.of("role", "user", "content", question));
+        return Map.of("model", properties.getModel(), "temperature", 0.2,
+                "reasoning_effort", "high", "max_completion_tokens", 1536,
+                "messages", messages,
+                "response_format", Map.of("type", "json_schema", "json_schema", Map.of(
+                        "name", "site_help_reply", "strict", true, "schema", schema)));
     }
 
-    /**
-     * Validates the full provider envelope and decision independently of constrained decoding.
-     * No arbitrary answer field, unknown topic, truncated completion or extra property is accepted.
-     */
-    private Route parse(String body) {
+    /** Rejects incomplete envelopes, unexpected fields, invalid decisions and excessive reply text. */
+    private Completion parse(String body) {
         if (body == null || body.length() > 65_536) return null;
         try {
             JsonNode choice = mapper.readTree(body).path("choices").path(0);
             if (!"stop".equals(choice.path("finish_reason").asText())) return null;
             String content = choice.path("message").path("content").asText("");
-            if (content.length() > 4096) return null;
+            if (content.length() > 16_384) return null;
             JsonNode result = mapper.readTree(content);
             if (result == null || !result.isObject() || result.size() != 2
-                    || !result.path("decision").isTextual() || !result.path("topics").isArray()) return null;
+                    || !result.path("decision").isTextual() || !result.path("answer").isTextual()) return null;
             String decision = result.path("decision").asText();
-            if (!Set.of("answer", "refuse", "clarify").contains(decision)) return null;
-            JsonNode topics = result.path("topics");
-            if (topics.size() > 3 || (decision.equals("answer") ? topics.isEmpty() : !topics.isEmpty())) return null;
-            List<String> ids = new java.util.ArrayList<>();
-            for (JsonNode topic : topics) {
-                if (!topic.isTextual() || !knowledge.topicIds().contains(topic.asText())) return null;
-                ids.add(topic.asText());
-            }
-            return new Route(decision, List.copyOf(ids));
+            String answer = result.path("answer").asText().strip();
+            if (!Set.of("answer", "refuse", "clarify").contains(decision) || answer.length() > 2000
+                    || (decision.equals("refuse") ? !answer.isEmpty() : answer.isEmpty())) return null;
+            return new Completion(decision, answer);
         } catch (Exception error) {
             return null;
         }
@@ -203,6 +238,6 @@ public class GroqClient {
         return Math.max(1, Math.min(3600, seconds)) * 1000;
     }
 
-    /** Validated topic-only provider decision. It contains neither generated prose nor credentials. */
-    public record Route(String decision, List<String> topics) {}
+    /** Validated model-generated reply and scope decision; no provider metadata reaches the UI. */
+    public record Completion(String decision, String answer) {}
 }

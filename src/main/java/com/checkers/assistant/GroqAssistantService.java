@@ -6,21 +6,19 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Main site-help service. Groq interprets questions, while the server renders only approved site
- * answers. Missing keys, quota limits or network failures preserve the local FAQ fallback.
+ * Main site-help service. Groq generates grounded conversational replies; local FAQ answers are
+ * used only when the provider is unavailable. The model's scope refusal remains authoritative.
  */
 @Service
 @Primary
 public class GroqAssistantService implements AssistantReplyService {
     private final GroqClient groq;
     private final SiteHelpKnowledge knowledge;
-    private final IntentAssistantService local;
 
-    /** Receives the remote router, authoritative content and existing offline FAQ matcher. */
-    public GroqAssistantService(GroqClient groq, SiteHelpKnowledge knowledge, IntentAssistantService local) {
+    /** Receives the generative client and authoritative content with explicit offline help. */
+    public GroqAssistantService(GroqClient groq, SiteHelpKnowledge knowledge) {
         this.groq = groq;
         this.knowledge = knowledge;
-        this.local = local;
     }
 
     /** Handles a single question using the same restricted pipeline as contextual requests. */
@@ -30,36 +28,25 @@ public class GroqAssistantService implements AssistantReplyService {
     }
 
     /**
-     * Uses only validated topic identifiers from Groq. The provider's arbitrary text never becomes
-     * a public answer, even if a prompt injection or malformed completion bypasses its instructions.
+     * Generates the answer from trusted site facts and untrusted recent dialogue. Explicit refusals
+     * never fall through to keyword matching; canned help is reserved for an unavailable provider.
      */
     @Override
-    public AssistantReply reply(String locale, String message, List<String> recentQuestions) {
+    public AssistantReply reply(String locale, String message, List<AssistantTurn> conversation) {
         String language = knowledge.locale(locale);
         if (message == null || message.isBlank()) return knowledge.clarify(language);
-        // A known missing feature still has a precise answer, even with no remote AI available.
-        AssistantReply direct = knowledge.directAnswer(language, message);
-        if (direct != null) return direct;
-        GroqClient.Route route = groq.route(language, message, recentQuestions);
-        if (route == null) {
-            AssistantReply fallback = fallback(language, message);
+        GroqClient.Completion completion = groq.complete(language, message, conversation);
+        if (completion == null) {
+            // A contextual follow-up cannot safely be answered by isolated keyword matching.
+            AssistantReply fallback = conversation == null || conversation.isEmpty() ? fallback(language, message) : null;
             return fallback != null ? fallback : knowledge.unavailable(language);
         }
-        return switch (route.decision()) {
-            case "answer" -> knowledge.answer(language, route.topics());
-            case "refuse" -> knowledge.refuse(language);
-            default -> {
-                AssistantReply fallback = fallback(language, message);
-                yield fallback != null ? fallback : knowledge.clarify(language);
-            }
-        };
+        if ("refuse".equals(completion.decision())) return knowledge.refuse(language);
+        return new AssistantReply(completion.answer(), "answer".equals(completion.decision()), "/faq?lang=" + language);
     }
 
-    /** Tries expanded local help before the original FAQ when AI routing cannot provide an answer. */
+    /** Tries expanded local help before the original FAQ when AI generation is unavailable. */
     private AssistantReply fallback(String locale, String message) {
-        AssistantReply expanded = knowledge.fallbackAnswer(locale, message);
-        if (expanded != null) return expanded;
-        AssistantReply faq = local.reply(locale, message);
-        return faq.matched() ? faq : null;
+        return knowledge.fallbackAnswer(locale, message);
     }
 }

@@ -36,7 +36,7 @@ app:
     groq:
       # Comma-separated server keys, tried in order; no key keeps local FAQ help available.
       api-keys: ${GROQ_API_KEYS:${GROQ_API_KEY:}}
-      model: ${GROQ_MODEL:openai/gpt-oss-20b}
+      model: ${GROQ_MODEL:openai/gpt-oss-120b}
       requests-per-minute: ${GROQ_REQUESTS_PER_MINUTE:12}
   jwt:
     # The fallback is for development; production supplies its secret through the environment.

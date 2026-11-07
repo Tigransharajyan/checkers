@@ -205,14 +205,17 @@ Checkers.initAssistant = function () {
     });
   });
 
-  /** Sends one question with bounded user-only context; credentials stay on the server. */
+  /** Sends one question with bounded user and assistant dialogue; credentials stay on the server. */
   async function send() {
     const message = (input?.value || '').trim();
     if (!message || sending) return;
     setSending(true);
     const language = Checkers.locale();
-    const recentQuestions = history.filter((item) => item.role === 'user')
-      .slice(-4).map((item) => item.text.slice(0, 500));
+    const dialogue = history.some((item) => item.role === 'user') ? history : [];
+    const conversation = dialogue.slice(-8).map((item) => ({
+      role: item.role === 'user' ? 'user' : 'assistant',
+      content: item.text.slice(0, 2000)
+    }));
     input.value = '';
     resizeInput();
     append('user', message);
@@ -220,11 +223,11 @@ Checkers.initAssistant = function () {
     try {
       const res = await Checkers.api('/api/assistant/chat', {
         method: 'POST',
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(28000),
         body: JSON.stringify({
           message,
           locale: language,
-          recentQuestions
+          conversation
         })
       });
       if (Checkers.locale() === language) append('bot', res.answer);

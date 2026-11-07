@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 const base = process.env.BASE_URL || 'http://localhost:8080';
 
 /** Checks real form submission, duplicate protection, bounded context and safe text rendering. */
-test('assistant sends bounded user-only context once and renders answers as plain text', { timeout: 30000 }, async () => {
+test('assistant sends bounded conversation once and renders answers as plain text', { timeout: 30000 }, async () => {
   const browser = await chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
     headless: true, args: ['--no-sandbox'],
@@ -30,8 +30,16 @@ test('assistant sends bounded user-only context once and renders answers as plai
       await page.waitForFunction(() => !document.querySelector('[data-assistant-send]').disabled);
       assert.equal(requests.length, index + 1);
       assert.equal(requests[index].locale, 'en');
-      assert.deepEqual(requests[index].recentQuestions,
-        Array.from({ length: index }, (_, n) => 'Site question ' + n).slice(-4));
+      const previous = Array.from({ length: index }, (_, n) => [
+        { role: 'user', content: 'Site question ' + n },
+        { role: 'assistant', content: '<b id="injected-marker">Site help</b>' }
+      ]).flat();
+      const context = requests[index].conversation;
+      assert(context.length <= 8);
+      assert.deepEqual(context.slice(index === 0 ? 0 : -Math.min(index * 2, 8)), previous.slice(-8));
+      assert(context.every(turn => ['user', 'assistant'].includes(turn.role)));
+      assert(!context.some(turn => turn.content === 'Site question ' + index));
+      assert.equal(requests[index].recentQuestions, undefined);
       assert.equal(await page.locator('.assistant-msg.bot p').last().textContent(), '<b id="injected-marker">Site help</b>');
       assert.equal(await page.locator('#injected-marker').count(), 0);
       assert(!JSON.stringify(requests[index]).includes('gsk_'));
@@ -55,6 +63,10 @@ test('assistant launcher stays fixed and its panel fits desktop, mobile and land
       await page.setViewportSize(viewport);
       for (const language of ['en', 'ru', 'hy']) {
         await page.goto(base + '/faq?lang=' + language);
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await new Promise(requestAnimationFrame);
+        });
         const toggle = page.locator('[data-assistant-toggle]');
         const before = await toggle.boundingBox();
         assert(before && before.y > 0 && before.y + before.height <= viewport.height);

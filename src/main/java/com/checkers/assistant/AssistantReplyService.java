@@ -15,10 +15,10 @@ public interface AssistantReplyService {
     AssistantReply reply(String locale, String message);
 
     /**
-     * Accepts a bounded list of earlier user questions for short follow-ups. Implementations
-     * without conversational routing retain their existing single-question behavior.
+     * Accepts bounded prior user and assistant turns so follow-ups retain their meaning.
+     * Implementations without conversational support keep their single-question behavior.
      */
-    default AssistantReply reply(String locale, String message, List<String> recentQuestions) {
+    default AssistantReply reply(String locale, String message, List<AssistantTurn> conversation) {
         return reply(locale, message);
     }
 }

@@ -16,6 +16,6 @@ import java.util.List;
 @ConfigurationProperties(prefix = "app.assistant.groq")
 public class GroqProperties {
     private List<String> apiKeys = new ArrayList<>();
-    private String model = "openai/gpt-oss-20b";
+    private String model = "openai/gpt-oss-120b";
     private int requestsPerMinute = 12;
 }

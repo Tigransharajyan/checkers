@@ -1,6 +1,9 @@
 package com.checkers.dto.request;
 
+import com.checkers.assistant.AssistantTurn;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +31,12 @@ public class AssistantChatRequest {
     @Size(min = 2, max = 8)
     private String locale;
 
-    /** Earlier user questions only; clients cannot submit system roles or trusted instructions. */
+    /** Recent dialogue in chronological order; validation rejects privileged roles and oversized turns. */
+    @Valid
+    @Size(max = 8)
+    private List<@NotNull AssistantTurn> conversation;
+
+    /** Compatibility with older cached clients that sent only their last four questions. */
     @Size(max = 4)
     private List<@NotBlank @Size(max = 500) String> recentQuestions;
 }

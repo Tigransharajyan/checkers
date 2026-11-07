@@ -1,6 +1,8 @@
 package com.checkers.controller;
 
 import com.checkers.assistant.AssistantReply;
+import com.checkers.assistant.AssistantTurn;
+
 import com.checkers.assistant.AssistantReplyService;
 import com.checkers.dto.request.AssistantChatRequest;
 import com.checkers.dto.response.AssistantChatResponse;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * REST endpoint for the assistant. Validates request shape and delegates answer retrieval to the
@@ -29,8 +33,13 @@ public class AssistantController {
      */
     @PostMapping("/chat")
     public ResponseEntity<AssistantChatResponse> chat(@Valid @RequestBody AssistantChatRequest request) {
+        List<AssistantTurn> conversation = request.getConversation();
+        if (conversation == null) {
+            conversation = request.getRecentQuestions() == null ? List.of()
+                    : request.getRecentQuestions().stream().map(text -> new AssistantTurn("user", text)).toList();
+        }
         AssistantReply reply = assistantReplyService.reply(
-                request.getLocale(), request.getMessage(), request.getRecentQuestions());
+                request.getLocale(), request.getMessage(), conversation);
         return ResponseEntity.ok(AssistantChatResponse.builder()
                 .answer(reply.answer())
                 .matched(reply.matched())
