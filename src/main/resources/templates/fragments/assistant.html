@@ -1,42 +1,69 @@
 <div class="assistant" xmlns:th="http://www.thymeleaf.org" th:fragment="widget">
-  <div class="assistant-panel" id="help-panel" data-assistant-panel role="dialog" aria-labelledby="help-title">
-    <div class="assistant-head">
-      <span id="help-title" th:text="#{assistant.title}">AI Assistant</span>
-      <button type="button" class="icon-btn" data-assistant-close th:aria-label="#{assistant.close}">
-        <i aria-hidden="true" data-lucide="x"></i>
+  <button type="button" class="assistant-backdrop" data-assistant-backdrop tabindex="-1" aria-hidden="true"></button>
+  <section class="assistant-panel" id="help-panel" data-assistant-panel role="dialog"
+           aria-labelledby="help-title" aria-describedby="help-subtitle" aria-hidden="true" inert>
+    <header class="assistant-head">
+      <span class="assistant-avatar" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><rect x="5" y="7" width="22" height="17" rx="7" stroke="currentColor" stroke-width="1.8"/><path d="m12 24-3 3v-5M16 4v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/><circle cx="20" cy="15" r="1.5" fill="currentColor"/><path d="M12 19c2.5 1.5 5.5 1.5 8 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="assistant-avatar-dot"></span>
+      </span>
+      <div class="assistant-heading">
+        <h2 id="help-title" data-assistant-i18n="assistant.title" th:text="#{assistant.title}">Game assistant</h2>
+        <p id="help-subtitle" data-assistant-i18n="assistant.subtitle" th:text="#{assistant.subtitle}">A little help, whenever you need it</p>
+      </div>
+      <button type="button" class="assistant-close" data-assistant-close th:aria-label="#{assistant.close}">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
-    </div>
+    </header>
     <div class="assistant-body">
-      <!-- Quick FAQ Chips -->
-      <div class="assistant-chips">
+      <div class="assistant-chips" th:aria-label="#{assistant.quickTopics}">
         <button type="button" class="chip" data-chip-key="assistant.quick.start.question"
-                data-chip-label-key="assistant.quick.start.label"
-                th:data-chip="#{assistant.quick.start.question}"
-                th:text="#{assistant.quick.start.label}">Start?</button>
+                data-chip-label-key="assistant.quick.start.label" th:data-chip="#{assistant.quick.start.question}"
+                th:text="#{assistant.quick.start.label}">Start a game</button>
         <button type="button" class="chip" data-chip-key="assistant.quick.friend.question"
-                data-chip-label-key="assistant.quick.friend.label"
-                th:data-chip="#{assistant.quick.friend.question}"
-                th:text="#{assistant.quick.friend.label}">Friend?</button>
+                data-chip-label-key="assistant.quick.friend.label" th:data-chip="#{assistant.quick.friend.question}"
+                th:text="#{assistant.quick.friend.label}">Play a friend</button>
         <button type="button" class="chip" data-chip-key="assistant.quick.king.question"
-                data-chip-label-key="assistant.quick.king.label"
-                th:data-chip="#{assistant.quick.king.question}"
-                th:text="#{assistant.quick.king.label}">King?</button>
+                data-chip-label-key="assistant.quick.king.label" th:data-chip="#{assistant.quick.king.question}"
+                th:text="#{assistant.quick.king.label}">Kings</button>
         <button type="button" class="chip" data-chip-key="assistant.quick.matchmaking.question"
-                data-chip-label-key="assistant.quick.matchmaking.label"
-                th:data-chip="#{assistant.quick.matchmaking.question}"
-                th:text="#{assistant.quick.matchmaking.label}">Match?</button>
+                data-chip-label-key="assistant.quick.matchmaking.label" th:data-chip="#{assistant.quick.matchmaking.question}"
+                th:text="#{assistant.quick.matchmaking.label}">Find an opponent</button>
       </div>
       <div class="assistant-log" data-assistant-log role="log" aria-live="polite" th:aria-label="#{assistant.title}"></div>
-      <form class="assistant-form" data-assistant-form>
-        <label for="help-question" th:text="#{redesign.assistant.question}">Your question</label>
-        <input id="help-question" type="text" data-assistant-input maxlength="500" th:placeholder="#{assistant.placeholder}" autocomplete="off"/>
-        <button type="submit" class="btn btn-primary btn-sm" data-assistant-send th:aria-label="#{assistant.send}">
-          <i aria-hidden="true" data-lucide="send"></i>
-        </button>
-      </form>
+      <div class="assistant-typing" data-assistant-typing role="status" aria-live="polite" hidden>
+        <span class="assistant-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span data-assistant-i18n="assistant.typing" th:text="#{assistant.typing}">Assistant is typing</span>
+      </div>
+      <div class="assistant-compose-area">
+        <form class="assistant-form" data-assistant-form>
+          <label class="sr-only" for="help-question" th:text="#{redesign.assistant.question}">Your question</label>
+          <div class="assistant-composer">
+            <textarea id="help-question" rows="1" data-assistant-input maxlength="500"
+                      th:placeholder="#{assistant.placeholder}" autocomplete="off"></textarea>
+            <button type="submit" class="assistant-send" data-assistant-send th:aria-label="#{assistant.send}">
+              <svg class="assistant-send-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 3-6.5 18-4-7.5L3 9.5 21 3ZM21 3 10.5 13.5"/></svg>
+              <span class="assistant-send-spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+        <p class="assistant-shortcut" data-assistant-i18n="assistant.shortcut" th:text="#{assistant.shortcut}">Enter to send · Shift+Enter for a new line</p>
+      </div>
     </div>
-  </div>
-  <button type="button" class="assistant-toggle" data-assistant-toggle aria-expanded="false" aria-controls="help-panel" th:aria-label="#{assistant.open}">
-    <i aria-hidden="true" data-lucide="help-circle"></i><span th:text="#{redesign.help}">Help with the game</span>
+    <footer class="assistant-footer">
+      <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5 13 3v4c0 3-3 5.5-5 6.5C6 12.5 3 10 3 7V3l5-1.5Z"/><path d="m5.5 7.5 1.7 1.7 3.3-3.4"/></svg>
+      <span data-assistant-i18n="assistant.scope" th:text="#{assistant.scope}">Only this website and Russian draughts</span>
+    </footer>
+  </section>
+  <button type="button" class="assistant-toggle" data-assistant-toggle aria-expanded="false"
+          aria-controls="help-panel" th:aria-label="#{assistant.open}" th:title="#{assistant.open}">
+    <span class="assistant-toggle-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.4-4A8.5 8.5 0 1 1 20.5 11.5Z"/><path d="M8 11h.01M12 11h.01M16 11h.01" stroke-width="2.8"/></svg>
+    </span>
+    <span class="assistant-toggle-copy">
+      <strong data-assistant-i18n="assistant.launcher" th:text="#{assistant.launcher}">Game assistant</strong>
+      <span data-assistant-i18n="assistant.tagline" th:text="#{assistant.tagline}">Let's figure it out</span>
+    </span>
+    <span class="assistant-toggle-spark" aria-hidden="true">✦</span>
   </button>
 </div>

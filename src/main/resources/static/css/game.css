@@ -113,12 +113,10 @@
 .game-lobby-link { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; margin-right: auto; color: #a7a298; font-size: 12px; }
 .game-lobby-link:hover { color: #f0ece4; }
 .game-lobby-link svg { width: 15px; height: 15px; }
-.game-board-tools .icon-btn, .game-page .assistant-toggle { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; min-height: 36px; padding: 0; border: 0; border-radius: 4px; color: #a7a298; background: transparent; }
-.game-board-tools .icon-btn:hover, .game-page .assistant-toggle:hover { background: #ffffff09; color: #eeeae1; }
+.game-board-tools .icon-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; min-height: 36px; padding: 0; border: 0; border-radius: 4px; color: #a7a298; background: transparent; }
+.game-board-tools .icon-btn:hover { background: #ffffff09; color: #eeeae1; }
 .game-board-tools .icon-btn[aria-pressed="true"] { color: #a8cc7b; }
-.game-board-tools .icon-btn svg, .game-page .assistant-toggle svg { width: 18px; height: 18px; }
-.game-page .assistant { display: block; margin: 0; }
-.game-page .assistant-toggle > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.game-board-tools .icon-btn svg { width: 18px; height: 18px; }
 
 @media (max-width: 1200px) {
   .game-page { --game-nav-width: 0px; --game-topbar-height: 56px; }
@@ -170,7 +168,7 @@
   .game-page .game-actions-row .btn { min-height: 30px; padding-block: 4px; font-size: 11px; }
   .game-board-tools { min-height: 35px; }
   .game-lobby-link { min-height: 32px; font-size: 11px; }
-  .game-board-tools .icon-btn, .game-page .assistant-toggle { width: 30px; height: 30px; min-height: 30px; }
+  .game-board-tools .icon-btn { width: 30px; height: 30px; min-height: 30px; }
 }
 @media (max-width: 600px) and (max-height: 600px) {
   .game-page .content { padding: 10px 12px 20px; }

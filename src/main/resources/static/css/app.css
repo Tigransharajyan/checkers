@@ -255,23 +255,6 @@ body.overlay-open { overflow: hidden; }
 #toast-root { position: fixed; right: 24px; bottom: 24px; z-index: 2100; display: flex; flex-direction: column; gap: 8px; max-width: min(380px,calc(100% - 32px)); pointer-events: none; }
 .toast { padding: 12px 16px; font-size: 14px; color: var(--ink); background: var(--sidebar); border: 1px solid #536e60; border-radius: 6px; overflow-wrap: anywhere; }
 .toast.error { background: var(--danger-fill); border-color: var(--danger); }
-/* Help has an in-flow entry, so it never covers a square or a primary control. */
-.assistant { margin: 28px 32px 28px calc(var(--sidebar-width) + 32px); display: flex; justify-content: flex-end; }
-.assistant-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; border: 0; padding: 8px 0; color: var(--muted); background: transparent; font-size: 14px; }
-.assistant-toggle:hover { color: var(--accent); }
-.assistant-panel { display: none; position: fixed; z-index: 160; bottom: 24px; right: 24px; width: min(400px,calc(100% - 32px)); height: min(550px,calc(100svh - 48px)); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 8px; box-shadow: 0 12px 40px #0002; flex-direction: column; }
-.assistant.is-open .assistant-panel { display: flex; }
-.assistant-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 600; }
-.assistant-body { min-height: 0; flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; }
-.assistant-chips { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px 12px; }
-.chip { border: 0; padding: 8px 0; min-height: 44px; text-align: left; background: transparent; color: var(--accent); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
-.assistant-log { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-.assistant-msg { padding: 12px; background: var(--surface-alt); font-size: 14px; }
-.assistant-msg.user { background: var(--ok-bg); border-left: 2px solid var(--accent); }
-.assistant-msg strong { display: block; font-size: 14px; margin-bottom: 4px; font-weight: 600; }
-.assistant-msg p { white-space: pre-wrap; }
-.assistant-form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
-.assistant-form label { grid-column: 1/-1; font-size: 14px; font-weight: 500; }
 @container (max-width: 600px) {
   .mode-tile { grid-template-columns: 24px minmax(0,1fr); }
   .mode-controls { grid-column: 2; }
@@ -297,7 +280,6 @@ body.overlay-open { overflow: hidden; }
   .game-page.sidebar-open .sidebar { visibility: visible; transform: none; }
   .game-page .mobile-top, .game-page .bottom-nav { display: flex; }
   .game-page .sidebar-close { display: inline-flex; }
-  .game-page .assistant { margin-left: 32px; margin-bottom: calc(var(--bottom-nav) + 24px); }
 }
 @media (max-width: 900px) {
   .content { margin-left: 0; padding: 88px 24px calc(var(--bottom-nav) + 24px); }
@@ -316,8 +298,6 @@ body.overlay-open { overflow: hidden; }
   .task-meta { margin-bottom: 12px; }
   .rating-grid { grid-template-columns: minmax(0,1fr); gap: 24px; }
   .rating-stats-card { padding-top: 0; }
-  .assistant { margin: 0 24px calc(var(--bottom-nav) + 24px); }
-  .assistant-panel { bottom: calc(var(--bottom-nav) + 12px); max-height: calc(100svh - var(--bottom-nav) - 80px); }
 }
 .mobile-top { position: fixed; z-index: 60; inset: 0 0 auto; height: var(--header-mobile); padding: 0 12px; justify-content: space-between; align-items: center; background: var(--bg); border-bottom: 1px solid var(--line); }
 .brand-mini { font-weight: 600; color: var(--accent); }
@@ -375,7 +355,6 @@ body.overlay-open { overflow: hidden; }
   .auth-header .lang-switch { margin-left: auto; }
   .auth-card { margin-top: 28px; padding: 24px; }
   .auth-card h1 { font-size: 32px; }
-  .assistant, .game-page .assistant { margin-inline: 16px; }
   .modal-dialog { padding: 24px; }
   .modal-dialog .actions-row .btn { flex: 1; }
   #toast-root { bottom: calc(var(--bottom-nav) + 16px); right: 16px; }
@@ -544,7 +523,6 @@ body.overlay-open { overflow: hidden; }
 .game-page .game-actions-row .btn { min-width: 0; }
 .game-page .move-log-panel { border-top: 1px solid var(--line); padding-top: 16px; }
 .game-page .move-log { max-height: min(340px,45svh); }
-.game-page .assistant { margin: 20px 24px 28px; justify-content: flex-end; }
 .game-page .mobile-top, .game-page .bottom-nav { display: none !important; }
 .game-page .sidebar-backdrop { display: none; }
 .game-page.sidebar-open .sidebar-backdrop { display: block; position: fixed; inset: 0; z-index: 70; background: #11100fcc; }
@@ -661,8 +639,6 @@ body.overlay-open { overflow: hidden; }
   .progress-layout { grid-template-columns: minmax(0,1fr); gap: 28px; }
   .progress-rate { max-width: 540px; }
   .history-page .page-title-row { align-items: end; }
-  .assistant { margin: 0 24px calc(var(--bottom-nav) + 24px); }
-  .assistant-panel { bottom: calc(var(--bottom-nav) + 12px); max-height: calc(100svh - var(--bottom-nav) - 80px); }
 }
 @media (max-width: 600px) {
   .content { padding-inline: 16px; }
@@ -701,7 +677,6 @@ body.overlay-open { overflow: hidden; }
   .game-page .board-instructions { margin: 6px 0 0 18px; width: calc(100% - 18px); }
   .game-page .side-panel { padding: 14px; }
   .game-page .game-actions-row { grid-template-columns: 1fr; }
-  .game-page .assistant { margin-inline: 16px; }
   .task-board-layout { gap: 18px; }
   .task-context h2 { font-size: 20px; }
   .task-instructions { font-size: 16px; }
