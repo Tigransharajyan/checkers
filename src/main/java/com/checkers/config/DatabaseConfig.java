@@ -13,16 +13,8 @@ import javax.sql.DataSource;
 import java.net.URI;
 
 /**
- * Production database configuration.
- *
- * <p>Handles PostgreSQL connections from Render.com, Heroku, Fly.io, etc.
- * Supports both URI formats:
- * <ul>
- *   <li>{@code postgresql://user:pass@host:port/dbname} (Render connectionString / DATABASE_URL)</li>
- *   <li>{@code postgres://user:pass@host:port/dbname}</li>
- *   <li>{@code jdbc:postgresql://host:port/dbname}</li>
- *   <li>Separate environment variables: {@code DB_HOST}, {@code DB_PORT}, {@code DB_NAME}, {@code DB_USER}, {@code DB_PASSWORD}</li>
- * </ul>
+ * Configures PostgreSQL in the production profile by parsing hosting connection settings and
+ * creating a HikariCP pool. Development uses H2 from application.yml.
  */
 @Configuration
 @Profile("prod")
@@ -47,6 +39,10 @@ public class DatabaseConfig {
     @Value("${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:checkers}}")
     private String defaultPassword;
 
+    /**
+     * Creates the production PostgreSQL connection pool. Applies the parsed JDBC address and
+     * credentials, connection timeout and maximum pool size.
+     */
     @Bean
     @Primary
     public DataSource dataSource() {
@@ -68,6 +64,11 @@ public class DatabaseConfig {
         return new HikariDataSource(config);
     }
 
+    /**
+     * Converts a hosting-provider PostgreSQL URL into JDBC settings or uses individual environment
+     * properties. Preserves the port and query parameters while separating credentials from the
+     * connection address.
+     */
     public ParsedDbConfig parseConnection() {
         String jdbcUrl = null;
         String username = defaultUser;
@@ -114,10 +115,17 @@ public class DatabaseConfig {
         return new ParsedDbConfig(jdbcUrl, username, password);
     }
 
+    /**
+     * Masks a password in the user:password@ URL form before logging. This handles that specific
+     * format and is not a general-purpose secret sanitizer.
+     */
     private String sanitizeUrl(String url) {
         if (url == null) return null;
         return url.replaceAll(":[^/@]+@", ":***@");
     }
 
+    /**
+     * Parsed database settings: JDBC URL, username and password passed to the connection pool.
+     */
     public record ParsedDbConfig(String jdbcUrl, String username, String password) {}
 }

@@ -7,7 +7,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Curated FAQ pairs per locale (same content as the public /faq page).
+ * Curated English, Russian and Armenian questions and answers shared by the FAQ page and local
+ * assistant.
  */
 @Component
 public class FaqKnowledgeBase {
@@ -132,11 +133,19 @@ public class FaqKnowledgeBase {
             )
     );
 
+    /**
+     * Returns curated questions, answers and search keywords for a supported language. Falls back
+     * to English for an unknown locale.
+     */
     public List<FaqEntry> entries(String locale) {
         String key = normalizeLocale(locale);
         return byLocale.getOrDefault(key, byLocale.get("en"));
     }
 
+    /**
+     * Normalizes supported languages to en, ru or hy, including regional variants and the arm
+     * alias. Uses English for blank or unsupported values.
+     */
     public String normalizeLocale(String locale) {
         if (locale == null || locale.isBlank()) {
             return "en";
@@ -151,6 +160,10 @@ public class FaqKnowledgeBase {
         return "en";
     }
 
+    /**
+     * Creates an immutable knowledge-base entry containing its identifier, question, answer and
+     * keywords. Keeps the multilingual catalogue declarations concise.
+     */
     private static FaqEntry entry(String id, String q, String a, String... keywords) {
         return new FaqEntry(id, q, a, List.of(keywords));
     }

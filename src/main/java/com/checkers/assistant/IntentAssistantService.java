@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Offline intent matcher: TF-IDF cosine for en/ru; keyword overlap for hy.
+ * Local site-help assistant that retrieves existing FAQ answers using TF-IDF/cosine similarity for
+ * English and Russian and keyword matching for Armenian. Does not generate text or call an external
+ * AI provider.
  */
 @Service
 public class IntentAssistantService implements AssistantReplyService {
@@ -22,10 +24,19 @@ public class IntentAssistantService implements AssistantReplyService {
 
     private final FaqKnowledgeBase knowledgeBase;
 
+    /**
+     * Receives the FAQ knowledge base through constructor injection. Answers are retrieved locally;
+     * questions are not sent to an external AI service.
+     */
     public IntentAssistantService(FaqKnowledgeBase knowledgeBase) {
         this.knowledgeBase = knowledgeBase;
     }
 
+    /**
+     * Normalizes the language and question, selects the search strategy and checks the confidence
+     * threshold. Returns a fallback message with a FAQ link when no sufficiently close entry
+     * exists.
+     */
     @Override
     public AssistantReply reply(String locale, String message) {
         String lang = knowledgeBase.normalizeLocale(locale);
@@ -40,13 +51,8 @@ public class IntentAssistantService implements AssistantReplyService {
         FaqEntry best;
         double score;
         if ("hy".equals(lang)) {
-            /*
-             * Armenian (hy): Lucene/OpenNLP do not ship a solid Armenian stemmer/analyzer
-             * in the JDK stack we use. Full TF-IDF on raw surface forms under-performs
-             * because of rich morphology and different tokenization expectations.
-             * We therefore use normalized keyword / token overlap against curated
-             * keyword lists instead of a full vector space model for this locale.
-             */
+            // Uses curated keyword matching for Armenian questions.
+            // This project does not include a full morphological analyzer for Armenian.
             Scored scored = bestByKeywords(text, entries);
             best = scored.entry();
             score = scored.score();
@@ -62,6 +68,11 @@ public class IntentAssistantService implements AssistantReplyService {
         return new AssistantReply(best.answer(), true, faqPath);
     }
 
+    /**
+     * Compares the question with FAQ questions and keywords using cosine similarity between TF-IDF
+     * vectors. Curated keyword matches increase the score; the result selects existing text rather
+     * than generating an answer.
+     */
     private Scored bestByTfIdf(String query, List<FaqEntry> entries, String lang) {
         List<List<String>> docs = new ArrayList<>();
         for (FaqEntry e : entries) {
@@ -76,7 +87,7 @@ public class IntentAssistantService implements AssistantReplyService {
         for (int i = 0; i < entries.size(); i++) {
             double[] dVec = tfIdfVector(docs.get(i), idf);
             double sim = cosine(qVec, dVec);
-            // boost if any curated keyword appears in the query
+            // A curated keyword match boosts the corresponding FAQ candidate's score.
             for (String kw : entries.get(i).keywords()) {
                 String stemmedKw = stem(kw.toLowerCase(Locale.ROOT), lang);
                 if (qTokens.contains(stemmedKw) || qTokens.contains(kw.toLowerCase(Locale.ROOT))) {
@@ -91,6 +102,10 @@ public class IntentAssistantService implements AssistantReplyService {
         return new Scored(best, bestScore);
     }
 
+    /**
+     * Finds the Armenian answer using the proportion and number of matching keywords. This strategy
+     * does not require a full Armenian morphological analyzer.
+     */
     private Scored bestByKeywords(String query, List<FaqEntry> entries) {
         Set<String> qTokens = new HashSet<>(tokenize(query));
         FaqEntry best = null;
@@ -105,7 +120,7 @@ public class IntentAssistantService implements AssistantReplyService {
                 }
             }
             double score = qTokens.isEmpty() ? 0 : (double) hits / qTokens.size();
-            // also reward absolute keyword hits
+            // Adds a small bonus for the absolute number of keyword matches.
             score += hits * 0.08;
             if (score > bestScore) {
                 bestScore = score;
@@ -115,6 +130,10 @@ public class IntentAssistantService implements AssistantReplyService {
         return new Scored(best, bestScore);
     }
 
+    /**
+     * Returns a localized message explaining that no reliable match was found. Includes a FAQ link
+     * so the user can continue searching.
+     */
     private AssistantReply fallback(String lang, String faqPath) {
         String answer = switch (lang) {
             case "ru" -> "Я пока знаю ответы на частые вопросы о сайте. Загляните в раздел FAQ: " + faqPath;
@@ -124,10 +143,20 @@ public class IntentAssistantService implements AssistantReplyService {
         return new AssistantReply(answer, false, faqPath);
     }
 
+    /**
+     * Splits text into lowercase words and numbers and ignores single-character tokens. The
+     * language-independent overload uses English; Russian tokens receive simplified suffix
+     * normalization.
+     */
     private List<String> tokenize(String text) {
         return tokenize(text, "en");
     }
 
+    /**
+     * Splits text into lowercase words and numbers and ignores single-character tokens. The
+     * language-independent overload uses English; Russian tokens receive simplified suffix
+     * normalization.
+     */
     private List<String> tokenize(String text, String lang) {
         List<String> tokens = new ArrayList<>();
         var matcher = TOKEN.matcher(text.toLowerCase(Locale.ROOT));
@@ -140,6 +169,10 @@ public class IntentAssistantService implements AssistantReplyService {
         return tokens;
     }
 
+    /**
+     * Removes selected common Russian suffixes so related word forms can match. This is a
+     * regular-expression heuristic, not a complete linguistic stemmer.
+     */
     private String stem(String word, String lang) {
         if (!"ru".equals(lang) || word.length() < 4) {
             return word;
@@ -147,6 +180,10 @@ public class IntentAssistantService implements AssistantReplyService {
         return word.replaceAll("(ами|ями|ов|ев|ом|ем|ой|ей|ах|ях|ть|ти|ешь|ете|ит|ут|ют|ат|ят|ого|его|ому|ему|ым|им|ую|юю|а|я|у|ю|о|е|и|ы)$", "");
     }
 
+    /**
+     * Computes inverse document frequency: words appearing in fewer FAQ entries receive more
+     * weight. Counts each word once per document and applies smoothing to avoid extreme weights.
+     */
     private Map<String, Double> idf(List<List<String>> docs) {
         Map<String, Integer> df = new HashMap<>();
         for (List<String> doc : docs) {
@@ -162,6 +199,10 @@ public class IntentAssistantService implements AssistantReplyService {
         return idf;
     }
 
+    /**
+     * Multiplies relative token frequencies by their IDF weights. Sorts the shared vocabulary so
+     * every compared vector uses the same coordinate order.
+     */
     private double[] tfIdfVector(List<String> tokens, Map<String, Double> idf) {
         Map<String, Integer> tf = new HashMap<>();
         for (String t : tokens) {
@@ -179,6 +220,10 @@ public class IntentAssistantService implements AssistantReplyService {
         return vec;
     }
 
+    /**
+     * Computes cosine similarity from the dot product and vector lengths. Returns zero for a
+     * zero-length vector to avoid division by zero.
+     */
     private double cosine(double[] a, double[] b) {
         double dot = 0;
         double na = 0;
@@ -194,6 +239,9 @@ public class IntentAssistantService implements AssistantReplyService {
         return dot / (Math.sqrt(na) * Math.sqrt(nb));
     }
 
+    /**
+     * Internal assistant-answer candidate paired with its numerical similarity score.
+     */
     private record Scored(FaqEntry entry, double score) {
     }
 }

@@ -16,6 +16,10 @@ import org.springframework.stereotype.Controller;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * Handles game STOMP commands, restores sender identity, invokes transactional services and
+ * publishes results. Does not duplicate draughts rules.
+ */
 @Controller
 @RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
@@ -26,9 +30,9 @@ public class GameWebSocketController {
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
-     * Client → {@code /app/game/{gameId}/move}
-     * Broadcast → {@code /topic/game/{gameId}}
-     * Bot reply (if any) is scheduled asynchronously on the same topic.
+     * Restores the sender's security context, applies the move through GameService and broadcasts
+     * the resulting game event. Schedules a possible bot reply afterward; errors are sent only to
+     * the sender.
      */
     @MessageMapping("/game/{gameId}/move")
     public void makeMove(@DestinationVariable Long gameId, @Payload MoveMessage message, java.security.Principal principal) {
@@ -47,6 +51,10 @@ public class GameWebSocketController {
         }
     }
 
+    /**
+     * Handles a STOMP resignation command and broadcasts completion, or sends a private error to
+     * the sender.
+     */
     @MessageMapping("/game/{gameId}/resign")
     public void resign(@DestinationVariable Long gameId, java.security.Principal principal) {
         setAuthFromPrincipal(principal);
@@ -60,6 +68,10 @@ public class GameWebSocketController {
         }
     }
 
+    /**
+     * Uses the accept field to distinguish a draw offer from acceptance or rejection. Delegates to
+     * the appropriate service method and publishes the result.
+     */
     @MessageMapping("/game/{gameId}/draw")
     public void draw(@DestinationVariable Long gameId, @Payload DrawOfferMessage message, java.security.Principal principal) {
         setAuthFromPrincipal(principal);
@@ -78,6 +90,9 @@ public class GameWebSocketController {
         }
     }
 
+    /**
+     * Handles an explicit presence update and publishes a reconnection event when necessary.
+     */
     @MessageMapping("/game/{gameId}/presence")
     public void presence(@DestinationVariable Long gameId, java.security.Principal principal) {
         setAuthFromPrincipal(principal);
@@ -91,21 +106,36 @@ public class GameWebSocketController {
         }
     }
 
+    /**
+     * Copies the already authenticated WebSocket principal into the current handler thread's
+     * SecurityContextHolder.
+     */
     private void setAuthFromPrincipal(java.security.Principal principal) {
         if (principal instanceof org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth) {
             org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
         }
     }
 
+    /**
+     * Builds the shared /topic/game/{id} STOMP destination for a game.
+     */
     private String topic(Long gameId) {
         return "/topic/game/" + gameId;
     }
 
+    /**
+     * Returns the name from the current security context, or anonymous as a fallback for addressing
+     * errors.
+     */
     private String currentUsername() {
         var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         return auth != null ? auth.getName() : "anonymous";
     }
 
+    /**
+     * Converts an exception into an ERROR event with a machine-readable code and details. Preserves
+     * domain error codes and uses INTERNAL_ERROR for unexpected failures.
+     */
     private GameEventMessage errorEvent(Long gameId, Exception ex) {
         String code = ex instanceof com.checkers.exception.BusinessException bex
                 ? bex.getErrorCode().name()

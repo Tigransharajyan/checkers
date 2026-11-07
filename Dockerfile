@@ -1,29 +1,29 @@
-# ── Stage 1: build ────────────────────────────────────────────────────────────
+# Stage one: build the executable JAR with the JDK and Maven.
 FROM eclipse-temurin:17-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Copy wrapper first for better layer caching
+# Copy build configuration first so dependencies stay cached until pom.xml changes.
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 RUN chmod +x mvnw
 
-# Resolve dependencies (cached unless pom.xml changes)
+# Resolve dependencies before the source-code layer.
 RUN ./mvnw dependency:go-offline -q
 
-# Copy source and build
+# Build the application. Tests run separately before publication and are skipped in this layer.
 COPY src/ src/
 RUN ./mvnw clean package -DskipTests -q
 
-# Pick the executable jar (exclude *-plain.jar if present)
+# Select the executable JAR, excluding a plain archive without bundled dependencies.
 RUN cp $(find target -maxdepth 1 -name "*.jar" ! -name "*-plain.jar" | head -n 1) app.jar
 
-# ── Stage 2: runtime ──────────────────────────────────────────────────────────
+# Stage two: run with the JRE; the final image does not need Maven or a compiler.
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Non-root user for security
+# Run the application as a dedicated non-root user.
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
@@ -31,5 +31,5 @@ COPY --from=builder /app/app.jar app.jar
 
 EXPOSE 8080
 
-# PORT env var is provided by Render at runtime
+# Render supplies PORT; application.yml uses it instead of the default local port.
 ENTRYPOINT ["java", "-jar", "app.jar"]

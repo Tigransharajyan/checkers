@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Public assistant response separated from the internal retrieval result. Lombok generates
+ * accessors and a builder.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

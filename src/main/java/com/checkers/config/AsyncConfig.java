@@ -9,11 +9,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.concurrent.Executor;
 
+/**
+ * Configures a separate bot executor and delayed-task scheduler so search and timers do not occupy
+ * HTTP/STOMP request threads.
+ */
 @Configuration
 @EnableAsync
 @EnableScheduling
 public class AsyncConfig {
 
+    /**
+     * Creates the bot calculation pool with two core threads, up to eight workers and a queue of
+     * one hundred tasks. Search therefore runs outside the WebSocket request thread.
+     */
     @Bean(name = "botExecutor")
     public Executor botExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -25,6 +33,10 @@ public class AsyncConfig {
         return executor;
     }
 
+    /**
+     * Creates a four-thread scheduler for delayed actions, including reconnect deadlines and
+     * matchmaking timeouts.
+     */
     @Bean
     public ThreadPoolTaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();

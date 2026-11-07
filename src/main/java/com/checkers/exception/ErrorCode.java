@@ -1,7 +1,8 @@
 package com.checkers.exception;
 
 /**
- * Machine-readable error codes. Frontend maps them to i18n keys.
+ * Machine-readable failures for authentication, accounts, games, invitations and validation.
+ * Localized messages are maintained separately.
  */
 public enum ErrorCode {
     VALIDATION_FAILED,

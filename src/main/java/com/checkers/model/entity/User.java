@@ -19,6 +19,10 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+/**
+ * Registered or guest account with language and statistics. Registered passwords use BCrypt hashes;
+ * guests have no email or password. Lombok generates accessors and a builder.
+ */
 @Entity
 @Table(
         name = "users",
@@ -47,11 +51,11 @@ public class User {
     @Size(min = 3, max = 50)
     private String username;
 
-    /** Null for guest accounts. */
+    /** Absent for guest accounts because password-based login is not available to guests. */
     @Column(length = 255)
     private String email;
 
-    /** Null for guest accounts. */
+    /** Absent for guest accounts because password-based login is not available to guests. */
     @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
@@ -60,8 +64,8 @@ public class User {
     private boolean guest = false;
 
     /**
-     * Selected UI language for registered users (ISO 639-1: en, ru, hy).
-     * Always null for guests — their locale lives only in the cookie.
+     * Registered-user interface language: en, ru or hy. Always null for guests, whose preference
+     * lives in the browser cookie.
      */
     @Column(name = "preferred_locale", length = 2)
     @Size(min = 2, max = 2)
@@ -85,6 +89,9 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /**
+     * Initializes creation and modification timestamps before inserting a user.
+     */
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
@@ -92,6 +99,9 @@ public class User {
         updatedAt = now;
     }
 
+    /**
+     * Updates the modification timestamp when an existing user record is saved.
+     */
     @PreUpdate
     void onUpdate() {
         updatedAt = Instant.now();

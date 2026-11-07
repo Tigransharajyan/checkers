@@ -11,11 +11,22 @@ import com.checkers.model.enums.GameMode;
 
 import java.util.List;
 
+/**
+ * Static conversion utility from JPA entities to public DTOs. Prevents direct serialization of
+ * internal persistence fields and relationships.
+ */
 public final class DtoMapper {
 
+    /**
+     * Prevents instantiation of this utility class; all DTO conversion methods are static.
+     */
     private DtoMapper() {
     }
 
+    /**
+     * Copies permitted user data and statistics into the API response. Does not expose the password
+     * hash or refresh tokens.
+     */
     public static UserResponse toUserResponse(User user) {
         if (user == null) {
             return null;
@@ -32,6 +43,9 @@ public final class DtoMapper {
                 .build();
     }
 
+    /**
+     * Converts a persisted move into a DTO containing its path, captures, author and timestamp.
+     */
     public static MoveResponse toMoveResponse(Move move) {
         return MoveResponse.builder()
                 .id(move.getId())
@@ -46,6 +60,10 @@ public final class DtoMapper {
                 .build();
     }
 
+    /**
+     * Creates a compact list entry with participants, mode, result and dates for history and
+     * active-game screens.
+     */
     public static GameSummaryResponse toGameSummary(Game game) {
         return GameSummaryResponse.builder()
                 .id(game.getId())
@@ -61,6 +79,10 @@ public final class DtoMapper {
                 .build();
     }
 
+    /**
+     * Builds the detailed client snapshot with board, participants, history, invitation and draw
+     * offer. Uses an empty move list when none is supplied.
+     */
     public static GameResponse toGameResponse(Game game, String inviteCode, List<Move> moves) {
         return GameResponse.builder()
                 .id(game.getId())

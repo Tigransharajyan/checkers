@@ -23,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Transactional account registration, login and token renewal. Checks uniqueness, stores password
+ * hashes and rotates refresh tokens.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -32,9 +36,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    /**
+     * Normalizes username and email, checks uniqueness, hashes the password with BCrypt and
+     * persists the account. Issues access and refresh tokens within the same transaction.
+     */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         String username = request.getUsername().trim();
+        // Email matching is case-insensitive; Locale.ROOT avoids dependence on the server's
+        // language.
         String email = request.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
         if (userRepository.existsByUsername(username)) {
             throw new BusinessException(ErrorCode.USERNAME_TAKEN);
@@ -46,6 +56,7 @@ public class AuthService {
         User user = User.builder()
                 .username(username)
                 .email(email)
+                // Persist only a one-way BCrypt hash, never the original password.
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .guest(false)
                 .build();
@@ -53,6 +64,10 @@ public class AuthService {
         return issueTokens(user);
     }
 
+    /**
+     * Finds an account by username or email and verifies the password against its hash. Guests
+     * cannot use password login; successful authentication issues a new token pair.
+     */
     @Transactional
     public AuthResponse login(LoginRequest request) {
         String identifier = request.getUsernameOrEmail().trim();
@@ -67,6 +82,10 @@ public class AuthService {
         return issueTokens(user);
     }
 
+    /**
+     * Creates a randomly named guest without email, password or stored profile language. Issues the
+     * tokens needed to participate in games.
+     */
     @Transactional
     public AuthResponse guestLogin() {
         String username = "guest_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
@@ -81,6 +100,10 @@ public class AuthService {
         return issueTokens(user);
     }
 
+    /**
+     * Validates the stored refresh token, revokes the submitted value and issues a replacement
+     * pair. Rotation prevents normal reuse of the old refresh value.
+     */
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request) {
         RefreshToken stored = refreshTokenRepository.findByToken(request.getRefreshToken())
@@ -90,11 +113,16 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
+        // A new refresh token replaces the submitted one within the same transaction.
         stored.setRevoked(true);
         refreshTokenRepository.save(stored);
         return issueTokens(stored.getUser());
     }
 
+    /**
+     * Revokes the matching refresh token when present. An already issued access token remains
+     * subject to its own expiry.
+     */
     @Transactional
     public void logout(RefreshTokenRequest request) {
         refreshTokenRepository.findByToken(request.getRefreshToken()).ifPresent(token -> {
@@ -103,6 +131,10 @@ public class AuthService {
         });
     }
 
+    /**
+     * Loads the account identified by the validated security principal and returns a safe
+     * UserResponse.
+     */
     @Transactional(readOnly = true)
     public UserResponse currentUser() {
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
@@ -111,6 +143,10 @@ public class AuthService {
         return DtoMapper.toUserResponse(user);
     }
 
+    /**
+     * Creates an access JWT and random refresh token, persists the refresh record and builds the
+     * authentication response. Does not include password data.
+     */
     private AuthResponse issueTokens(User user) {
         String access = jwtService.createAccessToken(user);
         String refreshValue = jwtService.createRefreshTokenValue();

@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Incoming invitation-code DTO. Validation runs before service execution; Lombok generates
+ * accessors.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

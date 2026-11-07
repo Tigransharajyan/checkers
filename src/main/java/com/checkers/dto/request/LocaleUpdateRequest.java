@@ -8,13 +8,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Incoming profile-language DTO. The service also checks supported language values; Lombok
+ * generates accessors.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class LocaleUpdateRequest {
 
-    /** ISO 639-1 language code: en, ru, hy. */
+    /** Supported two-letter language code: en, ru or hy. */
     @NotBlank
     @Size(min = 2, max = 2)
     @Pattern(regexp = "en|ru|hy")

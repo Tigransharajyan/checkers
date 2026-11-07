@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Incoming username/email and password DTO. The password is used for verification and never
+ * included in the response. Lombok generates accessors.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

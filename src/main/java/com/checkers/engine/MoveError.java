@@ -1,7 +1,8 @@
 package com.checkers.engine;
 
 /**
- * Machine-readable move validation errors. Frontend maps codes to i18n (Stage 4).
+ * Machine-readable move-rejection reasons. The client translates them through error.move.* message
+ * keys.
  */
 public enum MoveError {
     NOT_YOUR_TURN,

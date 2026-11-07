@@ -5,8 +5,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * JUnit checks for DatabaseConfig. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 class DatabaseConfigTest {
 
+    /**
+     * Checks conversion of a Render PostgreSQL URI into a JDBC URL with separately extracted
+     * credentials.
+     */
     @Test
     void parsesRenderPostgresqlUri() {
         DatabaseConfig config = new DatabaseConfig();
@@ -21,6 +29,9 @@ class DatabaseConfigTest {
         assertEquals("jBa9ybB8YMfjekmTaidRzawmRZk8Ws35", parsed.password());
     }
 
+    /**
+     * Checks preservation of an explicit port and query parameters when converting a postgres URI.
+     */
     @Test
     void parsesPostgresUriWithPortAndQuery() {
         DatabaseConfig config = new DatabaseConfig();
@@ -35,6 +46,9 @@ class DatabaseConfigTest {
         assertEquals("mypass", parsed.password());
     }
 
+    /**
+     * Checks that an existing JDBC URL is not converted again or stripped of parameters.
+     */
     @Test
     void preservesExistingJdbcUrl() {
         DatabaseConfig config = new DatabaseConfig();
@@ -49,6 +63,9 @@ class DatabaseConfigTest {
         assertEquals("mypass", parsed.password());
     }
 
+    /**
+     * Checks JDBC configuration from individual host properties when no full URL is supplied.
+     */
     @Test
     void fallsBackToIndividualHostProperties() {
         DatabaseConfig config = new DatabaseConfig();
@@ -66,6 +83,9 @@ class DatabaseConfigTest {
         assertEquals("secret", parsed.password());
     }
 
+    /**
+     * Checks configured default credentials when the connection URI has no user information.
+     */
     @Test
     void parsesUriWithoutUserInfoUsesDefaults() {
         DatabaseConfig config = new DatabaseConfig();

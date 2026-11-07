@@ -7,6 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Incoming assistant-question DTO. Bean Validation checks field constraints; Lombok generates
+ * accessors and utility constructors.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +21,7 @@ public class AssistantChatRequest {
     @Size(max = 500)
     private String message;
 
-    /** ISO language: en | ru | hy (from current UI locale). */
+    /** Requested reply language from the interface: en, ru or hy. */
     @NotBlank
     @Size(min = 2, max = 8)
     private String locale;

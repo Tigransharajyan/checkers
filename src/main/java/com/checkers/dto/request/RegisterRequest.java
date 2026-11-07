@@ -8,6 +8,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Registration input with username, email and password constraints. The plaintext password is
+ * passed to hashing rather than persisted. Lombok generates accessors.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

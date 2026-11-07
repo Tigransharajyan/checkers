@@ -28,6 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * JUnit checks for GameDraw. Each test specifies a behavior or regression boundary; helper methods
+ * build the required test data.
+ */
 class GameDrawTest {
     private GameRepository games;
     private MoveRepository moves;
@@ -40,6 +44,10 @@ class GameDrawTest {
     private final User white = User.builder().id(1L).username("white").build();
     private final User black = User.builder().id(2L).username("black").build();
 
+    /**
+     * Creates the service with mocked repositories, move history and an authenticated user.
+     * Isolates draw lifecycle behavior from the network transport.
+     */
     @BeforeEach
     void setup() {
         games = mock(GameRepository.class); moves = mock(MoveRepository.class); bot = mock(BotService.class);
@@ -55,26 +63,42 @@ class GameDrawTest {
         authenticate(white);
     }
 
+    /**
+     * Clears SecurityContextHolder after each test so another test cannot inherit its principal.
+     */
     @AfterEach
     void cleanup() { SecurityContextHolder.clearContext(); }
 
+    /**
+     * Installs the supplied test account in Spring Security's context.
+     */
     private void authenticate(User user) {
         SecurityUser principal = new SecurityUser(user);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
     }
 
+    /**
+     * Builds a compact test position from coordinates and piece codes.
+     */
     private Board board(String... entries) {
         Board board = new Board(PieceColor.WHITE);
         for (int i = 0; i < entries.length; i += 2) board.set(Square.parse(entries[i]), Piece.fromCode(entries[i + 1]));
         return board;
     }
 
+    /**
+     * Creates an ongoing test game with the required mode, board and participants.
+     */
     private void begin(GameMode mode, Board board) {
         game = Game.builder().id(1L).mode(mode).status(GameStatus.IN_PROGRESS).whitePlayer(white)
                 .blackPlayer(mode == GameMode.BOT ? null : black).currentTurn(board.turn())
                 .botDifficulty(BotDifficulty.EASY).boardState(board.toJson()).build();
     }
 
+    /**
+     * Submits the required human move or supplies the selected bot move and calls the real
+     * GameService.
+     */
     private GameEventMessage play(String from, String to) {
         Board board = Board.fromJson(game.getBoardState());
         if (game.getMode() == GameMode.BOT && board.turn() == PieceColor.BLACK) {
@@ -87,6 +111,10 @@ class GameDrawTest {
         return service.applyMove(1L, message);
     }
 
+    /**
+     * Checks repetition completion in BOT, FRIEND and MATCHMAKING, with exactly one draw update and
+     * no accidental human loss.
+     */
     @ParameterizedTest
     @EnumSource(value = GameMode.class, names = {"BOT", "FRIEND", "MATCHMAKING"})
     void repetitionFinishesAllModesAndUpdatesDrawStatisticsExactlyOnce(GameMode mode) {
@@ -109,6 +137,10 @@ class GameDrawTest {
         assertEquals(1, white.getDraws()); assertEquals(8, log.size());
     }
 
+    /**
+     * Checks persisted offers, rejection of self-acceptance and expiry when the recipient makes a
+     * move.
+     */
     @Test
     void aDrawOfferIsDurableCannotBeAcceptedByItsAuthorAndExpiresOnOpponentMove() {
         begin(GameMode.FRIEND, Board.initial());
@@ -123,6 +155,9 @@ class GameDrawTest {
         assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
     }
 
+    /**
+     * Checks the configured minimum move count and normal two-player agreement.
+     */
     @Test
     void drawAgreementHonoursConfiguredRegulation() {
         begin(GameMode.FRIEND, Board.initial());
@@ -135,6 +170,10 @@ class GameDrawTest {
         assertEquals(1, white.getDraws()); assertEquals(1, black.getDraws());
     }
 
+    /**
+     * Checks that bot evaluation creates an offer only, and rejection preserves active play without
+     * an immediate repeated offer.
+     */
     @Test
     void approximateBotEvaluationOnlyOffersAndDecliningContinuesTheGame() {
         Board board = board("a1", "WK", "c1", "WK", "h6", "BK", "h8", "BK");
@@ -153,6 +192,10 @@ class GameDrawTest {
         assertFalse(DrawState.fromJson(game.getDrawState()).mayOfferBotDraw());
     }
 
+    /**
+     * Checks both agreement directions: accepting a bot offer and receiving the bot's acceptance or
+     * rejection of a human offer.
+     */
     @Test
     void aHumanCanAcceptABotOfferOrOfferADrawToTheBot() {
         begin(GameMode.BOT, board("a1", "WK", "h6", "BK"));

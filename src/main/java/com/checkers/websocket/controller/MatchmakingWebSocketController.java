@@ -13,6 +13,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * STOMP matchmaking controller reporting waiting, cancellation and matched pairs through private
+ * notifications.
+ */
 @Controller
 @RequiredArgsConstructor
 public class MatchmakingWebSocketController {
@@ -20,6 +24,10 @@ public class MatchmakingWebSocketController {
     private final MatchmakingService matchmakingService;
     private final GameEventPublisher eventPublisher;
 
+    /**
+     * Enqueues the user, acknowledges waiting and immediately attempts to form a pair. Sends
+     * failures to the user's private queue.
+     */
     @MessageMapping("/matchmaking/join")
     public void joinQueue(java.security.Principal principal) {
         if (principal instanceof org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth) {
@@ -37,6 +45,9 @@ public class MatchmakingWebSocketController {
         }
     }
 
+    /**
+     * Cancels the current user's matchmaking entry and sends a cancellation acknowledgement.
+     */
     @MessageMapping("/matchmaking/leave")
     public void leaveQueue(java.security.Principal principal) {
         if (principal instanceof org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth) {
@@ -49,6 +60,10 @@ public class MatchmakingWebSocketController {
         }
     }
 
+    /**
+     * Builds matched-game details and notifies both participants through their individual private
+     * queues.
+     */
     private void notifyMatched(Game game) {
         Map<String, Object> whiteData = baseMatchData(game);
         whiteData.put("yourColor", "WHITE");
@@ -80,6 +95,10 @@ public class MatchmakingWebSocketController {
         ));
     }
 
+    /**
+     * Builds the shared match payload so both notifications contain the same game id and
+     * participants.
+     */
     private Map<String, Object> baseMatchData(Game game) {
         Map<String, Object> data = new HashMap<>();
         data.put("gameId", game.getId());

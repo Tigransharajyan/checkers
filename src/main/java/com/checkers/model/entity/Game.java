@@ -25,6 +25,11 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+/**
+ * Game entity in the games table containing participants, status, board JSON, persisted draw
+ * history and result. A bot has no separate Black User record. Lombok generates constructors,
+ * accessors and a builder.
+ */
 @Entity
 @Table(
         name = "games",
@@ -75,18 +80,21 @@ public class Game {
     @Column(name = "current_turn", length = 10)
     private PieceColor currentTurn;
 
-    /** Serialized board snapshot (JSON / FEN-like). Filled by game engine later. */
+    /**
+     * Current Board JSON snapshot containing turn, outcome and piece placement; updated by the
+     * engine.
+     */
     @Column(name = "board_state", columnDefinition = "TEXT")
     private String boardState;
 
     @Column(name = "draw_state", columnDefinition = "TEXT")
     private String drawState;
 
-    /** Null: none; -1: bot; otherwise the proposing player's id. */
+    /** Draw-offer author: null means no offer, -1 means bot, otherwise the proposing user's id. */
     @Column(name = "draw_offer_by_id")
     private Long drawOfferById;
 
-    /** Machine-readable finish reason: RESIGN, DRAW, NO_MOVES, TECHNICAL_DEFEAT, … */
+    /** Machine-readable finish reason: resignation, draw, no legal moves or technical defeat. */
     @Column(name = "finish_reason", length = 40)
     private String finishReason;
 
@@ -99,6 +107,10 @@ public class Game {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /**
+     * Sets creation time before the first database insert and supplies WAITING when no status was
+     * explicitly assigned.
+     */
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();

@@ -1,8 +1,8 @@
 package com.checkers.model.enums;
 
 /**
- * Bot difficulty levels. Stored as STRING on {@code games.bot_difficulty}.
- * Not a separate DB table — reference values live in this enum.
+ * EASY, MEDIUM and HARD levels controlling search depth, top-candidate group size and a short
+ * presentation delay.
  */
 public enum BotDifficulty {
     EASY,

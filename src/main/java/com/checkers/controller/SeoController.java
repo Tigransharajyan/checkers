@@ -13,11 +13,18 @@ import javax.xml.stream.XMLStreamException;
 import java.io.StringWriter;
 import java.time.Duration;
 
+/**
+ * Builds robots.txt and sitemap.xml from deployment settings and the public-page catalogue.
+ */
 @RestController
 @RequiredArgsConstructor
 public class SeoController {
     private final SeoService seo;
 
+    /**
+     * Builds robots.txt using the environment's indexing policy and sitemap address. Development
+     * and disabled environments remain non-indexable.
+     */
     @GetMapping(value = "/robots.txt", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> robots() {
         String body = seo.indexingEnabled()
@@ -26,6 +33,9 @@ public class SeoController {
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)).cachePublic()).body(body);
     }
 
+    /**
+     * Builds the XML sitemap from public indexable pages and their supported language variants.
+     */
     @GetMapping(value = "/sitemap.xml", produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> sitemap() throws XMLStreamException {
         StringWriter text = new StringWriter();

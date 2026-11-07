@@ -14,17 +14,27 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * JUnit checks for BotService. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 class BotServiceTest {
 
     private BotService botService;
     private CheckersRulesEngine engine;
 
+    /**
+     * Creates the engine and bot for isolated legality and move-selection checks.
+     */
     @BeforeEach
     void setUp() {
         botService = new BotService();
         engine = new CheckersRulesEngine();
     }
 
+    /**
+     * Checks that the bot selects a mandatory capture from legal moves.
+     */
     @Test
     void choosesCaptureWhenMandatory() {
         Board board = new Board(PieceColor.WHITE);
@@ -38,6 +48,9 @@ class BotServiceTest {
         assertTrue(engine.legalMoves(board).stream().anyMatch(m -> m.equals(move)));
     }
 
+    /**
+     * Checks that the bot can select a legal move in the standard starting position.
+     */
     @Test
     void returnsMoveOnInitialPosition() {
         Board board = engine.createInitialBoard();
@@ -46,6 +59,9 @@ class BotServiceTest {
         assertTrue(move.path().size() >= 2);
     }
 
+    /**
+     * Checks that the hard bot prefers a capture that wins the game.
+     */
     @Test
     void hardPrefersWinningCapture() {
         // White can capture black's last piece

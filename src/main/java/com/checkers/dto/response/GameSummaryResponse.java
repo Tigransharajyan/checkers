@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+/**
+ * Compact game-list entry for history and active games. Omits full board JSON and move history.
+ * Lombok generates accessors and a builder.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

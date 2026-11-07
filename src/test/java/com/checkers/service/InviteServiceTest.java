@@ -33,6 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+/**
+ * JUnit checks for InviteService. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 @ExtendWith(MockitoExtension.class)
 class InviteServiceTest {
 
@@ -53,16 +57,26 @@ class InviteServiceTest {
 
     private InviteService inviteService;
 
+    /**
+     * Builds InviteService with mocked persistence and event publication.
+     */
     @BeforeEach
     void setUp() {
         inviteService = new InviteService(gameInviteRepository, gameRepository, moveRepository, userService, eventPublisher);
     }
 
+    /**
+     * Clears the security context after each invitation test.
+     */
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
+    /**
+     * Creates a test principal with the supplied id and username for participant-authorization
+     * checks.
+     */
     private void authenticateUser(Long id, String username) {
         User user = User.builder().id(id).username(username).guest(false).build();
         SecurityUser securityUser = new SecurityUser(user);
@@ -71,6 +85,9 @@ class InviteServiceTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
+    /**
+     * Checks that the creator reopening an invitation receives the same game without a second join.
+     */
     @Test
     void acceptInvite_creatorReopensInvite_returnsGameIdempotently() {
         authenticateUser(100L, "creatorAlice");
@@ -104,6 +121,9 @@ class InviteServiceTest {
         assertEquals("creatorAlice", response.getWhitePlayer().getUsername());
     }
 
+    /**
+     * Checks that the already joined Black player can reopen the invitation idempotently.
+     */
     @Test
     void acceptInvite_joinedBlackPlayerRefreshes_returnsGameIdempotently() {
         authenticateUser(200L, "joinerBob");
@@ -138,6 +158,10 @@ class InviteServiceTest {
         assertEquals("joinerBob", response.getBlackPlayer().getUsername());
     }
 
+    /**
+     * Checks rejection of a third party trying to claim an invitation already accepted by another
+     * player.
+     */
     @Test
     void acceptInvite_thirdPartyAttemptsToJoinAcceptedInvite_throwsInviteAlreadyUsed() {
         authenticateUser(300L, "strangerCharlie");

@@ -12,11 +12,19 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * JUnit checks for DailyPuzzleService. Each test specifies a behavior or regression boundary;
+ * helper methods build the required test data.
+ */
 class DailyPuzzleServiceTest {
     private final CheckersRulesEngine rules = new CheckersRulesEngine();
     private final ObjectMapper mapper = new ObjectMapper();
     private final Clock clock = Clock.fixed(Instant.parse("2026-10-18T20:15:00Z"), ZoneOffset.UTC);
 
+    /**
+     * Proves every catalogue puzzle has one quiet key move and a win within its required move count
+     * against all legal defenses.
+     */
     @Test
     void everyPuzzleRequiresAUniqueQuietKeyAndThreeOrFourMovesAgainstAllDefences() throws Exception {
         List<DailyPuzzleService.Definition> catalog;
@@ -40,6 +48,9 @@ class DailyPuzzleServiceTest {
         }
     }
 
+    /**
+     * Checks complete puzzle solutions through public service methods and normal game rules.
+     */
     @Test
     void everyDailyPuzzleCanBeCompletedThroughThePublicServiceUsingNormalRules() throws Exception {
         DailyPuzzleService service = new DailyPuzzleService(rules, mapper, clock);
@@ -80,10 +91,18 @@ class DailyPuzzleServiceTest {
         }
     }
 
+    /**
+     * Extracts the remaining search-ply budget from public puzzle state for continuation selection
+     * in tests.
+     */
     private int viewRemaining(Board board, PuzzleSolver solver) {
         return solver.distance(board, 7) - 1;
     }
 
+    /**
+     * Checks that a legal but losing plan does not advance the solution and an illegal move is
+     * rejected.
+     */
     @Test
     void wrongLegalMovesDoNotAdvanceOrInventAWinAndIllegalMovesAreRejected() throws Exception {
         DailyPuzzleService service = new DailyPuzzleService(rules, mapper, clock);
@@ -102,6 +121,9 @@ class DailyPuzzleServiceTest {
         assertThrows(BusinessException.class, () -> service.submit("bogus", List.of(List.of("a1", "b2"))));
     }
 
+    /**
+     * Checks shared UTC dates and puzzle identifiers independently of the local time zone.
+     */
     @Test
     void dayAndIdAreSharedWorldwideAtUtcMidnight() throws Exception {
         DailyPuzzleService yerevanClock = new DailyPuzzleService(rules, mapper, clock.withZone(ZoneOffset.ofHours(4)));

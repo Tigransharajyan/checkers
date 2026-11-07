@@ -16,6 +16,9 @@ import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.Locale;
 
+/**
+ * REST endpoint for supported changes to the authenticated user's profile settings.
+ */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -24,6 +27,10 @@ public class UserController {
     private final UserService userService;
     private final LocaleResolver localeResolver;
 
+    /**
+     * Validates and saves a registered user's preferred language. Guest language selection remains
+     * a browser preference.
+     */
     @PatchMapping("/me/locale")
     public ResponseEntity<UserResponse> updateLocale(@Valid @RequestBody LocaleUpdateRequest request,
                                                      HttpServletRequest httpRequest,

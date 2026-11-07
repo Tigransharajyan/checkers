@@ -8,6 +8,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Incoming game-creation DTO containing mode and bot difficulty. GameService requires difficulty
+ * for bot mode; Lombok generates accessors.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +21,6 @@ public class CreateGameRequest {
     @NotNull
     private GameMode mode;
 
-    /** Required when {@code mode == BOT}. */
+    /** Difficulty used when mode is BOT. */
     private BotDifficulty botDifficulty;
 }

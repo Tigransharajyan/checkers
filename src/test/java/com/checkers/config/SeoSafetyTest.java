@@ -8,7 +8,15 @@ import org.springframework.context.support.StaticMessageSource;
 import org.springframework.mock.env.MockEnvironment;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * JUnit checks for SeoSafety. Each test specifies a behavior or regression boundary; helper methods
+ * build the required test data.
+ */
 class SeoSafetyTest {
+    /**
+     * Checks rejection of credentials, paths and other unsuitable components in the public site
+     * origin.
+     */
     @Test
     void originMustNotContainCredentialsOrAnUntrustedPath() {
         SiteProperties site = new SiteProperties();
@@ -19,6 +27,10 @@ class SeoSafetyTest {
         assertEquals("https://checkers.example", site.getBaseUrl());
     }
 
+    /**
+     * Checks that development, localhost and explicitly disabled staging deployments cannot become
+     * indexable.
+     */
     @Test
     void developmentLocalhostAndDisabledStagingNeverBecomeIndexable() {
         SiteProperties site = new SiteProperties();

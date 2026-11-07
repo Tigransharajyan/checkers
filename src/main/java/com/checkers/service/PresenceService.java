@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * Tracks STOMP subscriptions to {@code /topic/game/{id}} and applies a reconnect
- * grace period before technical defeat.
+ * Associates STOMP sessions with users and games. Allows a reconnect grace period before requesting
+ * technical defeat.
  */
 @Service
 @Slf4j
@@ -46,6 +46,11 @@ public class PresenceService {
     private final GameProperties gameProperties;
     private final ThreadPoolTaskScheduler taskScheduler;
 
+    /**
+     * Receives persistence, game collaborators, settings and the scheduler. Lazy dependencies
+     * connect presence with game finishing and matchmaking without immediate circular
+     * initialization.
+     */
     public PresenceService(GameRepository gameRepository,
                            @Lazy GameService gameService,
                            @Lazy MatchmakingService matchmakingService,
@@ -60,6 +65,9 @@ public class PresenceService {
         this.taskScheduler = taskScheduler;
     }
 
+    /**
+     * Records the association between the STOMP session id and authenticated user after connection.
+     */
     @EventListener
     public void onConnected(SessionConnectedEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -69,6 +77,10 @@ public class PresenceService {
         }
     }
 
+    /**
+     * Associates a session with its game, cancels pending technical defeat and notifies the
+     * opponent on return. Processes only /topic/game/{id} subscriptions.
+     */
     @EventListener
     public void onSubscribe(SessionSubscribeEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -113,6 +125,10 @@ public class PresenceService {
         }
     }
 
+    /**
+     * Removes the closed session, leaves matchmaking and processes departure from its associated
+     * games.
+     */
     @EventListener
     public void onDisconnect(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -135,6 +151,10 @@ public class PresenceService {
         }
     }
 
+    /**
+     * Cancels pending technical defeat and reports whether the player had been considered
+     * disconnected before this call.
+     */
     public boolean markPresent(Long gameId, Long userId) {
         String key = key(gameId, userId);
         boolean wasDisconnected = pendingDefeats.containsKey(key) || disconnectedAt.containsKey(key);
@@ -142,6 +162,10 @@ public class PresenceService {
         return wasDisconnected;
     }
 
+    /**
+     * Checks participation in an active human game, publishes disconnection and schedules defeat
+     * after the reconnect grace period. Does not create a second timer for the same game/user pair.
+     */
     private void handlePlayerLeft(Long gameId, Long userId) {
         Game game = gameRepository.findById(gameId).orElse(null);
         if (game == null || game.getStatus() != GameStatus.IN_PROGRESS || game.getMode() == GameMode.BOT) {
@@ -168,6 +192,10 @@ public class PresenceService {
         pendingDefeats.put(key, future);
     }
 
+    /**
+     * Removes the waiting marker, requests completion through GameService and publishes the result.
+     * Safely skips obsolete scheduled actions.
+     */
     private void applyTechnicalDefeat(Long gameId, Long userId) {
         String key = key(gameId, userId);
         pendingDefeats.remove(key);
@@ -182,6 +210,9 @@ public class PresenceService {
         }
     }
 
+    /**
+     * Cancels the specific delayed defeat task and removes its recorded disconnection time.
+     */
     private void cancelDefeat(String key) {
         ScheduledFuture<?> future = pendingDefeats.remove(key);
         if (future != null) {
@@ -190,11 +221,18 @@ public class PresenceService {
         disconnectedAt.remove(key);
     }
 
+    /**
+     * Checks whether the user belongs to the White or Black side of the game.
+     */
     private boolean isParticipant(Game game, Long userId) {
         return (game.getWhitePlayer() != null && game.getWhitePlayer().getId().equals(userId))
                 || (game.getBlackPlayer() != null && game.getBlackPlayer().getId().equals(userId));
     }
 
+    /**
+     * Extracts a numeric identifier from a game STOMP destination. Returns null when the suffix is
+     * not a valid game id.
+     */
     private Long parseGameId(String destination) {
         try {
             String suffix = destination.substring("/topic/game/".length());
@@ -208,6 +246,10 @@ public class PresenceService {
         }
     }
 
+    /**
+     * Reads the id from a validated SecurityUser inside Authentication. An incompatible principal
+     * is not treated as a participant.
+     */
     private Long resolveUserId(Principal principal) {
         if (principal instanceof org.springframework.security.core.Authentication auth
                 && auth.getPrincipal() instanceof SecurityUser user) {
@@ -216,6 +258,9 @@ public class PresenceService {
         return null;
     }
 
+    /**
+     * Combines game and user ids into one key so independent reconnection deadlines cannot overlap.
+     */
     private static String key(Long gameId, Long userId) {
         return gameId + ":" + userId;
     }

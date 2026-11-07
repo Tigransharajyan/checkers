@@ -12,15 +12,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * JUnit checks for CheckersRulesEngine. Each test specifies a behavior or regression boundary;
+ * helper methods build the required test data.
+ */
 class CheckersRulesEngineTest {
 
     private CheckersRulesEngine engine;
 
+    /**
+     * Creates a fresh engine before each independent rules test.
+     */
     @BeforeEach
     void setUp() {
         engine = new CheckersRulesEngine();
     }
 
+    /**
+     * Checks a man's legal one-square forward diagonal move.
+     */
     @Test
     void quietMove_forwardDiagonal_succeeds() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -34,6 +44,9 @@ class CheckersRulesEngineTest {
         assertEquals(PieceColor.BLACK, result.board().turn());
     }
 
+    /**
+     * Checks rejection of a man's non-capturing backward move.
+     */
     @Test
     void quietMove_backward_rejectedForMan() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -44,6 +57,9 @@ class CheckersRulesEngineTest {
         assertFalse(result.success());
     }
 
+    /**
+     * Checks that a man may capture backward under Russian draughts rules.
+     */
     @Test
     void capture_manCanCaptureBackward() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -58,6 +74,9 @@ class CheckersRulesEngineTest {
         assertTrue(result.move().isCapture());
     }
 
+    /**
+     * Checks that an available capture prevents a quiet move.
+     */
     @Test
     void captureMandatory_quietMoveRejectedWhenCaptureExists() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -71,6 +90,9 @@ class CheckersRulesEngineTest {
         assertEquals(MoveError.CAPTURE_MANDATORY, result.error());
     }
 
+    /**
+     * Checks a complete multi-jump chain as one move and removal of every captured piece.
+     */
     @Test
     void multiCapture_chainInOneMove() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -87,6 +109,10 @@ class CheckersRulesEngineTest {
         assertEquals(2, result.move().captured().size());
     }
 
+    /**
+     * Checks that any complete capture branch is legal, even when another branch captures more
+     * pieces.
+     */
     @Test
     void notMaximalCapture_eitherCaptureBranchAllowed() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -104,6 +130,9 @@ class CheckersRulesEngineTest {
         assertEquals(1, shorter.move().captured().size());
     }
 
+    /**
+     * Checks a flying king's capture across a diagonal distance.
+     */
     @Test
     void king_capturesAtDistance() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -117,6 +146,9 @@ class CheckersRulesEngineTest {
         assertEquals(PieceType.KING, result.board().get(Square.parse("f6")).type());
     }
 
+    /**
+     * Checks a king's long diagonal move through empty squares without capture.
+     */
     @Test
     void king_quietLongDiagonal() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -128,6 +160,9 @@ class CheckersRulesEngineTest {
         assertNotNull(result.board().get(Square.parse("e5")));
     }
 
+    /**
+     * Checks promotion when a man reaches the final rank.
+     */
     @Test
     void promotion_manBecomesKingOnLastRank() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -140,6 +175,9 @@ class CheckersRulesEngineTest {
         assertTrue(result.move().promotion());
     }
 
+    /**
+     * Checks victory after the opponent's last piece is captured.
+     */
     @Test
     void winner_whenOpponentHasNoPieces() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -152,6 +190,9 @@ class CheckersRulesEngineTest {
         assertEquals(GameOutcome.WHITE_WINS, result.board().outcome());
     }
 
+    /**
+     * Checks defeat of a side that cannot make any legal move.
+     */
     @Test
     void winner_whenOpponentHasNoLegalMoves() {
         Board board = emptyBoard(PieceColor.BLACK);
@@ -164,6 +205,9 @@ class CheckersRulesEngineTest {
         assertEquals(GameOutcome.WHITE_WINS, board.outcome());
     }
 
+    /**
+     * Checks that the standard initial setup generates valid opening moves.
+     */
     @Test
     void initialBoard_hasLegalOpeningMoves() {
         Board board = engine.createInitialBoard();
@@ -172,6 +216,9 @@ class CheckersRulesEngineTest {
         assertTrue(moves.stream().noneMatch(EngineMove::isCapture));
     }
 
+    /**
+     * Checks preservation of the position through Board-to-JSON serialization and restoration.
+     */
     @Test
     void board_roundTripJson() {
         Board board = engine.createInitialBoard();
@@ -181,6 +228,9 @@ class CheckersRulesEngineTest {
         assertEquals(board.countPieces(PieceColor.BLACK), restored.countPieces(PieceColor.BLACK));
     }
 
+    /**
+     * Checks that promotion in the middle of a chain remains recorded in the complete move result.
+     */
     @Test
     void promotionDuringMultiJump_preservesPromotedFlag() {
         Board board = emptyBoard(PieceColor.WHITE);
@@ -198,14 +248,23 @@ class CheckersRulesEngineTest {
         assertNull(result.board().get(Square.parse("e7")));
     }
 
+    /**
+     * Creates an empty test board with the supplied side to move.
+     */
     private static Board emptyBoard(PieceColor turn) {
         return new Board(turn);
     }
 
+    /**
+     * Places a man of the supplied color on a test-board square.
+     */
     private static Piece man(PieceColor color) {
         return new Piece(color, PieceType.MAN);
     }
 
+    /**
+     * Places a king of the supplied color on a test-board square.
+     */
     private static Piece king(PieceColor color) {
         return new Piece(color, PieceType.KING);
     }

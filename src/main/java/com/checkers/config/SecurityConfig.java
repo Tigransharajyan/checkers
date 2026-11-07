@@ -20,6 +20,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Defines HTTP access rules, BCrypt password encoding and JWT filtering. Participant-specific game
+ * access is also checked by the service layer.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -29,6 +33,11 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    /**
+     * Configures public pages and authentication routes while requiring JWT authentication for
+     * protected APIs. Disables server HTTP sessions, form login and HTTP Basic; the dedicated
+     * filter validates Bearer tokens.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -86,11 +95,18 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Creates the BCrypt encoder used to hash passwords and compare login input against stored
+     * hashes. Plaintext passwords are not saved in the user table.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Exposes the AuthenticationManager supplied by Spring Security's configuration.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
             throws Exception {

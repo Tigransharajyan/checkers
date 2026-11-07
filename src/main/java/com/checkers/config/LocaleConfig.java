@@ -12,17 +12,24 @@ import java.time.Duration;
 import java.util.Locale;
 
 /**
- * i18n skeleton. Default language is always English — never Accept-Language.
- * Locale is switched via {@code ?lang=} (interceptor) and/or cookie / user preference.
+ * Selects language through the lang parameter and locale cookie, defaulting to English.
  */
 @Configuration
 public class LocaleConfig implements WebMvcConfigurer {
 
     public static final String LOCALE_COOKIE_NAME = "CHECKERS_LOCALE";
 
+    /**
+     * Creates the CHECKERS_LOCALE cookie resolver with English as the default. Unsupported
+     * languages also resolve to English.
+     */
     @Bean
     public LocaleResolver localeResolver() {
         CookieLocaleResolver resolver = new CookieLocaleResolver(LOCALE_COOKIE_NAME) {
+            /**
+             * Restricts the cookie-resolved language to en, ru or hy. Reduces regional variants to
+             * their supported base language.
+             */
             @Override
             public Locale resolveLocale(jakarta.servlet.http.HttpServletRequest request) {
                 Locale locale = super.resolveLocale(request);
@@ -37,6 +44,10 @@ public class LocaleConfig implements WebMvcConfigurer {
         return resolver;
     }
 
+    /**
+     * Creates the Spring MVC interceptor that applies language changes from the lang request
+     * parameter.
+     */
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
@@ -45,6 +56,9 @@ public class LocaleConfig implements WebMvcConfigurer {
         return interceptor;
     }
 
+    /**
+     * Registers the language-change interceptor in the HTTP request processing chain.
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());

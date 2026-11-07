@@ -17,12 +17,19 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * JUnit checks for SiteExperience. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 @SpringBootTest(properties = {"spring.jpa.show-sql=false", "logging.level.com.checkers=INFO"})
 @AutoConfigureMockMvc
 class SiteExperienceTest {
     @Autowired MockMvc mvc;
     @Autowired GameRepository games;
 
+    /**
+     * Checks that development pages and sitemap responses disallow indexing.
+     */
     @Test
     void developmentPagesAndSitemapCannotBeIndexed() throws Exception {
         mvc.perform(get("/").param("lang", "ru"))
@@ -36,6 +43,9 @@ class SiteExperienceTest {
                 .andExpect(content().string(not(containsString("<loc>"))));
     }
 
+    /**
+     * Checks successful rendering of the main screens in English, Russian and Armenian.
+     */
     @Test
     void rendersEveryScreenInAllThreeLanguages() throws Exception {
         for (String lang : new String[]{"en", "ru", "hy"}) {
@@ -49,6 +59,10 @@ class SiteExperienceTest {
         }
     }
 
+    /**
+     * Checks actual completed-game counts and deduplication of repeated activity from the same
+     * visitor.
+     */
     @Test
     @Transactional
     void publicStatsCountCompletedGamesOnceAndPresenceDeduplicatesCookies() throws Exception {
@@ -71,6 +85,10 @@ class SiteExperienceTest {
                 .andExpect(cookie().sameSite("checkers_visitor", "Lax"));
     }
 
+    /**
+     * Checks public puzzle retrieval without revealing the solution or modifying ordinary-game
+     * totals.
+     */
     @Test
     void dailyPuzzleIsPublicAndDoesNotExposeASolutionOrChangeGameTotals() throws Exception {
         long before = games.countByStatus(GameStatus.FINISHED);
@@ -85,6 +103,9 @@ class SiteExperienceTest {
         org.junit.jupiter.api.Assertions.assertEquals(before, games.countByStatus(GameStatus.FINISHED));
     }
 
+    /**
+     * Checks solution-request validation and HTTP 404 for unknown puzzle identifiers.
+     */
     @Test
     void puzzleRequestsAreValidatedAndUnknownPuzzlesReturn404() throws Exception {
         for (String body : new String[]{"{}", "{\"moves\":[]}", "{\"moves\":[null]}",

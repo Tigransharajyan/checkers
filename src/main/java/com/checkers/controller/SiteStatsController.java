@@ -19,12 +19,19 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Duration;
 import java.util.UUID;
 
+/**
+ * REST endpoints for visitor heartbeats and public activity statistics.
+ */
 @RestController
 @RequestMapping("/api/site")
 @RequiredArgsConstructor
 public class SiteStatsController {
     private final SiteStatsService stats;
 
+    /**
+     * Identifies the visitor by cookie, associates an authenticated user when available and updates
+     * the last activity time.
+     */
     @PostMapping("/presence")
     public ResponseEntity<Void> heartbeat(
             @CookieValue(name = "checkers_visitor", required = false) String visitor,
@@ -40,6 +47,9 @@ public class SiteStatsController {
         return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
     }
 
+    /**
+     * Returns active-visitor and completed-game totals from the shared statistics service.
+     */
     @GetMapping("/stats")
     public ResponseEntity<SiteStatsService.Stats> stats() {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(stats.stats());

@@ -28,10 +28,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * In-memory matchmaking queue ({@link ConcurrentLinkedQueue}).
- * <p>
- * For horizontal scaling across multiple app instances, replace this with a
- * shared store such as Redis (LIST / ZSET + pub-sub for MATCHMAKING_* events).
+ * In-memory opponent queue for one application instance. Concurrent collections and synchronization
+ * protect pairing; multiple instances require shared queue infrastructure.
  */
 @Service
 @RequiredArgsConstructor
@@ -49,10 +47,18 @@ public class MatchmakingService {
     private final ThreadPoolTaskScheduler taskScheduler;
     private final CheckersRulesEngine rulesEngine = new CheckersRulesEngine();
 
+    /**
+     * Adds the current or explicitly supplied user at most once, records the waiting time and
+     * schedules the timeout.
+     */
     public void enqueue() {
         enqueue(CustomUserDetailsService.requireCurrentUserId());
     }
 
+    /**
+     * Adds the current or explicitly supplied user at most once, records the waiting time and
+     * schedules the timeout.
+     */
     public void enqueue(Long userId) {
         if (queue.contains(userId)) {
             return;
@@ -62,17 +68,28 @@ public class MatchmakingService {
         scheduleTimeout(userId);
     }
 
+    /**
+     * Removes the currently authenticated user from the waiting queue.
+     */
     public void dequeue() {
         Long userId = CustomUserDetailsService.requireCurrentUserId();
         removeFromQueue(userId);
     }
 
+    /**
+     * Removes the user from the queue and waiting map and cancels the scheduled timeout.
+     */
     public void removeFromQueue(Long userId) {
         queue.remove(userId);
         queuedAt.remove(userId);
         cancelTimeout(userId);
     }
 
+    /**
+     * Synchronizes selection of two distinct waiting users and creates their active game. Returns
+     * an unmatched first user to the queue. The synchronized section prevents concurrent selection
+     * of the same pair.
+     */
     @Transactional
     public Game tryMatch() {
         synchronized (queue) {
@@ -113,10 +130,17 @@ public class MatchmakingService {
         }
     }
 
+    /**
+     * Reports whether the user currently has a valid matchmaking entry.
+     */
     public boolean isQueued(Long userId) {
         return queue.contains(userId);
     }
 
+    /**
+     * Retrieves the next queued user while skipping entries whose active-waiting marker has already
+     * been removed.
+     */
     private Long pollValid() {
         Long id;
         while ((id = queue.poll()) != null) {
@@ -127,6 +151,10 @@ public class MatchmakingService {
         return null;
     }
 
+    /**
+     * Cancels the user's previous timer and schedules expiry using the configured matchmaking wait
+     * limit.
+     */
     private void scheduleTimeout(Long userId) {
         cancelTimeout(userId);
         Duration timeout = Duration.ofSeconds(gameProperties.getMatchmakingTimeoutSeconds());
@@ -136,6 +164,9 @@ public class MatchmakingService {
         timeoutTasks.put(userId, future);
     }
 
+    /**
+     * Removes and cancels an existing scheduled matchmaking timeout.
+     */
     private void cancelTimeout(Long userId) {
         ScheduledFuture<?> future = timeoutTasks.remove(userId);
         if (future != null) {
@@ -143,6 +174,9 @@ public class MatchmakingService {
         }
     }
 
+    /**
+     * Removes a still-waiting user and publishes a private MATCHMAKING_TIMEOUT event.
+     */
     private void onTimeout(Long userId) {
         if (!queue.contains(userId) && !queuedAt.containsKey(userId)) {
             return;

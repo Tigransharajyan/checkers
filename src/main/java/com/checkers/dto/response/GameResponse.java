@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Detailed client snapshot containing participants, board, turn, result, invitation and move
+ * history. Lombok generates accessors and a builder.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,7 +32,7 @@ public class GameResponse {
     private PieceColor currentTurn;
     private String boardState;
     private String inviteCode;
-    /** Relative invite link hint, e.g. {@code /play?code=ABCD}. */
+    /** Relative invitation path, for example {@code /play?code=ABCD}. */
     private String invitePath;
     private String finishReason;
     private Long drawOfferById;

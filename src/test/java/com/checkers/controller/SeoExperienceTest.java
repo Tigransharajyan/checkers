@@ -20,6 +20,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * JUnit checks for SeoExperience. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 @SpringBootTest(properties = {
         "app.site.base-url=https://checkers.example/", "app.site.indexing-enabled=true",
         "app.site.google-verification=google-test-token", "app.site.bing-verification=bing-test-token",
@@ -36,6 +40,10 @@ class SeoExperienceTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper mapper;
 
+    /**
+     * Renders pages in every supported language and checks distinct metadata, canonical URLs and
+     * indexing restrictions.
+     */
     @Test
     void allPagesHaveUniqueLocalizedMetadataAndOnlyPublicContentIsIndexable() throws Exception {
         Set<String> titles = new HashSet<>(), descriptions = new HashSet<>();
@@ -75,6 +83,9 @@ class SeoExperienceTest {
         }
     }
 
+    /**
+     * Checks that /home renders the main screen without creating a separately indexable duplicate.
+     */
     @Test
     void homeAliasUsesTheSameScreenAndCanonicalHomeWithoutBecomingAnIndexableDuplicate() throws Exception {
         for (String language : SeoService.LANGUAGES) {
@@ -87,6 +98,10 @@ class SeoExperienceTest {
         }
     }
 
+    /**
+     * Checks sitemap language variants and consistency between robots.txt and the page-indexing
+     * policy.
+     */
     @Test
     void sitemapContainsEveryIndexableLanguageAndRobotsAllowsReadingNoindexPages() throws Exception {
         byte[] xml = mvc.perform(get("/sitemap.xml")).andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
@@ -117,6 +132,10 @@ class SeoExperienceTest {
         assertTrue(robots.contains("Disallow: /api/"));
     }
 
+    /**
+     * Parses JSON-LD and compares FAQ content with visible HTML. Rejects fabricated ratings,
+     * reviews and commercial offers.
+     */
     @Test
     void structuredDataIsParseableAndUsesOnlyRealVisibleContentWithoutRatingsOrOffers() throws Exception {
         for (String language : SeoService.LANGUAGES) {
@@ -146,6 +165,9 @@ class SeoExperienceTest {
         }
     }
 
+    /**
+     * Checks URL and language normalization without losing game identifiers or invitation codes.
+     */
     @Test
     void normalizesAliasesAndLanguagesWithoutDroppingGameOrInviteParameters() throws Exception {
         mvc.perform(get("/index?lang=ru")).andExpect(status().isMovedPermanently()).andExpect(header().string("Location", "/?lang=ru"));
@@ -159,6 +181,9 @@ class SeoExperienceTest {
         assertTrue(attribute(html, "a", "data-lang", "hy", "href").contains("code=INVITE"));
     }
 
+    /**
+     * Checks local availability and caching of assets addressed by content version.
+     */
     @Test
     void contentVersionedAssetsAreLocallyServedAndCacheable() throws Exception {
         String html = mvc.perform(get("/")).andReturn().getResponse().getContentAsString();
@@ -171,6 +196,9 @@ class SeoExperienceTest {
         mvc.perform(get("/images/checkers-social.jpg")).andExpect(status().isOk()).andExpect(content().contentType("image/jpeg"));
     }
 
+    /**
+     * Extracts an HTML attribute using a regular expression for metadata assertions.
+     */
     private static String attribute(String html, String tag, String selector, String value, String target) {
         var tags = Pattern.compile("<" + tag + "\\b[^>]*>").matcher(html);
         while (tags.find()) {

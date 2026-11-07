@@ -20,6 +20,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Access-JWT HTTP filter. After verifying signature, expiry and account identity, installs
+ * Authentication in the request security context.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -27,6 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
+    /**
+     * Validates the HTTP Bearer token's signature and expiry and installs the authenticated
+     * principal. Also matches the account name against the token to reject reused
+     * development-database ids. Clears authentication when validation fails.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -44,7 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Long userId = Long.valueOf(claims.getSubject());
                 SecurityUser principal = userDetailsService.loadById(userId);
-                // Development databases can reuse an ID after a restart.
+                // H2 may reuse an id after restart, so also compare the account name with the token
+                // claim.
                 if (!principal.getUsername().equals(claims.get("username", String.class))) {
                     throw new IllegalArgumentException("Token account no longer exists");
                 }

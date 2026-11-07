@@ -17,6 +17,9 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Exposes translation dictionaries for client-side language updates.
+ */
 @RestController
 @RequestMapping("/api/i18n")
 @RequiredArgsConstructor
@@ -26,6 +29,9 @@ public class I18nController {
     private final MessageSource messageSource;
     private final LocaleResolver localeResolver;
 
+    /**
+     * Returns the selected language's translation dictionary for client-side text updates.
+     */
     @GetMapping
     public Map<String, String> messages(
             @RequestParam @Pattern(regexp = "en|ru|hy") String lang,

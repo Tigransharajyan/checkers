@@ -11,11 +11,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Locale;
 
+/**
+ * Normalizes public page URLs before rendering while preserving meaningful game and language
+ * parameters.
+ */
 @Configuration
 public class SeoWebConfig implements WebMvcConfigurer {
+    /**
+     * Registers early URL normalization so equivalent public pages do not produce multiple address
+     * variants.
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new HandlerInterceptor() {
+            /**
+             * Normalizes the /index alias, trailing slash and lang parameter. Sends a permanent
+             * redirect when necessary, preserving other parameters; otherwise continues request
+             * processing.
+             */
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
                 String original = request.getRequestURI();

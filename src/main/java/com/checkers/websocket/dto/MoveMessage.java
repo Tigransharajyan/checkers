@@ -10,9 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Client move payload.
- * Prefer {@code path} for multi-captures (from … intermediate … to).
- * {@code fromSquare}/{@code toSquare} kept for simple two-square moves.
+ * Incoming full move path or compatible endpoint fields. Bean Validation checks required data; the
+ * rules engine decides legality.
  */
 @Data
 @NoArgsConstructor
@@ -23,9 +22,17 @@ public class MoveMessage {
     private String fromSquare;
     private String toSquare;
 
-    /** Full ply path including from and to. Takes precedence when size ≥ 2. */
+    /**
+     * Complete path with source and destination. Takes precedence over from/to when it has at least
+     * two squares.
+     */
     private List<String> path;
 
+    /**
+     * Prefers a full path containing at least two squares; otherwise collects the available
+     * fromSquare and toSquare values. The separate isPathPresent check verifies that two
+     * coordinates are present.
+     */
     public List<String> resolvedPath() {
         if (path != null && path.size() >= 2) {
             return path;
@@ -40,6 +47,10 @@ public class MoveMessage {
         return simple;
     }
 
+    /**
+     * Validates that the request contains either a complete path of at least two squares or both
+     * endpoint fields.
+     */
     @AssertTrue(message = "path or fromSquare+toSquare required")
     public boolean isPathPresent() {
         return resolvedPath().size() >= 2;

@@ -14,12 +14,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Profile operations for safe account retrieval and supported registered-user language updates.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
 
+    /**
+     * Checks the supported language and permission to save profile preferences, then persists the
+     * registered user's language.
+     */
     @Transactional
     public UserResponse updatePreferredLocale(LocaleUpdateRequest request) {
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
@@ -34,6 +41,9 @@ public class UserService {
         return DtoMapper.toUserResponse(user);
     }
 
+    /**
+     * Loads a user by id and returns a safe public DTO.
+     */
     @Transactional(readOnly = true)
     public UserResponse getById(Long id) {
         User user = userRepository.findById(id)
@@ -41,6 +51,9 @@ public class UserService {
         return DtoMapper.toUserResponse(user);
     }
 
+    /**
+     * Loads a user entity or raises the controlled USER_NOT_FOUND failure.
+     */
     @Transactional(readOnly = true)
     public User requireEntity(Long id) {
         return userRepository.findById(id)

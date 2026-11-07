@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * Common API failure DTO with machine-readable code, server timestamp and details. The browser
+ * selects localized wording; Lombok generates accessors and a builder.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,6 +20,6 @@ public class ApiErrorResponse {
 
     private String errorCode;
     private Instant timestamp;
-    /** Machine-readable details for frontend substitution — never localized text. */
+    /** Structured error parameters; the browser selects the localized message. */
     private Map<String, Object> details;
 }

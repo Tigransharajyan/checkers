@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.util.*;
 
+/**
+ * Builds canonical links, language variants, metadata and JSON-LD from actual site content.
+ * Excludes personal and game pages from indexing.
+ */
 @Service
 @RequiredArgsConstructor
 public class SeoService {
@@ -27,6 +31,10 @@ public class SeoService {
     private final FaqKnowledgeBase faq;
     private final Environment environment;
 
+    /**
+     * Allows indexing only when configuration and the public deployment origin permit it. Excludes
+     * development profiles, localhost and service addresses.
+     */
     public boolean indexingEnabled() {
         String host = URI.create(site.getBaseUrl()).getHost().toLowerCase(Locale.ROOT);
         return site.isIndexingEnabled() && !environment.acceptsProfiles(Profiles.of("dev"))
@@ -34,10 +42,25 @@ public class SeoService {
                 && !host.startsWith("127.") && !host.equals("[::1]") && !host.equals("0.0.0.0");
     }
 
+    /**
+     * Requires both global indexing permission and membership in the public indexable-path list.
+     */
     public boolean isIndexable(String path) { return indexingEnabled() && INDEXABLE_PATHS.contains(path); }
+    /**
+     * Returns the prevalidated public origin from configuration rather than the incoming Host
+     * header.
+     */
     public String baseUrl() { return site.getBaseUrl(); }
+    /**
+     * Combines the public origin, page path and language parameter for canonical links and sitemap
+     * entries.
+     */
     public String localizedUrl(String path, String language) { return baseUrl() + path + "?lang=" + language; }
 
+    /**
+     * Builds localized titles, descriptions, canonical URLs, robots directives, language
+     * alternatives and social metadata. The /home alias uses / as its canonical path.
+     */
     public Metadata metadata(String path, Locale locale) {
         String language = LANGUAGES.contains(locale.getLanguage()) ? locale.getLanguage() : "en";
         Locale supportedLocale = Locale.forLanguageTag(language);
@@ -61,6 +84,10 @@ public class SeoService {
                 site.getGoogleVerification(), site.getBingVerification());
     }
 
+    /**
+     * Builds JSON-LD from actual public site content and FAQ entries. Escapes angle brackets and
+     * ampersands before embedding JSON in an HTML script element.
+     */
     private String structuredData(String path, Locale locale, String title, String description, String canonical, String image) {
         String websiteId = baseUrl() + "/#website", gameId = baseUrl() + "/#game";
         List<Map<String, Object>> graph = new ArrayList<>();
@@ -97,8 +124,15 @@ public class SeoService {
         } catch (JsonProcessingException ex) { throw new IllegalStateException("Cannot serialize structured data", ex); }
     }
 
+    /**
+     * Resolves one localized SEO message through MessageSource.
+     */
     private String text(String key, Locale locale) { return messages.getMessage(key, null, locale); }
 
+    /**
+     * Immutable per-page SEO model containing localized text, canonical URL, robots directives,
+     * language variants and social metadata.
+     */
     public record Metadata(String title, String description, String canonical, String robots,
                            Map<String, String> alternates, String language, String ogLocale,
                            String image, String imageAlt, String structuredData, boolean preloadHero,

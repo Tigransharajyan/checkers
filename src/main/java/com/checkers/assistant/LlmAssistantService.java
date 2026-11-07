@@ -1,21 +1,18 @@
 package com.checkers.assistant;
 
 /**
- * Skeleton for a future paid LLM provider.
- *
- * <p>Enable with {@code app.assistant.provider=llm} and implement
- * {@link #reply(String, String)} using {@code app.assistant.llm.api-key}.
- * Uncomment {@code @Service} / {@code @ConditionalOnProperty} when ready —
- * leave {@link IntentAssistantService} as the default otherwise.
+ * Inactive extension point for a future external LLM provider. No external model is called by this
+ * implementation.
  */
-// @Service
-// @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-//         name = "app.assistant.provider", havingValue = "llm")
-// @org.springframework.context.annotation.Primary
 public class LlmAssistantService implements AssistantReplyService {
 
-    // Inject: @Value("${app.assistant.llm.api-key}") String apiKey;
+    // Future extension: inject an external provider client and its environment-supplied API key
+    // here.
 
+    /**
+     * Throws UnsupportedOperationException because the external LLM integration has not been
+     * implemented. The running application uses the local intent-based assistant instead.
+     */
     @Override
     public AssistantReply reply(String locale, String message) {
         throw new UnsupportedOperationException(

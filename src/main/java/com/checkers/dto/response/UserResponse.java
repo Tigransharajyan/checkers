@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Safe public account data: id, username, guest flag, language and result counters. Passwords and
+ * hashes are excluded. Lombok generates accessors and a builder.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

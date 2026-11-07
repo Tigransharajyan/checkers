@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+/**
+ * One complete ply, including intermediate jumps, captures, promotion, author and time. Lombok
+ * generates accessors and a builder.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

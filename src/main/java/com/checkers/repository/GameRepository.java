@@ -13,14 +13,28 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+/**
+ * Game persistence queries for lists, history, statistics and row-locked updates.
+ */
 public interface GameRepository extends JpaRepository<Game, Long> {
 
+    /**
+     * Loads a game with a pessimistic row lock held until the transaction ends. Concurrent moves,
+     * resignation and draw agreement must observe one current game state.
+     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT g FROM Game g WHERE g.id = :id")
     Optional<Game> findForUpdate(@Param("id") Long id);
 
+    /**
+     * Counts games with the supplied status directly in the database.
+     */
     long countByStatus(GameStatus status);
 
+    /**
+     * Finds games where the user plays either color and the status belongs to the supplied set.
+     * Returns newer games first.
+     */
     @Query("""
             SELECT g FROM Game g
             WHERE (g.whitePlayer.id = :userId OR g.blackPlayer.id = :userId)
@@ -30,6 +44,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     List<Game> findActiveByUserId(@Param("userId") Long userId,
                                   @Param("statuses") List<GameStatus> statuses);
 
+    /**
+     * Returns a page of the user's completed games ordered by descending finish time.
+     */
     @Query("""
             SELECT g FROM Game g
             WHERE (g.whitePlayer.id = :userId OR g.blackPlayer.id = :userId)

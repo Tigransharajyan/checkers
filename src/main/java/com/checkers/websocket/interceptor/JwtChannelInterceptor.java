@@ -16,6 +16,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Authenticates STOMP connections and propagates Authentication onto broker handler threads. Clears
+ * context after processing to avoid identity leakage between users.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtChannelInterceptor implements ExecutorChannelInterceptor {
@@ -23,6 +27,10 @@ public class JwtChannelInterceptor implements ExecutorChannelInterceptor {
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
+    /**
+     * Validates the JWT on STOMP CONNECT and binds Authentication to the connection. Restores
+     * subsequent messages' context from the authenticated session user.
+     */
     @Override
     public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -48,6 +56,10 @@ public class JwtChannelInterceptor implements ExecutorChannelInterceptor {
         return message;
     }
 
+    /**
+     * Restores SecurityContextHolder on the actual message-handler thread because the broker may
+     * dispatch work to another thread.
+     */
     @Override
     public Message<?> beforeHandle(@NonNull Message<?> message, @NonNull MessageChannel channel, @NonNull org.springframework.messaging.MessageHandler handler) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -57,11 +69,19 @@ public class JwtChannelInterceptor implements ExecutorChannelInterceptor {
         return message;
     }
 
+    /**
+     * Clears the security context after handling so a reused worker thread cannot retain another
+     * user's identity.
+     */
     @Override
     public void afterMessageHandled(@NonNull Message<?> message, @NonNull MessageChannel channel, @NonNull org.springframework.messaging.MessageHandler handler, Exception ex) {
         SecurityContextHolder.clearContext();
     }
 
+    /**
+     * Extracts the Bearer token from the native Authorization header or the fallback access_token
+     * STOMP header.
+     */
     private String resolveToken(StompHeaderAccessor accessor) {
         String header = accessor.getFirstNativeHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {

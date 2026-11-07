@@ -11,11 +11,19 @@ import java.time.ZoneOffset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+/**
+ * JUnit checks for SiteStatsService. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 class SiteStatsServiceTest {
     private final GameRepository games = mock(GameRepository.class);
     private final Clock clock = mock(Clock.class);
     private final Instant now = Instant.parse("2026-10-18T10:00:00Z");
 
+    /**
+     * Checks deduplication of one person's repeated visits and retrieval of completed-game totals
+     * from persistence.
+     */
     @Test
     void countsDistinctPeopleAndUsesCompletedDatabaseGames() {
         when(clock.instant()).thenReturn(now);
@@ -29,6 +37,10 @@ class SiteStatsServiceTest {
         verify(games).countByStatus(GameStatus.FINISHED);
     }
 
+    /**
+     * Checks expiry of inactive visits and merging of an anonymous cookie identity with an account
+     * after login.
+     */
     @Test
     void expiresAbsentVisitorsAndReplacesAnonymousIdentityOnLogin() {
         when(clock.instant()).thenReturn(now);
@@ -43,6 +55,9 @@ class SiteStatsServiceTest {
         assertEquals(1, service.stats().online());
     }
 
+    /**
+     * Checks zero totals when no real visits or completed games exist.
+     */
     @Test
     void newSiteHasZeroActivity() {
         SiteStatsService service = new SiteStatsService(games, Clock.fixed(now, ZoneOffset.UTC));

@@ -2,6 +2,8 @@
 
 Online multiplayer checkers (Russian draughts) web application built with Spring Boot, Thymeleaf, WebSocket/STOMP.
 
+Backend classes and methods have detailed English comments. For a Russian-language walkthrough of the architecture and algorithms, see the [diploma guide](docs/diploma-guide.md) and [architecture overview](ARCHITECTURE.md).
+
 ## Tech Stack
 
 - **Backend:** Java 17, Spring Boot 3.3.4

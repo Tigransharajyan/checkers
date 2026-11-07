@@ -1,9 +1,8 @@
 package com.checkers.model.enums;
 
 /**
- * Structured WebSocket / domain event codes.
- * Backend never sends localized human-readable text — frontend maps
- * {@code EventType} + {@code data} to messages via i18n keys (Stage 4).
+ * Real-time event types for moves, game lifecycle, draw offers, matchmaking and presence. The
+ * client localizes event wording.
  */
 public enum EventType {
     GAME_STARTED,

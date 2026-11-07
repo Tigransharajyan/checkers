@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * Transport DTO for an incoming STOMP matchmaking request, separate from queue implementation.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

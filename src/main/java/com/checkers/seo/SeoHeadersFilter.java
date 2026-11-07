@@ -10,11 +10,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Adds HTTP indexing directives consistent with page metadata and the deployment environment.
+ */
 @Component
 @RequiredArgsConstructor
 public class SeoHeadersFilter extends OncePerRequestFilter {
     private final SeoService seo;
 
+    /**
+     * Adds X-Robots-Tag for non-indexable pages and environments, then continues the HTTP filter
+     * chain.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {

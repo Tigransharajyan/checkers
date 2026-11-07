@@ -20,6 +20,10 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+/**
+ * Persisted complete ply in the moves table. Its number is unique within a game and path retains
+ * intermediate jumps for replay. Lombok generates accessors and a builder.
+ */
 @Entity
 @Table(
         name = "moves",
@@ -55,11 +59,14 @@ public class Move {
     @Column(name = "to_square", nullable = false, length = 8)
     private String toSquare;
 
-    /** Comma-separated captured squares, if any (e.g. "c3,e5"). */
+    /**
+     * Captured-square coordinates separated by commas, for example c3,e5; absent when nothing is
+     * captured.
+     */
     @Column(name = "captured_squares", length = 64)
     private String capturedSquares;
 
-    /** Full ply path for replay (e.g. "b2,d4,f6"). */
+    /** Complete ply path including intermediate landings, for example b2,d4,f6. */
     @Column(name = "path", length = 255)
     private String path;
 
@@ -74,6 +81,9 @@ public class Move {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /**
+     * Records server creation time before a new move is inserted.
+     */
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();

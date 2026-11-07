@@ -16,8 +16,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Exposes the full message bundle for the active locale so templates can
- * inline {@code window.i18n = {...}} without duplicating translations in JS.
+ * Adds the current language and shared translation dictionary to PageController views. Server
+ * templates and browser code use the same message keys.
  */
 @ControllerAdvice(assignableTypes = com.checkers.controller.PageController.class)
 @Configuration
@@ -25,10 +25,18 @@ public class I18nModelAdvice {
 
     private final MessageSource messageSource;
 
+    /**
+     * Receives Spring's message source, shared by server-rendered templates and the browser
+     * translation dictionary.
+     */
     public I18nModelAdvice(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
+    /**
+     * Builds the known translation dictionary in the current request language. Templates expose it
+     * as window.i18n so JavaScript and Thymeleaf use the same messages.
+     */
     @ModelAttribute("i18nMap")
     public Map<String, String> i18nMap(HttpServletRequest request) {
         Locale locale = resolveLocale(request);
@@ -40,11 +48,18 @@ public class I18nModelAdvice {
         return map;
     }
 
+    /**
+     * Returns the short language code used by the HTML lang attribute and language links.
+     */
     @ModelAttribute("currentLocale")
     public String currentLocale(HttpServletRequest request) {
         return resolveLocale(request).getLanguage();
     }
 
+    /**
+     * Resolves the request language through the configured LocaleResolver. Uses English if the
+     * resolver supplies no locale.
+     */
     private Locale resolveLocale(HttpServletRequest request) {
         LocaleResolver resolver = RequestContextUtils.getLocaleResolver(request);
         if (resolver != null) {
@@ -58,6 +73,10 @@ public class I18nModelAdvice {
 
     private static volatile Iterable<String> cachedKeys;
 
+    /**
+     * Loads and sorts the base message keys once. A volatile reference and synchronized
+     * initialization safely publish the shared cache to concurrent requests.
+     */
     public static Iterable<String> loadKeys() {
         Iterable<String> local = cachedKeys;
         if (local != null) {

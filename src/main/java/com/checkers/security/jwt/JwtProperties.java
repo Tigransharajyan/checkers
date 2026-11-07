@@ -4,6 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Secret and access/refresh lifetime settings under app.jwt. Spring Boot binds values; Lombok
+ * generates accessors.
+ */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "app.jwt")

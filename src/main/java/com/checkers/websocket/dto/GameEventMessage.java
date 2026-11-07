@@ -10,7 +10,8 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * Generic event envelope. Frontend resolves {@link EventType} to localized text.
+ * Real-time event envelope with type, game id, timestamp and machine-readable data. Localization
+ * belongs to the client. Lombok generates accessors and a builder.
  */
 @Data
 @NoArgsConstructor
@@ -21,6 +22,9 @@ public class GameEventMessage {
     private EventType type;
     private Long gameId;
     private Instant timestamp;
-    /** Substitution data only (usernames, squares, ids) — never localized copy. */
+    /**
+     * Event parameters such as names, squares and ids; localized wording is chosen by the
+     * recipient's browser.
+     */
     private Map<String, Object> data;
 }

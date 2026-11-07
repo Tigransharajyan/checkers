@@ -1,7 +1,9 @@
+# Shared settings. The --- separators below introduce dev and prod profile overrides.
 spring:
   application:
     name: checkers-online
   profiles:
+    # Local runs use H2. SPRING_PROFILES_ACTIVE=prod selects PostgreSQL on the server.
     active: dev
   messages:
     basename: i18n/messages
@@ -10,6 +12,7 @@ spring:
   thymeleaf:
     cache: false
   jpa:
+    # Resolve JPA relationships inside service transactions rather than during view rendering.
     open-in-view: false
     hibernate:
       ddl-auto: validate
@@ -27,23 +30,24 @@ server:
 
 app:
   jwt:
+    # The fallback is for development; production supplies its secret through the environment.
     secret: ${JWT_SECRET:dev-only-change-me-to-a-long-enough-secret-key-for-hs256-checkers-online}
     access-token-ttl-minutes: 30
     refresh-token-ttl-days: 3
   site:
-    # Render provides its real public URL; a custom domain can override it.
+    # Public origin for canonical URLs and sitemap; SITE_BASE_URL overrides the hosting domain.
     base-url: ${SITE_BASE_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}
     indexing-enabled: ${SITE_INDEXING_ENABLED:true}
     google-verification: ${GOOGLE_SITE_VERIFICATION:}
     bing-verification: ${BING_SITE_VERIFICATION:}
   game:
     reconnect-timeout-seconds: 60
-    # In-memory queue; for multi-instance deploy prefer Redis LIST/ZSET + pub-sub
+    # The queue lives in one process; multiple instances require shared matchmaking infrastructure.
     matchmaking-timeout-seconds: 120
-    # Casual games allow agreement immediately; set 20 for tournament regulations.
+    # Minimum full moves before an offer: 0 for casual play, or 20 for that tournament regulation.
     draw-offer-minimum-moves: 0
   assistant:
-    # intent (default) | llm — set to llm when LlmAssistantService is implemented
+    # The working intent provider uses the local FAQ; llm remains an unimplemented extension point.
     provider: intent
     llm:
       api-key: ${ASSISTANT_LLM_API_KEY:}
@@ -54,6 +58,7 @@ spring:
     activate:
       on-profile: dev
   datasource:
+    # The development database lives in process memory and is lost when the process stops.
     url: jdbc:h2:mem:checkers;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
     driver-class-name: org.h2.Driver
     username: sa
@@ -82,8 +87,7 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    # Configured programmatically in com.checkers.config.DatabaseConfig
-    # Supports Render connectionString (postgresql://...), DATABASE_URL, and DB_* variables
+    # DatabaseConfig builds the DataSource from DATABASE_URL or individual DB_* variables.
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
@@ -98,6 +102,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   web:
     resources:
+      # Content hashes in asset URLs allow long caching while changed content receives a new URL.
       chain:
         strategy:
           content:

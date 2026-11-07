@@ -12,9 +12,17 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Common REST exception boundary mapping known failures to HTTP statuses and logging unexpected
+ * errors.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Converts an expected domain exception into the appropriate HTTP status and standard JSON
+     * error with its code, timestamp and details.
+     */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusiness(BusinessException ex) {
         HttpStatus status = mapStatus(ex.getErrorCode());
@@ -25,6 +33,10 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    /**
+     * Collects Bean Validation failures by form field and returns HTTP 400 in the common API-error
+     * format.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, Object> details = new HashMap<>();
@@ -38,6 +50,10 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    /**
+     * Returns HTTP 404 for a missing static resource instead of incorrectly reporting an internal
+     * server error.
+     */
     @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiErrorResponse.builder()
@@ -47,6 +63,10 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    /**
+     * Handles malformed parameters, incompatible types and invalid JSON as client errors with HTTP
+     * 400.
+     */
     @ExceptionHandler({
             org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
             org.springframework.web.bind.MissingServletRequestParameterException.class,
@@ -61,6 +81,10 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    /**
+     * Logs an unexpected exception and returns a general HTTP 500 response. Expected domain
+     * failures have their own handler.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex) {
         org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class).error("Unhandled exception in API request: ", ex);
@@ -71,6 +95,10 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    /**
+     * Maps domain error codes to authentication, authorization, not-found, conflict or bad-request
+     * HTTP statuses.
+     */
     private HttpStatus mapStatus(ErrorCode code) {
         return switch (code) {
             case UNAUTHORIZED, INVALID_CREDENTIALS, INVALID_REFRESH_TOKEN -> HttpStatus.UNAUTHORIZED;

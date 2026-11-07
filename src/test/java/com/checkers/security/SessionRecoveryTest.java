@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * JUnit checks for SessionRecovery. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 @SpringBootTest(properties = {"spring.jpa.show-sql=false", "logging.level.com.checkers=INFO"})
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -25,6 +29,10 @@ class SessionRecoveryTest {
     @Autowired JwtService jwt;
     @Autowired UserRepository users;
 
+    /**
+     * Checks session behavior after an account disappears while public endpoints and the refresh
+     * mechanism remain usable.
+     */
     @Test
     void missingAccountRequiresLoginWhilePublicRequestsAndRefreshStillWork() throws Exception {
         String header = "Bearer " + jwt.createAccessToken(User.builder()
@@ -42,6 +50,10 @@ class SessionRecoveryTest {
                 .andExpect(jsonPath("$.errorCode").value("INVALID_REFRESH_TOKEN"));
     }
 
+    /**
+     * Checks rejection of an old JWT when the development database reuses its id for another
+     * account.
+     */
     @Test
     void reusedDatabaseIdCannotAuthenticateThePreviousAccount() throws Exception {
         User current = users.save(User.builder().username("new_guest").guest(true).build());
@@ -54,6 +66,9 @@ class SessionRecoveryTest {
                 .andExpect(jsonPath("$.username").value("new_guest"));
     }
 
+    /**
+     * Checks HTTP 401 on protected endpoints for absent or malformed authentication.
+     */
     @Test
     void anonymousAndMalformedSessionsReturn401OnProtectedRequests() throws Exception {
         mvc.perform(get("/api/auth/me"))

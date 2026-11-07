@@ -27,6 +27,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Creates and validates invitations, joins the second player and notifies participants when play
+ * starts.
+ */
 @Service
 @RequiredArgsConstructor
 public class InviteService {
@@ -42,6 +46,10 @@ public class InviteService {
     private final GameEventPublisher eventPublisher;
     private final CheckersRulesEngine rulesEngine = new CheckersRulesEngine();
 
+    /**
+     * Creates a unique invitation code with PENDING status and a twenty-four-hour expiry, linked to
+     * its game and creator.
+     */
     @Transactional
     public GameInvite createInvite(Game game, User creator) {
         GameInvite invite = GameInvite.builder()
@@ -54,6 +62,11 @@ public class InviteService {
         return gameInviteRepository.save(invite);
     }
 
+    /**
+     * Validates the invitation and joins the second participant. Reopening by the creator or
+     * already joined player returns the same game. Publishes acceptance and start events after a
+     * successful join.
+     */
     @Transactional
     public GameResponse acceptInvite(String code) {
         Long userId = CustomUserDetailsService.requireCurrentUserId();
@@ -68,7 +81,7 @@ public class InviteService {
 
         Game game = invite.getGame();
 
-        // If the current user is already the creator or the joined opponent, return game idempotently
+        // Reopening by an existing participant returns the same game without joining twice.
         boolean isCreator = invite.getCreator().getId().equals(userId);
         boolean isExistingBlackPlayer = game.getBlackPlayer() != null && game.getBlackPlayer().getId().equals(userId);
         if (isCreator || isExistingBlackPlayer) {
@@ -126,6 +139,9 @@ public class InviteService {
                 moveRepository.findByGameIdOrderByMoveNumberAsc(game.getId()));
     }
 
+    /**
+     * Allows only the invitation creator to cancel it and persists CANCELLED status.
+     */
     @Transactional
     public void cancelInvite(String code) {
         Long userId = CustomUserDetailsService.requireCurrentUserId();
@@ -138,6 +154,10 @@ public class InviteService {
         gameInviteRepository.save(invite);
     }
 
+    /**
+     * Generates an eight-character SecureRandom code without ambiguous characters and checks
+     * uniqueness in the database. Reports an internal failure after twenty unsuccessful attempts.
+     */
     private String generateUniqueCode() {
         for (int attempt = 0; attempt < 20; attempt++) {
             StringBuilder sb = new StringBuilder(CODE_LENGTH);

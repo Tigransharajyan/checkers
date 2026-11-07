@@ -24,6 +24,10 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+/**
+ * Invitation entity containing its unique code, game, creator, status and expiry. Lombok generates
+ * accessors and a builder.
+ */
 @Entity
 @Table(
         name = "game_invites",
@@ -69,6 +73,10 @@ public class GameInvite {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /**
+     * Initializes invitation timestamps and the default status before insertion when values were
+     * not provided.
+     */
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();

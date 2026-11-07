@@ -28,6 +28,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * JUnit checks for AuthService. Each test specifies a behavior or regression boundary; helper
+ * methods build the required test data.
+ */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -45,11 +49,18 @@ class AuthServiceTest {
 
     private AuthService authService;
 
+    /**
+     * Builds AuthService with mocked dependencies to test normalization and validation without a
+     * real database.
+     */
     @BeforeEach
     void setUp() {
         authService = new AuthService(userRepository, refreshTokenRepository, passwordEncoder, jwtService);
     }
 
+    /**
+     * Checks lowercase email normalization before registration.
+     */
     @Test
     void register_normalizesEmailToLowercase() {
         RegisterRequest request = new RegisterRequest();
@@ -74,6 +85,9 @@ class AuthServiceTest {
         assertEquals("AliceUser", saved.getUsername());
     }
 
+    /**
+     * Checks rejection of a duplicate email differing only in letter case.
+     */
     @Test
     void register_duplicateEmailDifferentCase_throwsEmailTaken() {
         RegisterRequest request = new RegisterRequest();
@@ -88,6 +102,9 @@ class AuthServiceTest {
         assertEquals(ErrorCode.EMAIL_TAKEN, ex.getErrorCode());
     }
 
+    /**
+     * Checks successful login using a mixed-case email through the shared identifier lookup.
+     */
     @Test
     void login_withMixedCaseEmail_usesFindByIdentifierAndSucceeds() {
         LoginRequest request = new LoginRequest();

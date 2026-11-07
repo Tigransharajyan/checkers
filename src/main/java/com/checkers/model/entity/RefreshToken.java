@@ -20,6 +20,10 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+/**
+ * Stored opaque refresh token with user, expiry and revocation state. Separate persistence supports
+ * rotation and revocation. Lombok generates accessors.
+ */
 @Entity
 @Table(
         name = "refresh_tokens",
@@ -59,11 +63,17 @@ public class RefreshToken {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /**
+     * Sets server creation time before the refresh-token record is inserted.
+     */
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();
     }
 
+    /**
+     * Compares the token expiry time with the current instant and reports whether it has expired.
+     */
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
     }

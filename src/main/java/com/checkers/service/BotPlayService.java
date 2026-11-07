@@ -13,7 +13,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
- * Schedules bot thinking off the request / STOMP handler thread.
+ * Asynchronous bot-response wrapper. Runs search outside the STOMP handler thread and lets
+ * GameService recheck whether a move still applies.
  */
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,11 @@ public class BotPlayService {
     private final BotService botService;
     private final GameEventPublisher eventPublisher;
 
+    /**
+     * Checks for a bot turn on a background thread, waits briefly and requests a move. GameService
+     * rechecks current state under a row lock before execution; the resulting event is published to
+     * participants.
+     */
     @Async("botExecutor")
     public void scheduleBotMove(Long gameId) {
         try {
