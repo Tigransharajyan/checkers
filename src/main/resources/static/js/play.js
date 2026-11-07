@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let boardUi = null;
   let disconnectTimer = null;
   let premoveSending = false;
+  let legalRequest = 0;
   let eventQueue = Promise.resolve();
 
   function setStatus(text, kind) {
@@ -168,16 +169,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updateActionButtons() {
     const isPlaying = game && game.status === 'IN_PROGRESS';
-    const isBot = game && game.mode === 'BOT';
     if (resignBtn) resignBtn.disabled = !isPlaying;
     if (drawOfferBtn) {
-      drawOfferBtn.disabled = !isPlaying || isBot;
-      if (isBot) {
-        drawOfferBtn.style.display = 'none';
-      } else {
-        drawOfferBtn.style.display = '';
-      }
+      drawOfferBtn.disabled = !isPlaying || game.drawOfferById === Checkers.Auth.user()?.id;
+      drawOfferBtn.style.display = '';
     }
+    const incoming = isPlaying && game.drawOfferById != null && game.drawOfferById !== Checkers.Auth.user()?.id;
+    drawOfferBox?.classList.toggle('hidden', !incoming);
   }
 
   function updateTurnBanner(hasCaptures) {
@@ -203,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       let isWin = false;
       let outcome = 'finished';
 
-      if (game.finishReason === 'DRAW') {
+      if (Checkers.isDraw(game.finishReason)) {
         result = Checkers.t('play.result.draw');
         outcome = 'draw';
       } else if (game.winnerId && me && game.winnerId === me.id) {
@@ -245,10 +243,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         setStatus(Checkers.t('play.opponentTurn'), 'warn');
       }
+      const count = boardUi?.getPremoves().length || 0;
+      if (count) setStatus(statusEl.textContent + ' · ' + Checkers.t('play.premoveQueued', count), 'warn');
     }
   }
 
   async function loadLegal() {
+    const request = ++legalRequest;
     if (!game || game.status !== 'IN_PROGRESS' || !myColor) {
       premoveSending = false;
       boardUi.setPremoveMode(false);
@@ -269,29 +270,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     boardUi.setPremoveMode(false);
     try {
+      const position = game.boardState;
       const paths = await Checkers.api('/api/games/' + game.id + '/legal-moves');
-      if (!game || game.status !== 'IN_PROGRESS' || game.currentTurn !== myColor) {
+      if (request !== legalRequest || !game || position !== game.boardState || game.status !== 'IN_PROGRESS' || game.currentTurn !== myColor) {
         return;
       }
 
-      const premove = boardUi.getPremove();
+      const queue = boardUi.getPremoves();
       boardUi.setLegal(paths);
 
-      if (premove && !premoveSending) {
-        const match = Checkers.BoardUI.matchPremove(paths, premove);
-        boardUi.clearPremove();
+      if (queue.length && !premoveSending) {
+        const match = Checkers.BoardUI.matchPremoveQueue(paths, queue);
         if (match) {
           premoveSending = true;
+          boardUi.consumePremoves(match.count);
           boardUi.setLegal([]);
           updateTurnBanner(false);
-          sendMove(match);
+          boardUi.executeMove(match.path);
           return;
         }
+        boardUi.clearPremove();
       }
 
       const hasCaptures = paths.some(path => Checkers.BoardUI.isCapturePath(path, boardUi.getBoard()));
       updateTurnBanner(hasCaptures);
     } catch (_) {
+      if (request !== legalRequest) return;
       boardUi.setLegal([]);
       updateTurnBanner(false);
     }
@@ -335,6 +339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const msg = JSON.parse(frame.body);
           const moveErr = msg.data && msg.data.moveError;
           premoveSending = false;
+          boardUi.clearPremove();
           if (moveErr) {
             Checkers.toast(Checkers.t('error.move.' + moveErr), 'error');
           } else if (msg.data && msg.data.errorCode) {
@@ -389,7 +394,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (data.status) game.status = data.status;
       if (data.finishReason) game.finishReason = data.finishReason;
       if (data.winnerId !== undefined) game.winnerId = data.winnerId;
+      if (Object.hasOwn(data, 'drawOfferById')) game.drawOfferById = data.drawOfferById;
       renderPlayers();
+      updateActionButtons();
 
       const path = Array.isArray(data.path)
         ? data.path
@@ -406,6 +413,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (type === 'DRAW_OFFERED') {
+      game.drawOfferById = data.userId;
+      updateActionButtons();
       // ONLY show accept/decline modal to the receiver, NOT the sender
       if (data.userId === me?.id) {
         Checkers.toast(Checkers.t('play.drawOffer') + ': ' + (Checkers.t('toast.moveSent') || 'Отправлено'));
@@ -418,6 +427,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (type === 'DRAW_ACCEPTED' || type === 'DRAW_DECLINED' || type === 'GAME_RESIGNED' || type === 'TECHNICAL_DEFEAT') {
+      game.drawOfferById = null;
       drawOfferBox?.classList.add('hidden');
       if (drawOfferBtn) drawOfferBtn.disabled = false;
       Checkers.toast(Checkers.eventMessage(type, data));
@@ -472,6 +482,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function sendMove(path) {
     if (!stompClient || !stompClient.connected) {
+      premoveSending = false;
+      boardUi?.clearPremove();
       Checkers.toast(Checkers.t('toast.disconnected'), 'error');
       return false;
     }
@@ -565,6 +577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     coordinates: true,
     onMove: sendMove,
     onLand: kind => Checkers.Sound.play(kind),
+    onPremoveChange: () => { if (game) updateTurnBanner(false); },
     onSyncNeeded: () => Checkers.api('/api/games/' + gameId).then(applyGame).catch(error => Checkers.toast(Checkers.apiErrorMessage(error), 'error'))
   });
 

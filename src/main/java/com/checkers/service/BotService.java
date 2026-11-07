@@ -76,6 +76,16 @@ public class BotService {
         };
     }
 
+    /** An offer only: this heuristic must never finish a game automatically. */
+    public boolean considersDraw(Board board) {
+        int pieces = board.countPieces(PieceColor.WHITE) + board.countPieces(PieceColor.BLACK);
+        boolean whiteKing = board.occupiedAlgebraic().containsValue("WK");
+        boolean blackKing = board.occupiedAlgebraic().containsValue("BK");
+        return pieces <= 7 && whiteKing && blackKing
+                && rulesEngine.legalMoves(board).stream().noneMatch(EngineMove::isCapture)
+                && Math.abs(evaluate(board, PieceColor.BLACK)) <= 60;
+    }
+
     private int minimax(Board board, int depth, int alpha, int beta, boolean maximizing, PieceColor botColor) {
         rulesEngine.refreshOutcome(board);
         GameOutcome outcome = board.outcome();

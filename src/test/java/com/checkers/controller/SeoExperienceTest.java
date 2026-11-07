@@ -132,7 +132,7 @@ class SeoExperienceTest {
                 for (var node : data.get("@graph")) {
                     assertTrue(node.has("@type"));
                     if (node.get("@type").asText().equals("FAQPage")) {
-                        assertEquals(11, node.get("mainEntity").size());
+                        assertEquals(13, node.get("mainEntity").size());
                         for (var question : node.get("mainEntity")) {
                             assertEquals("Question", question.get("@type").asText());
                             assertEquals("Answer", question.get("acceptedAnswer").get("@type").asText());

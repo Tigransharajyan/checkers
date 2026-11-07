@@ -75,6 +75,7 @@ public final class DtoMapper {
                 .inviteCode(inviteCode)
                 .invitePath(inviteCode != null ? "/play?code=" + inviteCode : null)
                 .finishReason(game.getFinishReason())
+                .drawOfferById(game.getDrawOfferById())
                 .startedAt(game.getStartedAt())
                 .finishedAt(game.getFinishedAt())
                 .createdAt(game.getCreatedAt())

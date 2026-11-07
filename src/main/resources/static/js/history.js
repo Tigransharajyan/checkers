@@ -25,16 +25,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       const vs = (g.whiteUsername || '—') + ' ' + Checkers.t('common.vs') + ' ' + (g.mode === 'BOT' ? Checkers.t('common.bot') : (g.blackUsername || '—'));
 
       let resultBadge = '';
-      const winner = g.winnerUsername || (g.mode === 'BOT' && g.finishReason !== 'DRAW' ? Checkers.t('common.bot') : '—');
+      const winner = g.winnerUsername || (g.mode === 'BOT' && !Checkers.isDraw(g.finishReason) ? Checkers.t('common.bot') : '—');
       if (g.winnerUsername) {
         if (g.winnerUsername === user.username) {
           resultBadge = `<span class="res-badge res-win">${Checkers.t('play.result.win')}</span>`;
         } else {
           resultBadge = `<span class="res-badge res-loss">${Checkers.t('play.result.loss')}</span>`;
         }
-      } else if (g.mode === 'BOT' && g.finishReason !== 'DRAW') {
+      } else if (g.mode === 'BOT' && !Checkers.isDraw(g.finishReason)) {
         resultBadge = `<span class="res-badge res-loss">${Checkers.t('play.result.loss')}</span>`;
-      } else if (g.finishReason === 'DRAW') {
+      } else if (Checkers.isDraw(g.finishReason)) {
         resultBadge = `<span class="res-badge res-draw">${Checkers.t('play.result.draw')}</span>`;
       }
 

@@ -1,4 +1,5 @@
 window.Checkers = window.Checkers || {};
+Checkers.isDraw = reason => reason === 'DRAW' || (typeof reason === 'string' && reason.startsWith('DRAW_'));
 
 Checkers.Auth = {
   KEY: 'checkers.auth',

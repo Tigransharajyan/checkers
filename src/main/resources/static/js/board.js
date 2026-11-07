@@ -88,6 +88,21 @@ Checkers.BoardUI = (function () {
     return byEnds.length === 1 ? byEnds[0] : null;
   }
 
+  function matchPremoveQueue(paths, queue) {
+    if (!queue?.length) return null;
+    let combined = queue[0].slice();
+    for (let count = 1; count <= queue.length; count++) {
+      const match = count === 1 ? matchPremove(paths, combined) : paths.find(path => pathsEqual(path, combined));
+      if (match) return { path: match, count };
+      // Consecutive planned jumps may be one mandatory multi-capture turn.
+      if (!paths.some(path => path.length > combined.length && combined.every((square, index) => path[index] === square))) return null;
+      const next = queue[count];
+      if (!next || next[0] !== combined.at(-1)) return null;
+      combined = combined.concat(next.slice(1));
+    }
+    return null;
+  }
+
   function create(root, options) {
     const id = ++boardId;
     const squares = new Map();
@@ -113,10 +128,11 @@ Checkers.BoardUI = (function () {
       arrows: new Set(),
       rightStart: null,
       rightStartPoint: null,
+      cancelledRightClick: false,
       drag: null,
       premoveMode: false,
       premoveColor: null,
-      premove: null
+      premoves: []
     };
 
     function ownColorChar() {
@@ -124,17 +140,59 @@ Checkers.BoardUI = (function () {
     }
 
     function isOwnPiece(alg) {
-      const code = state.board.squares && state.board.squares[alg];
+      const code = projectedSquares()[alg];
       return !!(code && state.premoveMode && state.premoveColor && code[0] === ownColorChar());
     }
 
+    function projectedSquares() {
+      const position = { ...state.board.squares };
+      if (!state.premoveMode || state.animating) return position;
+      for (const path of state.premoves) {
+        let code = position[path[0]];
+        if (!code || code[0] !== ownColorChar()) break;
+        delete position[path[0]];
+        for (let step = 1; step < path.length; step++) {
+          const from = path[step - 1], to = path[step];
+          const distance = Math.abs(to.charCodeAt(0) - from.charCodeAt(0));
+          const df = Math.sign(to.charCodeAt(0) - from.charCodeAt(0));
+          const dr = Math.sign(Number(to[1]) - Number(from[1]));
+          for (let offset = 1; offset < distance; offset++) {
+            const square = String.fromCharCode(from.charCodeAt(0) + df * offset) + (Number(from[1]) + dr * offset);
+            if (position[square]?.[0] !== code[0]) delete position[square];
+          }
+          if (code[1] === 'M' && to[1] === (code[0] === 'W' ? '8' : '1')) code = code[0] + 'K';
+        }
+        position[path.at(-1)] = code;
+      }
+      return position;
+    }
+
+    function enqueuePremove(path) {
+      const position = projectedSquares();
+      let code = position[path[0]];
+      if (!code || code[0] !== ownColorChar() || position[path.at(-1)]?.[0] === code[0]) return false;
+      for (let step = 1; step < path.length; step++) {
+        const from = path[step - 1], to = path[step];
+        const df = Math.abs(to.charCodeAt(0) - from.charCodeAt(0)), dr = Number(to[1]) - Number(from[1]);
+        if (!df || df !== Math.abs(dr)) return false;
+        if (code[1] === 'M' && !(df === 2 || (df === 1 && dr === (code[0] === 'W' ? 1 : -1)))) return false;
+        if (to[1] === (code[0] === 'W' ? '8' : '1')) code = code[0] + 'K';
+      }
+      state.premoves.push(path.slice());
+      state.selected = null;
+      state.partial = [];
+      options?.onPremoveChange?.(state.premoves.length);
+      if (!state.animating) render();
+      return true;
+    }
+
     function invalidatePremoveIfBroken() {
-      if (!state.premove || !state.premove.length) return;
-      const from = state.premove[0];
+      if (!state.premoves.length) return;
+      const from = state.premoves[0][0];
       const code = state.board.squares && state.board.squares[from];
       const want = ownColorChar();
       if (!code || code[0] !== want) {
-        state.premove = null;
+        clearPremove();
       }
     }
 
@@ -177,6 +235,7 @@ Checkers.BoardUI = (function () {
         : [0, 1, 2, 3, 4, 5, 6, 7];
 
       const highlights = highlightSet();
+      const displaySquares = projectedSquares();
       const mandatorySources = mandatoryCaptureSources();
       updateCoordLabels(state.flip);
 
@@ -201,13 +260,13 @@ Checkers.BoardUI = (function () {
           sq.setAttribute('aria-colindex', String(columnIndex + 1));
           sq.tabIndex = alg === (state.focused || 'a1') ? 0 : -1;
           sq.setAttribute('aria-selected', String(state.selected === alg || state.partial.includes(alg)));
-          const labelCode = state.board.squares[alg];
+          const labelCode = displaySquares[alg];
           const accessibleStates = [];
           if (mandatorySources.has(alg)) accessibleStates.push(Checkers.t('redesign.board.mandatory'));
           else if (isMovableSquare(alg)) accessibleStates.push(Checkers.t('redesign.board.movable'));
           if (highlights.cap.has(alg)) accessibleStates.push(Checkers.t('redesign.board.capture'));
           else if (highlights.dest.has(alg)) accessibleStates.push(Checkers.t('redesign.board.destination'));
-          if (state.premove?.includes(alg)) accessibleStates.push(Checkers.t('redesign.board.premove'));
+          if (state.premoves.some(path => path.includes(alg))) accessibleStates.push(Checkers.t('redesign.board.premove'));
           sq.setAttribute('aria-label', [alg + (labelCode ? ': ' + Checkers.t('play.color.' + (labelCode[0] === 'W' ? 'WHITE' : 'BLACK')) + (labelCode[1] === 'K' ? ' ' + Checkers.t('play.king') : '') : ''), ...accessibleStates].join(', '));
           if (options && options.coordinates) {
             for (const [kind, text] of [['rank', columnIndex === 0 ? String(rank + 1) : ''], ['file', rowIndex === 7 ? FILES[file] : '']]) {
@@ -230,10 +289,10 @@ Checkers.BoardUI = (function () {
           }
           if (state.lastFrom === alg) sq.classList.add('last-from');
           if (state.lastTo === alg) sq.classList.add('last-to');
-          if (state.premove && state.premove.length >= 2) {
-            if (state.premove[0] === alg) sq.classList.add('premove-from');
-            if (state.premove[state.premove.length - 1] === alg) sq.classList.add('premove-to');
-            if (state.premove.includes(alg)) sq.classList.add('premove-path');
+          for (const path of state.premoves) {
+            if (path[0] === alg) sq.classList.add('premove-from');
+            if (path.at(-1) === alg) sq.classList.add('premove-to');
+            if (path.includes(alg)) sq.classList.add('premove-path');
           }
           if (highlights.dest.has(alg)) sq.classList.add(state.premoveMode ? 'premove-hl' : 'hl');
           if (highlights.cap.has(alg)) sq.classList.add(state.premoveMode ? 'premove-cap' : 'cap');
@@ -242,7 +301,7 @@ Checkers.BoardUI = (function () {
             sq.classList.add('drop-target');
           }
 
-          const code = state.board.squares && state.board.squares[alg];
+          const code = displaySquares[alg];
           let piece = sq.querySelector('.piece');
           if (piece && piece.dataset.code !== code) { piece.remove(); piece = null; }
           if (code) {
@@ -390,8 +449,11 @@ Checkers.BoardUI = (function () {
     }
 
     function clearPremove() {
-      if (!state.premove) return false;
-      state.premove = null;
+      if (!state.premoves.length) return false;
+      state.premoves = [];
+      state.selected = null;
+      state.partial = [];
+      options?.onPremoveChange?.(0);
       if (!state.animating) render();
       return true;
     }
@@ -494,6 +556,7 @@ Checkers.BoardUI = (function () {
     }
 
     root.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); clearPremove(); clearSelection(); return; }
       const square = event.target.closest('[data-square]');
       if (!square || state.animating) return;
       const alg = square.dataset.square;
@@ -517,6 +580,7 @@ Checkers.BoardUI = (function () {
         return;
       }
       if (event.button !== 2) return;
+      if (state.cancelledRightClick) { event.preventDefault(); return; }
       // RMB while dragging — cancel drag and clear focus.
       if (state.drag) {
         event.preventDefault();
@@ -526,7 +590,7 @@ Checkers.BoardUI = (function () {
         return;
       }
       // RMB cancels a queued premove (chess.com-style).
-      if (state.premove) {
+      if (state.premoves.length) {
         event.preventDefault();
         clearPremove();
         state.rightStart = null;
@@ -543,14 +607,17 @@ Checkers.BoardUI = (function () {
     // Also catch RMB via pointer events (some browsers skip mousedown order).
     window.addEventListener('pointerdown', (event) => {
       if (event.button !== 2) return;
+      state.cancelledRightClick = false;
       if (state.drag) {
+        state.cancelledRightClick = true;
         event.preventDefault();
         state.rightStart = null;
         state.rightStartPoint = null;
         cancelActiveDrag();
         return;
       }
-      if (state.premove) {
+      if (state.premoves.length) {
+        state.cancelledRightClick = true;
         event.preventDefault();
         clearPremove();
         state.rightStart = null;
@@ -558,6 +625,7 @@ Checkers.BoardUI = (function () {
       }
     });
     root.addEventListener('mouseup', (event) => {
+      if (event.button === 2 && state.cancelledRightClick) { state.cancelledRightClick = false; return; }
       if (event.button !== 2 || !state.rightStart) return;
       event.preventDefault();
       const from = state.rightStart;
@@ -646,8 +714,7 @@ Checkers.BoardUI = (function () {
       state.selected = null;
       state.partial = [];
       if (state.premoveMode) {
-        state.premove = path.slice();
-        render();
+        enqueuePremove(path);
         return;
       }
       render();
@@ -836,6 +903,7 @@ Checkers.BoardUI = (function () {
         (lastMove?.from && lastMove?.to ? [lastMove.from, lastMove.to] : []);
       if (samePosition(state.board, next)) return;
       state.animating = true;
+      if (state.premoveMode && state.premoves.length) render();
       if (state.drag) { stopDragListeners(); endDrag(); }
       state.selected = null;
       state.partial = [];
@@ -893,19 +961,31 @@ Checkers.BoardUI = (function () {
       },
       setPremoveMode(enabled, color) {
         state.premoveMode = !!enabled;
-        state.premoveColor = enabled ? (color || null) : null;
+        if (color) state.premoveColor = color;
         state.selected = null;
         state.partial = [];
         if (!state.animating) render();
       },
       setPremove(path) {
-        state.premove = path && path.length >= 2 ? path.slice() : null;
+        state.premoves = path && path.length >= 2 ? [path.slice()] : [];
         state.selected = null;
         state.partial = [];
         if (!state.animating) render();
       },
       getPremove() {
-        return state.premove ? state.premove.slice() : null;
+        return state.premoves[0]?.slice() || null;
+      },
+      getPremoves() {
+        return state.premoves.map(path => path.slice());
+      },
+      consumePremoves(count = 1) {
+        state.premoves.splice(0, count);
+        options?.onPremoveChange?.(state.premoves.length);
+        if (!state.animating) render();
+      },
+      enqueuePremove,
+      executeMove(path) {
+        commitPath(path);
       },
       clearPremove() {
         return clearPremove();
@@ -922,5 +1002,5 @@ Checkers.BoardUI = (function () {
     };
   }
 
-  return { create, parseBoard, algebraic, isCapturePath, pathsEqual, matchPremove };
+  return { create, parseBoard, algebraic, isCapturePath, pathsEqual, matchPremove, matchPremoveQueue };
 })();

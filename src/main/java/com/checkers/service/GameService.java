@@ -4,6 +4,8 @@ import com.checkers.dto.request.CreateGameRequest;
 import com.checkers.dto.response.GameResponse;
 import com.checkers.dto.response.GameSummaryResponse;
 import com.checkers.engine.Board;
+import com.checkers.engine.DrawState;
+import com.checkers.config.GameProperties;
 import com.checkers.engine.CheckersRulesEngine;
 import com.checkers.engine.EngineMove;
 import com.checkers.engine.GameOutcome;
@@ -54,6 +56,7 @@ public class GameService {
     private final BotService botService;
     private final CheckersRulesEngine rulesEngine;
     private final PresenceService presenceService;
+    private final GameProperties gameProperties;
 
     public GameService(GameRepository gameRepository,
                        MoveRepository moveRepository,
@@ -64,7 +67,8 @@ public class GameService {
                        MatchmakingService matchmakingService,
                        BotService botService,
                        CheckersRulesEngine rulesEngine,
-                       @Lazy PresenceService presenceService) {
+                       @Lazy PresenceService presenceService,
+                       GameProperties gameProperties) {
         this.gameRepository = gameRepository;
         this.moveRepository = moveRepository;
         this.gameInviteRepository = gameInviteRepository;
@@ -75,6 +79,7 @@ public class GameService {
         this.botService = botService;
         this.rulesEngine = rulesEngine;
         this.presenceService = presenceService;
+        this.gameProperties = gameProperties;
     }
 
     @Transactional
@@ -148,7 +153,7 @@ public class GameService {
     public GameEventMessage applyMove(Long gameId, MoveMessage moveMessage) {
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
         User player = userService.requireEntity(principal.getId());
-        Game game = requireGame(gameId);
+        Game game = requireGameForUpdate(gameId);
 
         if (game.getStatus() != GameStatus.IN_PROGRESS) {
             throw moveException(ErrorCode.INVALID_MOVE, Map.of("moveError", "GAME_OVER"));
@@ -166,8 +171,9 @@ public class GameService {
                     Map.of("moveError", result.error().name()));
         }
 
+        if (game.getDrawOfferById() != null && !game.getDrawOfferById().equals(player.getId())) game.setDrawOfferById(null);
+        recordDrawState(game, board, result);
         persistMove(game, player, result.move());
-        syncGameFromBoard(game, result.board());
         gameRepository.save(game);
 
         return buildMoveEvent(game, player, result.move(), false);
@@ -179,7 +185,7 @@ public class GameService {
      */
     @Transactional
     public GameEventMessage applyBotMoveIfNeeded(Long gameId) {
-        Game game = requireGame(gameId);
+        Game game = requireGameForUpdate(gameId);
         if (game.getMode() != GameMode.BOT
                 || game.getStatus() != GameStatus.IN_PROGRESS
                 || game.getCurrentTurn() != PieceColor.BLACK) {
@@ -192,7 +198,7 @@ public class GameService {
     public GameEventMessage resign(Long gameId) {
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
         User player = userService.requireEntity(principal.getId());
-        Game game = requireGame(gameId);
+        Game game = requireGameForUpdate(gameId);
         assertParticipant(game);
         if (game.getStatus() != GameStatus.IN_PROGRESS) {
             throw new BusinessException(ErrorCode.INVALID_MOVE);
@@ -225,7 +231,7 @@ public class GameService {
      */
     @Transactional
     public GameEventMessage endActiveGame(Long gameId) {
-        Game game = requireGame(gameId);
+        Game game = requireGameForUpdate(gameId);
         assertParticipant(game);
 
         if (game.getStatus() == GameStatus.IN_PROGRESS) {
@@ -261,12 +267,26 @@ public class GameService {
 
     @Transactional
     public GameEventMessage offerDraw(Long gameId) {
-        Game game = requireGame(gameId);
+        Game game = requireGameForUpdate(gameId);
         assertParticipant(game);
-        if (game.getStatus() != GameStatus.IN_PROGRESS || game.getMode() == GameMode.BOT) {
+        if (game.getStatus() != GameStatus.IN_PROGRESS) {
             throw new BusinessException(ErrorCode.INVALID_MOVE);
         }
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
+        int plies = moveRepository.findByGameIdOrderByMoveNumberAsc(gameId).size();
+        if (plies / 2 < gameProperties.getDrawOfferMinimumMoves()) throw new BusinessException(ErrorCode.DRAW_TOO_EARLY);
+        if (game.getDrawOfferById() != null) {
+            if (!game.getDrawOfferById().equals(principal.getId())) return respondToDraw(gameId, true);
+            throw new BusinessException(ErrorCode.DRAW_OFFER_PENDING);
+        }
+        if (game.getMode() == GameMode.BOT) {
+            boolean accepts = botService.considersDraw(Board.fromJson(game.getBoardState()));
+            if (accepts) finishGame(game, null, "DRAW");
+            return GameEventMessage.builder().type(accepts ? EventType.DRAW_ACCEPTED : EventType.DRAW_DECLINED)
+                    .gameId(gameId).timestamp(Instant.now()).data(Map.of("userId", -1L, "status", game.getStatus().name())).build();
+        }
+        game.setDrawOfferById(principal.getId());
+        gameRepository.save(game);
         return GameEventMessage.builder()
                 .type(EventType.DRAW_OFFERED)
                 .gameId(gameId)
@@ -280,12 +300,16 @@ public class GameService {
 
     @Transactional
     public GameEventMessage respondToDraw(Long gameId, boolean accept) {
-        Game game = requireGame(gameId);
+        Game game = requireGameForUpdate(gameId);
         assertParticipant(game);
-        if (game.getStatus() != GameStatus.IN_PROGRESS || game.getMode() == GameMode.BOT) {
+        if (game.getStatus() != GameStatus.IN_PROGRESS) {
             throw new BusinessException(ErrorCode.INVALID_MOVE);
         }
         SecurityUser principal = CustomUserDetailsService.requireCurrent();
+        if (game.getDrawOfferById() == null || game.getDrawOfferById().equals(principal.getId())) {
+            throw new BusinessException(ErrorCode.DRAW_OFFER_NOT_FOUND);
+        }
+        game.setDrawOfferById(null);
         if (accept) {
             finishGame(game, null, "DRAW");
             return GameEventMessage.builder()
@@ -299,6 +323,7 @@ public class GameService {
                     ))
                     .build();
         }
+        gameRepository.save(game);
         return GameEventMessage.builder()
                 .type(EventType.DRAW_DECLINED)
                 .gameId(gameId)
@@ -331,7 +356,7 @@ public class GameService {
      */
     @Transactional
     public GameEventMessage technicalDefeat(Long gameId, Long disconnectedUserId) {
-        Game game = requireGame(gameId);
+        Game game = requireGameForUpdate(gameId);
         if (game.getStatus() != GameStatus.IN_PROGRESS) {
             return null;
         }
@@ -372,8 +397,9 @@ public class GameService {
         if (!result.success()) {
             return null;
         }
+        if (game.getDrawOfferById() != null && game.getDrawOfferById() != -1L) game.setDrawOfferById(null);
+        recordDrawState(game, board, result);
         persistMove(game, null, result.move());
-        syncGameFromBoard(game, result.board());
         gameRepository.save(game);
         return buildMoveEvent(game, null, result.move(), true);
     }
@@ -426,7 +452,39 @@ public class GameService {
         moveRepository.save(move);
     }
 
-    private void syncGameFromBoard(Game game, Board board) {
+    private DrawState drawHistory(Game game, Board current) {
+        if (game.getDrawState() != null) return DrawState.fromJson(game.getDrawState());
+        // Upgrade already-running games from their durable move log when possible.
+        Board replay = Board.initial();
+        DrawState history = DrawState.start(replay);
+        for (Move move : moveRepository.findByGameIdOrderByMoveNumberAsc(game.getId())) {
+            List<String> path = move.getPath() == null ? List.of(move.getFromSquare(), move.getToSquare())
+                    : List.of(move.getPath().split(","));
+            MoveResult result = rulesEngine.applyMove(replay, path);
+            if (!result.success()) return DrawState.start(current);
+            history.record(replay, result.move(), result.board());
+            replay = result.board();
+        }
+        return DrawState.positionKey(replay).equals(DrawState.positionKey(current)) ? history : DrawState.start(current);
+    }
+
+    private void recordDrawState(Game game, Board before, MoveResult result) {
+        DrawState state = drawHistory(game, before);
+        state.record(before, result.move(), result.board());
+        String drawReason = state.reason(result.board(), rulesEngine);
+        if (drawReason != null) result.board().setOutcome(GameOutcome.DRAW);
+        game.setDrawState(state.toJson());
+        syncGameFromBoard(game, result.board(), drawReason);
+        if (game.getStatus() == GameStatus.IN_PROGRESS && game.getMode() == GameMode.BOT
+                && before.turn() == PieceColor.BLACK && state.mayOfferBotDraw()
+                && botService.considersDraw(result.board())) {
+            game.setDrawOfferById(-1L);
+            state.setLastBotOfferPly(state.getPlies());
+            game.setDrawState(state.toJson());
+        }
+    }
+
+    private void syncGameFromBoard(Game game, Board board, String drawReason) {
         game.setBoardState(board.toJson());
         game.setCurrentTurn(board.turn());
         GameOutcome outcome = board.outcome();
@@ -442,7 +500,7 @@ public class GameService {
             winner = game.getBlackPlayer();
             reason = "NO_MOVES";
         } else {
-            reason = "DRAW";
+            reason = drawReason == null ? "DRAW" : drawReason;
         }
         finishGame(game, winner, reason);
     }
@@ -456,6 +514,7 @@ public class GameService {
         game.setFinishReason(reason);
         game.setFinishedAt(Instant.now());
         game.setCurrentTurn(null);
+        game.setDrawOfferById(null);
         gameRepository.save(game);
         updateStats(game, winner, reason);
     }
@@ -464,7 +523,7 @@ public class GameService {
         User white = game.getWhitePlayer();
         User black = game.getBlackPlayer();
 
-        if ("DRAW".equals(reason)) {
+        if (DrawState.isDrawReason(reason)) {
             bumpDraw(white);
             bumpDraw(black);
             return;
@@ -528,6 +587,7 @@ public class GameService {
         data.put("currentTurn", game.getCurrentTurn() != null ? game.getCurrentTurn().name() : null);
         data.put("status", game.getStatus().name());
         data.put("finishReason", game.getFinishReason());
+        data.put("drawOfferById", game.getDrawOfferById());
         if (game.getStatus() == GameStatus.FINISHED) {
             data.put("winnerId", game.getWinner() != null ? game.getWinner().getId() : null);
             data.put("reason", game.getFinishReason());
@@ -547,6 +607,11 @@ public class GameService {
 
     private Game requireGame(Long gameId) {
         return gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.GAME_NOT_FOUND));
+    }
+
+    private Game requireGameForUpdate(Long gameId) {
+        return gameRepository.findForUpdate(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.GAME_NOT_FOUND));
     }
 

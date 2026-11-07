@@ -40,6 +40,8 @@ app:
     reconnect-timeout-seconds: 60
     # In-memory queue; for multi-instance deploy prefer Redis LIST/ZSET + pub-sub
     matchmaking-timeout-seconds: 120
+    # Casual games allow agreement immediately; set 20 for tournament regulations.
+    draw-offer-minimum-moves: 0
   assistant:
     # intent (default) | llm — set to llm when LlmAssistantService is implemented
     provider: intent

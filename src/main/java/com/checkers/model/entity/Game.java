@@ -79,6 +79,13 @@ public class Game {
     @Column(name = "board_state", columnDefinition = "TEXT")
     private String boardState;
 
+    @Column(name = "draw_state", columnDefinition = "TEXT")
+    private String drawState;
+
+    /** Null: none; -1: bot; otherwise the proposing player's id. */
+    @Column(name = "draw_offer_by_id")
+    private Long drawOfferById;
+
     /** Machine-readable finish reason: RESIGN, DRAW, NO_MOVES, TECHNICAL_DEFEAT, … */
     @Column(name = "finish_reason", length = 40)
     private String finishReason;

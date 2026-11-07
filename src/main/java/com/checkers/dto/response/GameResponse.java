@@ -31,6 +31,7 @@ public class GameResponse {
     /** Relative invite link hint, e.g. {@code /play?code=ABCD}. */
     private String invitePath;
     private String finishReason;
+    private Long drawOfferById;
     private Instant startedAt;
     private Instant finishedAt;
     private Instant createdAt;

@@ -16,4 +16,7 @@ public class GameProperties {
 
     /** In-memory matchmaking wait timeout (seconds). For multi-instance deploy, use Redis. */
     private long matchmakingTimeoutSeconds = 120;
+
+    /** Casual games allow agreement immediately. Set 20 for a tournament regulation. */
+    private int drawOfferMinimumMoves = 0;
 }
