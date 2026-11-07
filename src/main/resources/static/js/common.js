@@ -69,7 +69,8 @@ Checkers.Sound = (function () {
   let moveIndex = 0;
   const buffers = new Map();
   const moves = ['move-1', 'move-2', 'move-3'];
-  const clips = [...moves, 'capture', 'start', 'end'];
+  const clips = [...moves, 'capture'];
+  const version = 'recorded-wood-20261107';
 
   function getContext() {
     if (!context) {
@@ -83,7 +84,7 @@ Checkers.Sound = (function () {
 
   function load(name, audio) {
     if (!buffers.has(name)) {
-      const pending = fetch('/sounds/board/' + name + '.wav')
+      const pending = fetch('/sounds/board/' + name + '.wav?v=' + version)
         .then(response => {
           if (!response.ok) throw new Error('Board sound unavailable');
           return response.arrayBuffer();
@@ -102,11 +103,10 @@ Checkers.Sound = (function () {
   }
 
   function play(kind) {
-    if (document.visibilityState === 'hidden') return;
+    if (document.visibilityState === 'hidden' || (kind !== 'move' && !clips.includes(kind))) return;
     const audio = getContext();
     if (!audio) return;
-    const name = kind === 'move' || !clips.includes(kind)
-      ? moves[moveIndex++ % moves.length] : kind;
+    const name = kind === 'move' ? moves[moveIndex++ % moves.length] : kind;
     const requested = performance.now();
     load(name, audio).then(buffer => {
       // Never replay an old click after a slow download or an autoplay unlock.

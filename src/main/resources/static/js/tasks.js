@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           const event = response.events[index];
           if (index > 0) show(Checkers.t('tasks.defending'), true);
           await board.setBoard(event.boardState, { path: event.path, from: event.path[0], to: event.path.at(-1) });
-          Checkers.Sound.play(event.capturedSquares.length ? 'capture' : 'move');
         }
       }
       current = response;
@@ -82,7 +81,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
         }
       } catch (_) { current = initial; }
-      if (!board) board = Checkers.BoardUI.create(root, { onMove: path => { submit(path); } });
+      if (!board) board = Checkers.BoardUI.create(root, {
+        onMove: path => { submit(path); },
+        onLand: kind => Checkers.Sound.play(kind)
+      });
       await board.setBoard(current.boardState);
       refreshText();
       setBusy(false);

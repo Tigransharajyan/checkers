@@ -1,5 +1,6 @@
-"""Build short, softened wooden board sounds from Kenney's CC0 impact sample.
-Requires ffmpeg. Run from any directory; output is self-contained 44.1 kHz WAV.
+"""Prepare real wooden-board recordings without pitch shifts or synthetic layers.
+
+Requires ffmpeg. Run from any directory; sources are bundled under scripts/audio.
 """
 from pathlib import Path
 import array
@@ -12,31 +13,25 @@ OUTPUT = ROOT / 'src/main/resources/static/sounds/board'
 RATE = 44100
 
 
-def tap(speed, duration, peak):
-    filters = (f'asetrate={int(RATE * speed)},aresample={RATE},'
-               f'highpass=f=110,lowpass=f=3200,atrim=duration={duration},'
-               f'afade=t=in:d=0.0015,afade=t=out:st={duration * .52}:d={duration * .48}')
-    raw = subprocess.check_output(['ffmpeg', '-v', 'error', '-i',
-        str(ROOT / 'scripts/audio/wood-impact.ogg'), '-af', filters,
-        '-ac', '1', '-ar', str(RATE), '-f', 's16le', '-'])
-    pcm = array.array('h', raw)
+def recording(name, peak):
+    raw = subprocess.check_output([
+        'ffmpeg', '-v', 'error', '-i', str(ROOT / 'scripts/audio' / name),
+        '-ac', '1', '-ar', str(RATE), '-f', 's16le', '-'
+    ])
+    samples = array.array('h', raw)
     if sys.byteorder != 'little':
-        pcm.byteswap()
-    scale = peak / max(abs(x) for x in pcm)
-    return [x * scale for x in pcm]
-
-
-def mix(events):
-    result = [0.] * max(int(delay * RATE) + len(pcm) for delay, pcm, volume in events)
-    for delay, pcm, volume in events:
-        offset = int(delay * RATE)
-        for i, value in enumerate(pcm):
-            result[offset + i] += value * volume
-    return result
+        samples.byteswap()
+    scale = peak / max(abs(value) for value in samples)
+    # Preserve the recorded contact and body; only soften the edit boundaries.
+    fade_in, fade_out = round(.0005 * RATE), round(.008 * RATE)
+    pcm = [value * scale * min(1, index / fade_in, (len(samples) - 1 - index) / fade_out)
+           for index, value in enumerate(samples)]
+    return pcm + [0.] * round(.012 * RATE)
 
 
 def write(path, pcm):
-    data = array.array('h', (round(max(-.8, min(.8, value)) * 32767) for value in pcm))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = array.array('h', (round(max(-1, min(1, value)) * 32767) for value in pcm))
     if sys.byteorder != 'little':
         data.byteswap()
     with wave.open(str(path), 'wb') as wav:
@@ -46,15 +41,24 @@ def write(path, pcm):
         wav.writeframes(data.tobytes())
 
 
-OUTPUT.mkdir(parents=True, exist_ok=True)
-moves = [tap(1.12, .17, .46), tap(1.18, .16, .43), tap(1.06, .19, .45)]
-clips = {f'move-{i+1}': pcm for i, pcm in enumerate(moves)}
-clips['capture'] = mix([(0, tap(.97, .21, .5), .9), (.072, moves[1], .62)])
-clips['start'] = mix([(0, moves[0], .7), (.13, moves[2], .8)])
-clips['end'] = mix([(0, moves[1], .72), (.12, moves[0], .6), (.27, tap(.94, .22, .4), .62)])
-for name, pcm in clips.items():
-    write(OUTPUT / (name + '.wav'), pcm)
-# The preview plays move, capture, start, end, separated by pauses.
-preview = mix([(0, moves[0], 1), (.7, clips['capture'], 1),
-               (1.5, clips['start'], 1), (2.4, clips['end'], 1)])
-write(ROOT / 'docs/redesign/chesscom-refinement/board-sounds-preview.wav', preview)
+def main():
+    # The original placement stays at its natural pitch; variation is level only.
+    clips = {f'move-{index + 1}': recording('board-placement.mp3', peak)
+             for index, peak in enumerate([.40, .38, .42])}
+    # A single recorded contact, not the old artificially doubled impact.
+    clips['capture'] = recording('board-capture.mp3', .58)
+    for name, pcm in clips.items():
+        write(OUTPUT / (name + '.wav'), pcm)
+    # Audition: three ordinary moves, one capture, then three capture landings.
+    preview = []
+    for name in ['move-1', 'move-2', 'move-3', 'capture']:
+        preview.extend(clips[name])
+        preview.extend([0.] * round(.45 * RATE))
+    for _ in range(3):
+        preview.extend(clips['capture'])
+        preview.extend([0.] * round(.04 * RATE))
+    write(ROOT / 'docs/redesign/chesscom-refinement/board-sounds-preview.wav', preview)
+
+
+if __name__ == '__main__':
+    main()

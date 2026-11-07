@@ -748,7 +748,7 @@ Checkers.BoardUI = (function () {
       if (!motion) return;
       motion.cancelled = true;
       motion.animations.forEach(animation => animation.cancel());
-      motion.element.remove();
+      motion.element?.remove();
       motion = null;
       root.querySelectorAll('.is-motion-source').forEach(piece => piece.classList.remove('is-motion-source'));
     }
@@ -763,7 +763,19 @@ Checkers.BoardUI = (function () {
 
     async function animatePath(path, droppedRect) {
       const source = root.querySelector('[data-square="' + path[0] + '"] .piece');
-      if (!source || prefersReducedMotion() || document.visibilityState === 'hidden') return;
+      if (!source || document.visibilityState === 'hidden') return;
+      const kind = isCapturePath(path, state.board) ? 'capture' : 'move';
+      const current = { element: null, animations: [], cancelled: false };
+      motion = current;
+      if (prefersReducedMotion()) {
+        if (!options?.onLand) return;
+        for (let step = 1; step < path.length; step++) {
+          if (step > 1) await new Promise(resolve => setTimeout(resolve, 170));
+          if (current.cancelled || document.visibilityState === 'hidden') return;
+          options.onLand(kind);
+        }
+        return;
+      }
       const rect = source.getBoundingClientRect();
       const boardRect = root.getBoundingClientRect();
       const element = source.cloneNode(true);
@@ -773,12 +785,13 @@ Checkers.BoardUI = (function () {
       element.style.height = rect.height + 'px';
       root.appendChild(element);
       source.classList.add('is-motion-source');
-      const current = { element, animations: [], cancelled: false };
-      motion = current;
-      let x = (droppedRect || rect).left - boardRect.left;
-      let y = (droppedRect || rect).top - boardRect.top;
+      current.element = element;
+      // A dragged capture still visits each landing square in its legal path.
+      const release = path.length === 2 && droppedRect;
+      let x = (release || rect).left - boardRect.left;
+      let y = (release || rect).top - boardRect.top;
       element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      const destinations = droppedRect ? [path[path.length - 1]] : path.slice(1);
+      const destinations = path.slice(1);
       for (const destination of destinations) {
         if (current.cancelled) return;
         const center = squareCenter(destination);
@@ -786,7 +799,7 @@ Checkers.BoardUI = (function () {
         const toX = center.x - rect.width / 2;
         const toY = center.y - rect.height / 2;
         const distance = Math.hypot(toX - x, toY - y) / (boardRect.width / 8);
-        const duration = droppedRect ? 90 : Math.min(300, 145 + distance * 24);
+        const duration = release ? 90 : Math.min(300, 145 + distance * 24);
         const animation = element.animate([
           { transform: `translate3d(${x}px, ${y}px, 0)` },
           { transform: `translate3d(${toX}px, ${toY}px, 0)` }
@@ -797,6 +810,7 @@ Checkers.BoardUI = (function () {
         element.style.transform = `translate3d(${toX}px, ${toY}px, 0)`;
         animation.cancel();
         x = toX; y = toY;
+        if (!current.cancelled && document.visibilityState !== 'hidden') options?.onLand?.(kind);
       }
     }
 

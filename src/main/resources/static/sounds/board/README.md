@@ -1,11 +1,15 @@
-# Wooden board sounds
+# Recorded wooden-board sounds
 
-Short, softened wooden impacts for moving draughts pieces, capturing, starting and ending games. All clips are mono PCM WAV (44.1 kHz), served locally. No oscillators or musical notification tones are used.
+Real recordings of pieces placed on a wooden board, served locally as mono PCM WAV (44.1 kHz). A quiet move plays one placement; each landing in a capture sequence plays one heavier contact. Game start/end do not add extra taps.
 
-Derived from Kenney's Impact Sounds 1.0, `impactWood_heavy_000.ogg`, CC0 1.0:
-- Creator/source pack: https://kenney.nl/assets/impact-sounds
-- Retrieved source copy: https://github.com/shoemoney/commander-in-chief/blob/main/assets/cc0_extra/sfx_impact/impactWood_heavy_000.ogg
-- Original source: `scripts/audio/wood-impact.ogg`.
-- License: `LICENSE.txt` in this directory.
+Sources by **el_boss**, both CC0 1.0, recorded on a wooden board for Chess Puzzle Blitz:
+- Placement: https://freesound.org/people/el_boss/sounds/546119/
+- Capture: https://freesound.org/people/el_boss/sounds/546120/
+- Bundled HQ preview sources: `scripts/audio/board-placement.mp3` and `scripts/audio/board-capture.mp3`.
+- License and direct source URLs: `LICENSE.txt` in this directory.
 
-Rebuild with `python3 scripts/build-board-sounds.py` (requires ffmpeg). Processing: mono conversion, subtle resampling variations, high/low-pass filtering, short fades, level control. Capture uses two contacts; start/end use short, quiet sequences of the same wooden taps.
+Rebuild with `python3 scripts/build-board-sounds.py` (ffmpeg required). Processing is limited to sample-rate/mono conversion, volume adjustment, and short edit-edge fades. There are no pitch changes, low-pass muffling, artificial doubled impacts, or synthetic layers. The three move files differ only in volume; the capture uses its own recording.
+
+`BoardUI.onLand` triggers audio when each animated segment finishes, including a player's preview and opponents' moves. Server confirmation and duplicate snapshots do not replay it. Reduced-motion mode preserves separated capture contacts without animating the piece; cancelled and hidden-tab moves stop remaining contacts. Audio URLs include a version to bypass old year-long browser caches.
+
+Preview: `docs/redesign/chesscom-refinement/board-sounds-preview.wav` — three moves, one capture, then three capture landings.

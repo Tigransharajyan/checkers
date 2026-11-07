@@ -40,8 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let stompClient = null;
   let boardUi = null;
   let disconnectTimer = null;
-  let startSoundPlayed = false;
-  let endSoundPlayed = false;
   let premoveSending = false;
   let eventQueue = Promise.resolve();
 
@@ -315,21 +313,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function applyGame(g) {
-    const previousStatus = game && game.status;
     game = g;
     renderPlayers();
     await boardUi.setBoard(game.boardState, lastMoveFromGame());
     renderLog();
     await loadLegal();
     updateActionButtons();
-    if (game.status === 'IN_PROGRESS' && !startSoundPlayed) {
-      startSoundPlayed = true;
-      Checkers.Sound.play('start');
-    }
-    if (game.status === 'FINISHED' && previousStatus !== 'FINISHED' && !endSoundPlayed) {
-      endSoundPlayed = true;
-      Checkers.Sound.play('end');
-    }
   }
 
   function connectWs() {
@@ -406,15 +395,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? data.path
         : (typeof data.path === 'string' ? data.path.split(/[,-]/).filter(Boolean) : []);
       if (path.length >= 2 && positionChanged) {
-        Checkers.Sound.play(data.capturedSquares ? 'capture' : 'move');
         if (moveAnnouncement) {
           const color = Checkers.t('play.color.' + movingColor);
           moveAnnouncement.textContent = Checkers.t('redesign.move.announcement', color, path.join('–'));
         }
-      }
-      if (game.status === 'FINISHED' && !endSoundPlayed) {
-        endSoundPlayed = true;
-        Checkers.Sound.play('end');
       }
 
       await loadLegal();
@@ -580,6 +564,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   boardUi = Checkers.BoardUI.create(boardRoot, {
     coordinates: true,
     onMove: sendMove,
+    onLand: kind => Checkers.Sound.play(kind),
     onSyncNeeded: () => Checkers.api('/api/games/' + gameId).then(applyGame).catch(error => Checkers.toast(Checkers.apiErrorMessage(error), 'error'))
   });
 
