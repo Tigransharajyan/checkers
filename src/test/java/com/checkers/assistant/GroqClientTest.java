@@ -196,7 +196,7 @@ class GroqClientTest {
             assertEquals("Original follow-up", messages.path(3).path("content").asText());
             assertEquals("assistant", messages.path(4).path("role").asText());
             assertEquals("A provisional site explanation.", messages.path(4).path("content").asText());
-            assertTrue(messages.path(5).path("content").asText().contains("Remove unsupported facts"));
+            assertTrue(messages.path(5).path("content").asText().contains("First check EVERY concrete claim"));
             assertTrue(messages.path(5).path("content").asText().contains("\"Original follow-up\""));
             assertTrue(messages.path(0).path("content").asText().contains("TRUSTED SITE TOPICS"));
         }).andRespond(withSuccess(completion(

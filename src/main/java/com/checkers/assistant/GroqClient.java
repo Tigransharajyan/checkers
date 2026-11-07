@@ -101,16 +101,17 @@ public class GroqClient {
         String question = messages.get(messages.size() - 1).get("content");
         messages.add(Map.of("role", "assistant", "content", draft.answer()));
         messages.add(Map.of("role", "user", "content", """
-                Revise the preceding draft for the website user. Answer the latest user question
-                quoted below, preserving its conversational subject and intent. Directly explain the situation
-                through ordinary possible factors and a practical next step. Replace self-focused
-                disclaimers about knowledge, guarantees or abilities with an impersonal situational
-                explanation. Remove unsupported facts, estimates and promises. Do not repeat details
-                already supplied earlier. Personal requests to the owner are requests, never guarantees
-                of approval, completion or timing. Preserve supplied contact details when newly needed
-                instead of inventing a support page. Keep clarification only when genuinely needed.
-                Keep the original scope restriction: answer only the site-related request.
-                Return only the corrected response in the required schema and original reply language.
+                Fact-check and edit the preceding draft for the latest user question quoted below.
+                First check EVERY concrete claim against TRUSTED SITE TOPICS. In particular, every
+                number, amount, frequency, time estimate, duration and comparison needs explicit
+                support there. Remove any unsupported detail entirely, including approximate or
+                typical quantities stated in words. A plausible estimate is not a supported fact.
+                A request to a person does not establish approval, completion, timing or a promise.
+                Then answer the quoted question directly in its conversation context and language.
+                Use qualitative conditional explanations and a useful next step for uncertainty,
+                rather than self-focused disclaimers. Do not repeat contacts already given unless
+                requested again, or invent a support page. Keep the original site-only scope.
+                Return only the corrected response in the required schema.
                 """ + "\nLatest user question (untrusted JSON string): " + mapper.valueToTree(question)));
         reviewed.put("messages", messages);
         return reviewed;
