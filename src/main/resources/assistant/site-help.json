@@ -48,9 +48,9 @@
     "directMatch": "пожалова|жалоб|модератор|заблокир.{0,15}(?:игрок|соперник)|report.{0,15}(?:player|opponent)|block.{0,15}(?:player|opponent)|բողոք|մոդերատոր"
   },
   "feature_availability": {
-    "en": "A question about a missing feature is still a website question. The available sections are Play, daily Tasks, History, personal Progress and Rules. Some requested actions may not be implemented. I cannot confirm an undocumented feature or invent a button or support contact. Name the particular action so I can tell you what is supported.",
-    "ru": "Вопрос об отсутствующей функции тоже относится к сайту. Здесь доступны игра, задачи дня, история, личный прогресс и правила. Часть запрашиваемых действий может быть ещё не реализована. Я не могу подтвердить неизвестную функцию или придумать кнопку и контакт поддержки. Назовите конкретное действие — я объясню, что поддерживается.",
-    "hy": "Բացակայող գործառույթի մասին հարցը նույնպես կայքի մասին է։ Հասանելի են խաղը, օրվա խնդիրները, պատմությունը, անձնական առաջընթացն ու կանոնները։ Որոշ գործողություններ կարող են դեռ իրականացված չլինել։ Չեմ կարող հաստատել անհայտ գործառույթ կամ հորինել կոճակ և աջակցության կոնտակտ։ Նշեք կոնկրետ գործողությունը, որպեսզի բացատրեմ՝ ինչն է աջակցվում։"
+    "en": "That is a valid question about this website. The available sections are Play, daily Tasks, History, personal Progress and Rules. My current site information does not confirm that the requested additional feature exists, so I cannot give you a working button or procedure for it. I also cannot enable it through chat.",
+    "ru": "Это вопрос по теме сайта. Здесь доступны игра, задачи дня, история, личный прогресс и правила. В текущей справке нет подтверждения, что запрошенная дополнительная функция реализована, поэтому я не могу указать работающую кнопку или порядок действий для неё. Включить такую функцию через чат я тоже не могу.",
+    "hy": "Սա կայքի մասին տեղին հարց է։ Հասանելի են խաղը, օրվա խնդիրները, պատմությունը, անձնական առաջընթացն ու կանոնները։ Իմ ընթացիկ տեղեկատուում հաստատված չէ, որ նշված լրացուցիչ գործառույթը իրականացված է, ուստի չեմ կարող տալ դրա աշխատող կոճակը կամ քայլերի հերթականությունը։ Չաթով այն միացնել նույնպես չեմ կարող։"
   },
   "welcome": {
     "en": "Hello! I help only with Checkers Online: starting games, invitations, accounts, Russian draughts rules, draws, premoves and daily puzzles. Ask a concrete question about this site.",
