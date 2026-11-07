@@ -30,10 +30,6 @@ services:
       # Staging: set SITE_INDEXING_ENABLED=false.
       # Optional GOOGLE_SITE_VERIFICATION / BING_SITE_VERIFICATION take meta-tag content tokens.
 
-      # LLM API key — optional, only needed if provider=llm
-      - key: ASSISTANT_LLM_API_KEY
-        sync: false
-
       # Render provides PORT automatically — Spring Boot reads ${PORT:8080}
       # No need to set PORT manually; Render manages it
 

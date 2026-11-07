@@ -46,11 +46,6 @@ app:
     matchmaking-timeout-seconds: 120
     # Minimum full moves before an offer: 0 for casual play, or 20 for that tournament regulation.
     draw-offer-minimum-moves: 0
-  assistant:
-    # The working intent provider uses the local FAQ; llm remains an unimplemented extension point.
-    provider: intent
-    llm:
-      api-key: ${ASSISTANT_LLM_API_KEY:}
 
 ---
 spring:
