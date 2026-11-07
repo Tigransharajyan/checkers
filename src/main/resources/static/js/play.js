@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let game = null;
   let myColor = null;
+  let boardFlipped = false;
   let stompClient = null;
   let boardUi = null;
   let disconnectTimer = null;
@@ -89,7 +90,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       oppAvatar.textContent = opp ? initialOf(opp.username) : '…';
     }
 
-    if (boardUi) boardUi.setFlip(myColor === 'BLACK');
+    const position = Checkers.BoardUI.parseBoard(game.boardState);
+    for (const [side, color] of [['you', myColor], ['opp', myColor === 'WHITE' ? 'BLACK' : 'WHITE']]) {
+      const card = side === 'you' ? youCard : oppCard;
+      if (card) card.dataset.color = color || '';
+      const count = Object.values(position.squares || {}).filter(code => code[0] === color?.[0]).length;
+      const material = document.querySelector('[data-' + side + '-material]');
+      if (material) {
+        material.setAttribute('aria-label', Checkers.t('play.piecesLeft', count));
+        material.title = Checkers.t('play.piecesLeft', count);
+      }
+      const countEl = document.querySelector('[data-' + side + '-count]');
+      if (countEl) countEl.textContent = count;
+    }
+    const modeEl = document.querySelector('[data-game-mode]');
+    if (modeEl) modeEl.textContent = Checkers.t('mode.' + game.mode) + (game.mode === 'BOT' && game.botDifficulty ? ' · ' + Checkers.t('lobby.difficulty.' + game.botDifficulty) : '');
+
+    if (boardUi) boardUi.setFlip((myColor === 'BLACK') !== boardFlipped);
   }
 
   function renderLog() {
@@ -123,14 +140,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.querySelector('[data-move-log-empty]')?.classList.toggle('hidden', pairs.length > 0);
+    const moveCount = document.querySelector('[data-move-count]');
+    if (moveCount) moveCount.textContent = game.moves.length;
+    const lastCell = logEl.lastElementChild?.querySelector(game.moves.length % 2 ? '.white-move' : '.black-move');
+    lastCell?.classList.add('is-latest');
     logEl.scrollTop = logEl.scrollHeight;
   }
 
-  function showGameOverModal(title, reason) {
+  function showGameOverModal(title, reason, outcome) {
     if (!gameoverModal) return;
+    gameoverModal.dataset.result = outcome;
     if (gameoverTitle) gameoverTitle.textContent = title;
-    if (gameoverReason) gameoverReason.textContent = reason;
-    Checkers.Overlay.open(gameoverModal, { initial: document.querySelector('[data-dismiss-gameover]'), onOpen: () => gameoverModal.classList.remove('hidden'), onClose: () => gameoverModal.classList.add('hidden') });
+    if (gameoverReason) {
+      gameoverReason.textContent = reason;
+      gameoverReason.hidden = !reason;
+    }
+    for (const [side, nameEl] of [['you', youName], ['opp', oppName]]) {
+      const name = nameEl?.textContent || Checkers.t(side === 'you' ? 'common.you' : 'common.opponent');
+      const label = gameoverModal.querySelector('[data-result-' + side + '-name]');
+      label.textContent = name;
+      label.title = name;
+      gameoverModal.querySelector('[data-result-' + side + '-avatar]').textContent = initialOf(name);
+      const winner = outcome === (side === 'you' ? 'win' : 'loss');
+      gameoverModal.querySelector('[data-result-' + side + ']').classList.toggle('is-winner', winner);
+      gameoverModal.querySelector('[data-result-' + side + '-score]').textContent = outcome === 'draw' ? '½' : outcome === 'finished' ? '—' : winner ? '1' : '0';
+    }
+    Checkers.Overlay.open(gameoverModal, { initial: document.querySelector('[data-new-game-btn]'), onOpen: () => gameoverModal.classList.remove('hidden'), onClose: () => gameoverModal.classList.add('hidden') });
   }
 
   function updateActionButtons() {
@@ -168,16 +203,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       const me = Checkers.Auth.user();
       let result = Checkers.t('play.finished');
       let isWin = false;
+      let outcome = 'finished';
 
       if (game.finishReason === 'DRAW') {
         result = Checkers.t('play.result.draw');
+        outcome = 'draw';
       } else if (game.winnerId && me && game.winnerId === me.id) {
         result = Checkers.t('play.result.win');
         isWin = true;
+        outcome = 'win';
       } else if (game.winnerId) {
         result = Checkers.t('play.result.loss');
+        outcome = 'loss';
       } else if (game.mode === 'BOT') {
         result = Checkers.t('play.result.loss');
+        outcome = 'loss';
       }
 
       const reasonKey = 'reason.' + (game.finishReason || '');
@@ -187,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       youCard?.classList.remove('is-active-turn');
       oppCard?.classList.remove('is-active-turn');
 
-      showGameOverModal(result, reason);
+      showGameOverModal(result, reason, outcome);
       return;
     }
 
@@ -360,6 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (data.status) game.status = data.status;
       if (data.finishReason) game.finishReason = data.finishReason;
       if (data.winnerId !== undefined) game.winnerId = data.winnerId;
+      renderPlayers();
 
       const path = Array.isArray(data.path)
         ? data.path
@@ -511,6 +552,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     Checkers.Overlay.close();
   });
 
+  document.querySelector('[data-close-gameover]')?.addEventListener('click', () => {
+    Checkers.Overlay.close();
+  });
+
+  document.querySelector('[data-flip-board]')?.addEventListener('click', (event) => {
+    boardFlipped = !boardFlipped;
+    event.currentTarget.setAttribute('aria-pressed', String(boardFlipped));
+    boardRoot.closest('.board-column')?.classList.toggle('is-flipped', boardFlipped);
+    boardUi.setFlip((myColor === 'BLACK') !== boardFlipped);
+  });
+
   gameoverModal?.addEventListener('click', (e) => {
     if (e.target === gameoverModal) {
       Checkers.Overlay.close();
@@ -526,6 +578,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   boardUi = Checkers.BoardUI.create(boardRoot, {
+    coordinates: true,
     onMove: sendMove,
     onSyncNeeded: () => Checkers.api('/api/games/' + gameId).then(applyGame).catch(error => Checkers.toast(Checkers.apiErrorMessage(error), 'error'))
   });

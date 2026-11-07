@@ -367,8 +367,8 @@ Checkers.initSidebar = function () {
   const toggle = document.querySelector('[data-sidebar-toggle]');
   const backdrop = document.querySelector('[data-sidebar-backdrop]');
   const closeButton = document.querySelector('[data-sidebar-close]');
-  // Must match app.css: ordinary900px, game1200px.
-  const media = matchMedia(document.body.classList.contains('game-page') ? '(min-width: 0px)' : '(max-width: 900px)');
+  // Must match the navigation breakpoints in app.css and game.css.
+  const media = matchMedia(document.body.classList.contains('game-page') ? '(max-width: 1200px)' : '(max-width: 900px)');
   const hide = () => {
     document.body.classList.remove('sidebar-open');
     toggle?.setAttribute('aria-expanded', 'false');

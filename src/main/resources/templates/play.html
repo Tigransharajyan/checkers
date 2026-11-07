@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLocale}">
 <head>
   <th:block th:replace="~{fragments/head :: meta}"></th:block>
+  <link rel="stylesheet" th:href="@{/css/game.css}"/>
   <script th:src="@{/js/assistant.js}" defer></script>
   <script th:src="@{/js/board.js}" defer></script>
   <script>var global = window;</script>
@@ -24,11 +25,16 @@
     <div class="play-layout">
       <div class="game-context">
         <h1 class="sr-only" th:text="#{play.title}">Checkers game</h1>
+        <nav class="game-panel-nav" th:aria-label="#{nav.play}">
+          <span class="is-current"><i aria-hidden="true" data-lucide="swords"></i><span th:text="#{play.title}">Game</span></span>
+          <a th:href="@{/play(lang=${currentLocale})}"><i aria-hidden="true" data-lucide="rotate-ccw"></i><span th:text="#{play.newGame}">New game</span></a>
+          <a th:href="@{/history(lang=${currentLocale})}"><i aria-hidden="true" data-lucide="history"></i><span th:text="#{nav.history}">History</span></a>
+        </nav>
         <div class="side-panel-header">
           <div class="game-badge-wrap">
-            <span class="game-mode-indicator"><i aria-hidden="true" data-lucide="swords"></i></span>
-            <span class="game-mode-text" th:text="#{play.title}">Game</span>
+            <span class="game-mode-text" data-game-mode th:text="#{play.title}">Game</span>
           </div>
+          <span class="game-variant" th:text="#{play.variant.short}">Russian · 8×8</span>
         </div>
 
         <!-- Status Banner -->
@@ -46,18 +52,13 @@
             <strong data-opp-name th:text="#{common.opponent}">Opponent</strong>
             <span data-opp-color></span>
           </div>
+          <div class="player-material" data-opp-material><span class="material-disc" aria-hidden="true"></span><strong data-opp-count>12</strong></div>
         </div>
 
 
         <div class="board-frame">
-          <div class="rank-labels" data-rank-labels>
-            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
-          </div>
           <div class="board-wrap">
             <div class="board" data-board aria-describedby="board-instructions"></div>
-          </div>
-          <div class="file-labels" data-file-labels>
-            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
           </div>
         </div>
         <!-- Your Player Card -->
@@ -67,23 +68,19 @@
             <strong data-you-name th:text="#{common.you}">You</strong>
             <span data-you-color></span>
           </div>
+          <div class="player-material" data-you-material><span class="material-disc" aria-hidden="true"></span><strong data-you-count>12</strong></div>
         </div>
 
-        <p class="board-instructions" id="board-instructions" th:text="#{redesign.board.keyboard}">Use the arrow keys and Enter to move.</p>
+        <p class="sr-only" id="board-instructions" th:text="#{redesign.board.keyboard}">Use the arrow keys and Enter to move.</p>
       </div>
 
       <!-- Side Control Panel -->
       <aside class="side-panel">
-        <!-- Action Buttons -->
-        <div class="actions-row game-actions-row">
-          <button type="button" class="btn btn-danger-quiet" data-resign-btn>
-            <i aria-hidden="true" data-lucide="flag"></i>
-            <span th:text="#{play.resign}">Resign</span>
-          </button>
-          <button type="button" class="btn btn-ghost" data-draw-offer-btn>
-            <i aria-hidden="true" data-lucide="handshake"></i>
-            <span th:text="#{play.drawOffer}">Draw</span>
-          </button>
+        <div class="move-log-panel">
+          <h3><span><i aria-hidden="true" data-lucide="notebook-tabs"></i><span th:text="#{play.moveLog}">Move log</span></span><span class="move-count" data-move-count>0</span></h3>
+          <div class="move-log-columns" aria-hidden="true"><span>#</span><span><i class="piece-dot white"></i><span th:text="#{play.color.WHITE}">White</span></span><span><i class="piece-dot black"></i><span th:text="#{play.color.BLACK}">Black</span></span></div>
+          <div class="move-log" data-move-log></div>
+          <div class="move-log-empty" data-move-log-empty><i aria-hidden="true" data-lucide="notebook-tabs"></i><p th:text="#{redesign.moves.empty}">Moves will appear here after the first turn.</p></div>
         </div>
 
         <!-- Draw Offer Alert Box (for opponent) -->
@@ -96,10 +93,16 @@
           </div>
         </div>
 
-        <!-- Move Log in 2-column notation -->
-        <div class="move-log-panel">
-          <h3><span th:text="#{play.moveLog}">Notation</span></h3>
-          <div class="move-log" data-move-log></div><p class="move-log-empty" data-move-log-empty th:text="#{redesign.moves.empty}">Moves will appear here.</p>
+        <div class="game-panel-footer">
+          <div class="actions-row game-actions-row">
+            <button type="button" class="btn btn-ghost" data-draw-offer-btn><i aria-hidden="true" data-lucide="handshake"></i><span th:text="#{play.drawOffer}">Offer draw</span></button>
+            <button type="button" class="btn btn-danger-quiet" data-resign-btn><i aria-hidden="true" data-lucide="flag"></i><span th:text="#{play.resign}">Resign</span></button>
+          </div>
+          <div class="game-board-tools">
+            <a class="game-lobby-link" th:href="@{/home(lang=${currentLocale})}"><i aria-hidden="true" data-lucide="arrow-left"></i><span th:text="#{play.backLobby}">Back to lobby</span></a>
+            <div th:replace="~{fragments/assistant :: widget}"></div>
+            <button type="button" class="icon-btn" data-flip-board aria-pressed="false" th:aria-label="#{play.flipBoard}" th:title="#{play.flipBoard}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v14m-4-4 4 4 4-4M17 21V7m-4 4 4-4 4 4"/></svg></button>
+          </div>
         </div>
       </aside>
     </div>
@@ -119,19 +122,39 @@
 </div>
 
 <!-- Game Over Modal -->
-<div class="modal-backdrop hidden" data-gameover-modal>
-  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
-    <h2 id="gameover-title" data-gameover-title th:text="#{play.finished}">Game Over</h2>
-    <p data-gameover-reason></p>
-    <div class="actions-row" style="margin-top:var(--s-8)">
-      <button type="button" class="btn btn-secondary" data-dismiss-gameover th:text="#{play.reviewBoard}">Review Board</button>
-      <button type="button" class="btn btn-primary" data-new-game-btn th:text="#{play.newGame}">New Game</button>
-          <a class="btn btn-ghost" th:href="@{/home(lang=${currentLocale})}" th:text="#{play.backLobby}">Lobby</a>
+<div class="modal-backdrop gameover-backdrop hidden" data-gameover-modal data-result="finished">
+  <div class="modal-dialog gameover-dialog" role="dialog" aria-modal="true" aria-labelledby="gameover-title" aria-describedby="gameover-reason">
+    <button type="button" class="gameover-close" data-close-gameover th:aria-label="#{common.close}"><i aria-hidden="true" data-lucide="x"></i></button>
+    <div class="gameover-hero">
+      <p class="gameover-eyebrow" th:text="#{play.finished}">Game over</p>
+      <div class="gameover-emblem" aria-hidden="true">
+        <span class="gameover-symbol" data-result-symbol="win"><i data-lucide="trophy"></i></span>
+        <span class="gameover-symbol" data-result-symbol="loss"><i data-lucide="flag"></i></span>
+        <span class="gameover-symbol" data-result-symbol="draw"><i data-lucide="handshake"></i></span>
+        <span class="gameover-symbol" data-result-symbol="finished"><i data-lucide="star"></i></span>
+      </div>
+      <h2 id="gameover-title" data-gameover-title th:text="#{play.finished}">Game over</h2>
+      <p id="gameover-reason" class="gameover-reason" data-gameover-reason></p>
     </div>
+    <div class="gameover-match">
+      <div class="gameover-player" data-result-you>
+        <span class="gameover-avatar" data-result-you-avatar aria-hidden="true"></span>
+        <span class="gameover-player-name" data-result-you-name></span>
+      </div>
+      <div class="gameover-score"><span data-result-you-score>—</span><span class="gameover-score-divider">:</span><span data-result-opp-score>—</span></div>
+      <div class="gameover-player" data-result-opp>
+        <span class="gameover-avatar" data-result-opp-avatar aria-hidden="true"></span>
+        <span class="gameover-player-name" data-result-opp-name></span>
+      </div>
+    </div>
+    <div class="gameover-actions">
+      <button type="button" class="btn btn-primary" data-new-game-btn><i aria-hidden="true" data-lucide="rotate-ccw"></i><span th:text="#{play.newGame}">New game</span></button>
+      <button type="button" class="btn btn-secondary" data-dismiss-gameover><i aria-hidden="true" data-lucide="eye"></i><span th:text="#{play.reviewBoard}">Review board</span></button>
+    </div>
+    <a class="gameover-lobby" th:href="@{/home(lang=${currentLocale})}"><i aria-hidden="true" data-lucide="arrow-left"></i><span th:text="#{play.backLobby}">Back to lobby</span></a>
   </div>
 </div>
 
 <div id="toast-root" aria-live="polite"></div>
-<div th:replace="~{fragments/assistant :: widget}"></div>
 </body>
 </html>

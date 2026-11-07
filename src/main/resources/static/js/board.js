@@ -209,6 +209,22 @@ Checkers.BoardUI = (function () {
           else if (highlights.dest.has(alg)) accessibleStates.push(Checkers.t('redesign.board.destination'));
           if (state.premove?.includes(alg)) accessibleStates.push(Checkers.t('redesign.board.premove'));
           sq.setAttribute('aria-label', [alg + (labelCode ? ': ' + Checkers.t('play.color.' + (labelCode[0] === 'W' ? 'WHITE' : 'BLACK')) + (labelCode[1] === 'K' ? ' ' + Checkers.t('play.king') : '') : ''), ...accessibleStates].join(', '));
+          if (options && options.coordinates) {
+            for (const [kind, text] of [['rank', columnIndex === 0 ? String(rank + 1) : ''], ['file', rowIndex === 7 ? FILES[file] : '']]) {
+              let label = sq.querySelector('.board-coordinate-' + kind);
+              if (text) {
+                if (!label) {
+                  label = document.createElement('span');
+                  label.className = 'board-coordinate board-coordinate-' + kind;
+                  label.setAttribute('aria-hidden', 'true');
+                  sq.appendChild(label);
+                }
+                label.textContent = text;
+              } else if (label) {
+                label.remove();
+              }
+            }
+          }
           if (state.selected === alg || state.partial.includes(alg)) {
             sq.classList.add('selected');
           }

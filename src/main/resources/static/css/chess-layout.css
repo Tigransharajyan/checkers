@@ -16,6 +16,63 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; }
 .btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 1px #ffffff25, 0 1px 0 #4c7429; }
 .btn-ghost, .btn-secondary { background: linear-gradient(#ffffff1a, #ffffff0d); border: 0; color: #f5f5f4; }
 .btn-ghost:hover:not(:disabled), .btn-secondary:hover:not(:disabled) { background: linear-gradient(#ffffff26, #ffffff16); }
+
+/* The final score gets a dedicated card, while the board stays in view. */
+.gameover-backdrop { background: #13120fd1; backdrop-filter: blur(5px); }
+.gameover-dialog {
+  --result-color: #c4c0b8;
+  --result-glow: #c4c0b812;
+  position: relative;
+  width: min(420px,100%);
+  padding: 32px;
+  border: 1px solid #ffffff14;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at 50% 0%,var(--result-glow),transparent 64%), #282622;
+  box-shadow: 0 28px 80px #0008, inset 0 1px 0 #ffffff08;
+  text-align: center;
+}
+[data-result="win"] .gameover-dialog { --result-color: #e9c779; --result-glow: #d8b45b1c; }
+[data-result="draw"] .gameover-dialog { --result-color: #b2c9e0; --result-glow: #8eafd41a; }
+.gameover-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #b5b0a7; }
+.gameover-close:hover { background: #ffffff0d; color: #fff; }
+.gameover-close svg { width: 20px; height: 20px; }
+.gameover-dialog .gameover-eyebrow { margin: 0 24px 24px; color: #b5b0a7; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.gameover-emblem { position: relative; display: grid; place-items: center; width: 96px; height: 96px; margin: 0 auto 24px; border: 1px solid color-mix(in srgb,var(--result-color) 32%,transparent); border-radius: 50%; color: var(--result-color); background: radial-gradient(circle at 38% 25%,#ffffff0c,transparent 70%), var(--result-glow); box-shadow: 0 0 0 8px color-mix(in srgb,var(--result-color) 4%,transparent), 0 12px 32px #0002, inset 0 1px 0 #ffffff14; }
+.gameover-emblem::before, .gameover-emblem::after { content: ''; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--result-color); opacity: .65; }
+.gameover-emblem::before { top: 13px; left: -22px; box-shadow: 130px 52px 0 -1px var(--result-color); }
+.gameover-emblem::after { top: -7px; right: -12px; width: 3px; height: 3px; box-shadow: -115px 77px 0 0 var(--result-color); }
+.gameover-symbol { display: none; }
+.gameover-symbol svg { display: block; width: 44px; height: 44px; stroke-width: 1.7; }
+[data-result="win"] [data-result-symbol="win"], [data-result="loss"] [data-result-symbol="loss"], [data-result="draw"] [data-result-symbol="draw"], [data-result="finished"] [data-result-symbol="finished"] { display: block; }
+.gameover-dialog h2 { margin: 0; font-size: clamp(28px,6vw,36px); line-height: 1.15; letter-spacing: -.035em; text-wrap: balance; }
+[data-result="win"] .gameover-dialog h2 { color: #e7ce94; }
+.gameover-dialog .gameover-reason { margin: 10px 0 0; color: #bcb7af; font-size: 14px; }
+.gameover-match { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 16px; margin: 28px 0 24px; padding: 20px 12px 16px; border: 1px solid #ffffff08; border-radius: 12px; background: #0000001f; }
+.gameover-player { display: grid; justify-items: center; gap: 9px; min-width: 0; }
+.gameover-avatar { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #ffffff14; border-radius: 12px; color: #dbd6ce; background: #45423b; font-size: 19px; font-weight: 700; }
+.gameover-player.is-winner .gameover-avatar { background: #81b64c1f; border-color: #81b64c80; color: #b7d990; box-shadow: 0 0 0 3px #81b64c0a; }
+.gameover-player-name { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c9c4bc; font-size: 12px; font-weight: 600; }
+.gameover-score { display: flex; align-items: center; gap: 10px; padding-bottom: 24px; font: 800 30px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.gameover-score-divider { color: #78736b; font-size: 20px; font-weight: 400; }
+.gameover-actions { display: grid; gap: 12px; }
+.gameover-actions .btn { width: 100%; min-height: 50px; padding: 12px 16px; border-radius: 9px; font-size: 15px; }
+.gameover-actions svg { width: 18px; height: 18px; flex: none; }
+.gameover-actions .btn-secondary { background: #ffffff07; border: 1px solid #ffffff12; box-shadow: none; color: #dedad3; }
+.gameover-actions .btn-secondary:hover { background: #ffffff10; }
+.gameover-lobby { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; margin-top: 16px; color: #b5b0a7; font-size: 13px; }
+.gameover-lobby:hover { color: #f7f6f5; }
+.gameover-lobby svg { width: 15px; height: 15px; }
+@media (prefers-reduced-motion: no-preference) {
+  .gameover-backdrop:not(.hidden) .gameover-dialog { animation: gameover-arrive 240ms ease-out both; }
+  @keyframes gameover-arrive { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+}
+@media (max-width: 480px), (max-height: 650px) {
+  .gameover-dialog { padding: 24px; border-radius: 16px; }
+  .gameover-dialog .gameover-eyebrow { margin-bottom: 20px; }
+  .gameover-emblem { width: 76px; height: 76px; margin-bottom: 20px; }
+  .gameover-symbol svg { width: 36px; height: 36px; }
+  .gameover-match { margin-top: 24px; }
+}
 .sidebar { padding: 16px 8px; }
 .sidebar-brand { gap: 3px; padding: 0 4px 16px; font-family: var(--font-display); font-size: 21px; font-weight: 800; line-height: 1; letter-spacing: -.6px; }
 .brand-checkers { flex: none; width: 33px; height: 38px; }
